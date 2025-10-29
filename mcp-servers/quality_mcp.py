@@ -720,7 +720,14 @@ class QualityServer:
         task_description: str,
         file_changes: List[str]
     ) -> Dict:
-        """Validate task is safe for autonomous execution."""
+        """Validate task is safe for autonomous execution.
+
+        Checks task against safety constraints from docs/autonomous-constraints.md.
+        Blocks forbidden operations like file deletions, config changes, and
+        dangerous database operations.
+
+        Returns dict with safety status and any violations found.
+        """
         violations = []
 
         # Forbidden file patterns (from docs/autonomous-constraints.md)
