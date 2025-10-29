@@ -94,3 +94,36 @@ def generate_report(since: str = None) -> dict:
         "success": False,
         "error": "Not implemented yet"
     }
+
+def review_code(project_path: str, file_patterns: list = None) -> dict:
+    """Review project code for bugs, inconsistencies, improvements.
+
+    Args:
+        project_path: Path to project to review
+        file_patterns: File patterns to review (default: ['*.py'])
+
+    Returns:
+        Dict with findings categorized by priority
+    """
+    try:
+        from pathlib import Path
+
+        if file_patterns is None:
+            file_patterns = ['*.py']
+
+        findings = {
+            "critical": [],
+            "high": [],
+            "medium": [],
+            "low": []
+        }
+
+        # Placeholder: Real implementation will use AST analysis
+        return {
+            "success": True,
+            "project_path": project_path,
+            "findings": findings,
+            "message": "Code review structure ready. Full implementation pending."
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
