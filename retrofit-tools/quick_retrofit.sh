@@ -356,8 +356,25 @@ fi
 
 echo ""
 
+# Install MCP servers
+echo -e "${BLUE}[6/7]${NC} Installing MCP servers..."
+TOOLKIT_DIR="/home/jc/CascadeProjects/best-practice"
+if [ -d "$TOOLKIT_DIR/mcp-servers" ]; then
+    mkdir -p mcp-servers
+    cp -r "$TOOLKIT_DIR/mcp-servers/"* mcp-servers/
+    echo -e "${GREEN}✅ MCP servers installed${NC}"
+    echo "   - memory_mcp.py (Context persistence)"
+    echo "   - quality_mcp.py (Quality enforcement)"
+    echo "   - project_mcp.py (Objective clarification)"
+    echo "   - learning_mcp.py (Self-learning + code review)"
+else
+    echo -e "${YELLOW}⚠️  MCP servers not found at $TOOLKIT_DIR${NC}"
+fi
+
+echo ""
+
 # Commit changes
-echo -e "${BLUE}[6/6]${NC} Committing changes..."
+echo -e "${BLUE}[7/7]${NC} Committing changes..."
 echo ""
 
 git add -A
@@ -377,6 +394,7 @@ Structure:
 - Organized documentation into docs/ subdirectories
 - Created PROJECT_PLAN.md with objective
 - Added CLAUDE.md project standards
+- Installed MCP servers (memory, quality, project, learning)
 $([ "$MODE" = "FULL" ] && echo "- Added quality gate (.ai-validation/)
 - Created test structure (tests/)
 - Added .gitignore")
