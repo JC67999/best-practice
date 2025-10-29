@@ -43,6 +43,35 @@ else
     echo "  - Complete retrofit (structure, docs, tests)"
 fi
 
+# Interactive confirmation
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+read -p "Proceed with installation? (Y/n): " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
+# Option to override mode
+echo ""
+read -p "Override mode? (y/N): " -n 1 -r
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "Select mode:"
+    echo "  1) LIGHT - Safe for production"
+    echo "  2) FULL  - Complete retrofit"
+    read -p "Choice (1/2): " -n 1 -r mode_choice
+    echo ""
+    if [ "$mode_choice" = "2" ]; then
+        is_production=false
+    else
+        is_production=true
+    fi
+fi
+
 echo ""
 echo "📦 Starting installation..."
 
