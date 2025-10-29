@@ -46,11 +46,40 @@ def search_best_practices(topic: str, max_results: int = 5) -> dict:
         return {"success": False, "error": str(e)}
 
 def store_learning(topic: str, learning_data: dict) -> dict:
-    """Store discovered best practices."""
-    return {
-        "success": False,
-        "error": "Not implemented yet"
-    }
+    """Store discovered best practices.
+
+    Args:
+        topic: Technology topic (python, angular, etc.)
+        learning_data: Dict containing learnings, sources, confidence
+
+    Returns:
+        Dict with success status and storage path
+    """
+    try:
+        import os
+        from pathlib import Path
+
+        # Create storage directory
+        storage_dir = Path.home() / ".claude_memory" / "learnings" / topic.lower()
+        storage_dir.mkdir(parents=True, exist_ok=True)
+
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        filename = f"{timestamp}_{learning_data.get('subtopic', 'general')}.json"
+        filepath = storage_dir / filename
+
+        # Store learning
+        with open(filepath, 'w') as f:
+            json.dump(learning_data, f, indent=2)
+
+        return {
+            "success": True,
+            "topic": topic,
+            "filepath": str(filepath),
+            "message": f"Learning stored at {filepath}"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 def get_learnings(topic: str = None, since: str = None) -> dict:
     """Retrieve stored learnings by topic/date."""
