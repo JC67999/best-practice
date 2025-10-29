@@ -733,11 +733,22 @@ Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
 
 ---
 
-## 📋 Tasks
+## 📋 Task Queue
 
-Tasks will be added here as they are created.
+### Ready for Autonomous Execution ✅
+These tasks can be executed safely without supervision:
 
----
+_(No tasks ready yet)_
+
+### Pending Approval ⏳
+These tasks need review before autonomous execution:
+
+_(No tasks pending yet)_
+
+### Not Ready ❌
+These tasks cannot be executed autonomously:
+
+_(None yet)_
 
 ## ✅ Completed Tasks
 
