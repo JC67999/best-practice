@@ -408,9 +408,12 @@ Can rollback with: git reset --hard retrofit-start
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-git tag retrofit-complete
-
-echo -e "${GREEN}✅ Changes committed and tagged${NC}"
+# Create tag (ignore error if already exists)
+if git tag retrofit-complete 2>/dev/null; then
+    echo -e "${GREEN}✅ Changes committed and tagged${NC}"
+else
+    echo -e "${GREEN}✅ Changes committed (tag already exists)${NC}"
+fi
 echo ""
 
 # Restore stashed changes if any
