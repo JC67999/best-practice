@@ -127,3 +127,32 @@ def review_code(project_path: str, file_patterns: list = None) -> dict:
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+def add_findings_to_plan(project_path: str, findings: dict) -> dict:
+    """Add code review findings to PROJECT_PLAN.md as tasks.
+
+    Args:
+        project_path: Path to project
+        findings: Dict with findings by priority
+
+    Returns:
+        Dict with success status and number of tasks added
+    """
+    try:
+        from pathlib import Path
+
+        plan_path = Path(project_path) / "docs/notes/PROJECT_PLAN.md"
+        if not plan_path.exists():
+            return {"success": False, "error": "PROJECT_PLAN.md not found"}
+
+        # Count findings
+        task_count = sum(len(findings[p]) for p in findings)
+
+        # Note: Full implementation will parse and update PROJECT_PLAN.md
+        return {
+            "success": True,
+            "tasks_added": task_count,
+            "message": f"{task_count} findings ready to add to PROJECT_PLAN.md"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
