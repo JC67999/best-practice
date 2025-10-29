@@ -8,23 +8,25 @@ A complete MCP (Model Context Protocol) server system that **enforces** best pra
 
 ## 🚀 Quick Start
 
-### Installation
+### Retrofit Your Existing Project (One Question!)
+
 ```bash
-# Download and install
-curl -L https://github.com/[repo]/best-practice-toolkit/releases/latest/download/best-practice-toolkit.tar.gz | tar xz
-cd best-practice-toolkit
-./install.sh
+# 1. Go to your project
+cd /path/to/your/project
+
+# 2. Run the script
+/home/jc/CascadeProjects/best-practice/retrofit-tools/quick_retrofit.sh
+
+# 3. Answer ONE question:
+#    "Is this a production system?"
+#
+#    Yes → Light touch (safe, minimal changes)
+#    No  → Full implementation (all best practices)
+
+# Done! 🎉
 ```
 
-### Usage
-```bash
-# For new projects
-claude-code --with-mcps memory,quality,project
-
-# For existing projects (retrofit)
-cd your-project
-./retrofit_assess.py
-```
+**That's it!** The script does everything automatically based on your answer.
 
 ---
 
