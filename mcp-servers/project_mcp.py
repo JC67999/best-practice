@@ -452,9 +452,9 @@ class ProjectServer:
         Returns:
             Tuple of (is_vague, follow_up_question)
         """
-        # Don't apply vague detection to deep follow-up chains (prevent infinite loops)
-        if question_id and question_id.count('_followup') >= 2:
-            # After 2 follow-ups, accept the answer
+        # Don't apply vague detection to ANY follow-up chains (prevent infinite loops)
+        if question_id and '_followup' in question_id:
+            # Accept any answer to a followup question - no infinite loops!
             return False, None
 
         answer_lower = answer.lower()
@@ -464,7 +464,8 @@ class ProjectServer:
         if len(answer) > 100:
             # For longer answers, only check for standalone vague terms
             # Don't trigger if the word appears in a detailed context
-            vague_words_standalone = ['people', 'users', 'better', 'faster', 'easier', 'improve', 'help']
+            # Added "manage" and "track" to prevent loops on detailed management descriptions
+            vague_words_standalone = ['people', 'users', 'better', 'faster', 'easier', 'improve', 'help', 'manage', 'track', 'organize']
             words = answer_lower.split()
 
             # Check if vague words appear multiple times without much context
