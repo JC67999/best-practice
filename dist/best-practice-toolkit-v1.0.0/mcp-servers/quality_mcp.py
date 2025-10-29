@@ -173,6 +173,29 @@ class QualityServer:
                         },
                         "required": ["project_path"]
                     }
+                ),
+                Tool(
+                    name="validate_autonomous_safety",
+                    description="Validate task is safe for autonomous execution",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "project_path": {
+                                "type": "string",
+                                "description": "Path to project"
+                            },
+                            "task_description": {
+                                "type": "string",
+                                "description": "Task description to validate"
+                            },
+                            "file_changes": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "List of files to be modified"
+                            }
+                        },
+                        "required": ["project_path", "task_description", "file_changes"]
+                    }
                 )
             ]
 
@@ -197,6 +220,8 @@ class QualityServer:
                     result = self.audit_project_structure(**arguments)
                 elif name == "validate_file_placement":
                     result = self.validate_file_placement(**arguments)
+                elif name == "validate_autonomous_safety":
+                    result = self.validate_autonomous_safety(**arguments)
                 else:
                     result = {"error": f"Unknown tool: {name}"}
 
@@ -687,6 +712,77 @@ class QualityServer:
             "compliant": len(violations) == 0,
             "violations": violations,
             "placement_score": max(0, 100 - (len(violations) * 20))
+        }
+
+    def validate_autonomous_safety(
+        self,
+        project_path: str,
+        task_description: str,
+        file_changes: List[str]
+    ) -> Dict:
+        """Validate task is safe for autonomous execution.
+
+        Checks task against safety constraints from docs/autonomous-constraints.md.
+        Blocks forbidden operations like file deletions, config changes, and
+        dangerous database operations.
+
+        Returns dict with safety status and any violations found.
+        """
+        violations = []
+
+        # Forbidden file patterns (from docs/autonomous-constraints.md)
+        forbidden_patterns = [
+            (r'\.env', "Modifying .env file"),
+            (r'docker-compose\.yml', "Modifying Docker config"),
+            (r'Dockerfile', "Modifying Docker config"),
+            (r'\.github/workflows', "Modifying CI/CD"),
+            (r'requirements\.txt', "Adding dependencies"),
+            (r'package\.json', "Adding dependencies"),
+            (r'\.gitignore', "Modifying git ignore"),
+        ]
+
+        # Check file changes for forbidden patterns
+        for pattern, reason in forbidden_patterns:
+            for file_path in file_changes:
+                if re.search(pattern, file_path):
+                    violations.append({
+                        "severity": "CRITICAL",
+                        "violation": reason,
+                        "file": file_path,
+                        "blocked": True
+                    })
+
+        # Forbidden code patterns in task description
+        forbidden_words = [
+            "delete file", "remove file", "drop table", "truncate",
+            "remove column", "add dependency", "install package",
+            "stripe", "payment", "deploy", "push to remote"
+        ]
+
+        task_lower = task_description.lower()
+        for word in forbidden_words:
+            if word in task_lower:
+                violations.append({
+                    "severity": "HIGH",
+                    "violation": f"Task mentions forbidden operation: {word}",
+                    "blocked": True
+                })
+
+        # Validate file paths in approved directories
+        approved_dirs = ["src/", "tests/", "docs/", "mcp-servers/"]
+        for file_path in file_changes:
+            # Check if file is in approved directory
+            if not any(file_path.startswith(d) for d in approved_dirs):
+                violations.append({
+                    "severity": "HIGH",
+                    "violation": f"File outside approved directories: {file_path}",
+                    "blocked": True
+                })
+
+        return {
+            "safe_for_autonomous": len(violations) == 0,
+            "violations": violations,
+            "can_proceed": len([v for v in violations if v.get("blocked", False)]) == 0
         }
 
     async def run(self):

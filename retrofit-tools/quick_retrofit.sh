@@ -379,14 +379,19 @@ echo ""
 
 git add -A
 
-echo "Changes to be committed:"
-git status --short | head -20
-if [ "$(git status --short | wc -l)" -gt 20 ]; then
-    echo "   ... and $(($(git status --short | wc -l) - 20)) more files"
-fi
-echo ""
+# Check if there are changes to commit
+if git diff --cached --quiet; then
+    echo -e "${YELLOW}No changes to commit (already up to date)${NC}"
+    echo ""
+else
+    echo "Changes to be committed:"
+    git status --short | head -20
+    if [ "$(git status --short | wc -l)" -gt 20 ]; then
+        echo "   ... and $(($(git status --short | wc -l) - 20)) more files"
+    fi
+    echo ""
 
-git commit -m "feat: retrofit with best-practice structure ($MODE_NAME)
+    git commit -m "feat: retrofit with best-practice structure ($MODE_NAME)
 
 Applied $([ "$MODE" = "LIGHT" ] && echo "light touch retrofit (production safe)" || echo "full best-practice implementation"):
 
@@ -408,13 +413,14 @@ Can rollback with: git reset --hard retrofit-start
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
-# Create tag (ignore error if already exists)
-if git tag retrofit-complete 2>/dev/null; then
-    echo -e "${GREEN}✅ Changes committed and tagged${NC}"
-else
-    echo -e "${GREEN}✅ Changes committed (tag already exists)${NC}"
+    # Create tag (ignore error if already exists)
+    if git tag retrofit-complete 2>/dev/null; then
+        echo -e "${GREEN}✅ Changes committed and tagged${NC}"
+    else
+        echo -e "${GREEN}✅ Changes committed (tag already exists)${NC}"
+    fi
+    echo ""
 fi
-echo ""
 
 # Restore stashed changes if any
 if [ "$STASHED" = true ]; then

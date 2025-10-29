@@ -182,6 +182,10 @@ class MemoryServer:
             except Exception as e:
                 return [TextContent(type="text", text=json.dumps({"error": str(e)}, indent=2))]
 
+    def get_storage_dir(self) -> Path:
+        """Get memory storage directory path."""
+        return MEMORY_DIR
+
     def get_project_id(self, project_path: str) -> str:
         """Generate project ID from path."""
         return Path(project_path).name.replace(" ", "_").lower()
