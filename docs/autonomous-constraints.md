@@ -480,6 +480,28 @@ Each task must be approved separately.
 
 ---
 
+### 🔄 Example Workflow - End-to-End
+
+**Before Bed (10:00 PM)**:
+1. Review PROJECT_PLAN.md
+2. Move 3-5 tasks to "Ready for Autonomous Execution"
+3. Start autonomous daemon: `python autonomous_daemon.py /path/to/project`
+4. Go to sleep
+
+**During Night (2:00 AM - 6:00 AM)**:
+- Daemon executes tasks sequentially
+- Each task: checkpoint → execute → quality gate → commit or rollback
+- Creates PR with completed work
+
+**Morning (8:00 AM)**:
+1. Review PR created by daemon
+2. Check quality (should already pass)
+3. Review code changes for correctness
+4. Merge if satisfied, or provide feedback
+5. Move more tasks to Ready queue for next night
+
+---
+
 ## Review Before Merging ☑️
 
 Even though quality gates pass, **ALWAYS REVIEW** autonomous PRs:
