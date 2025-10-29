@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Autonomous Execution Daemon - Safe overnight task execution
-Implements Phase 2 of autonomous mode roadmap
+Implements Phase 3: Production Integration with MCP servers
 """
 import argparse
 import json
@@ -13,6 +13,15 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+# MCP integration
+sys.path.insert(0, str(Path(__file__).parent / "mcp-servers"))
+try:
+    from quality_mcp import QualityServer
+    from memory_mcp import MemoryServer
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+
 
 class AutonomousDaemon:
     """Safe autonomous task execution daemon."""
@@ -23,6 +32,16 @@ class AutonomousDaemon:
         self.config = config or self._default_config()
         self.session_log = []
         self.checkpoint_hash = None
+
+        # Initialize MCP servers
+        if MCP_AVAILABLE:
+            self.quality_mcp = QualityServer()
+            self.memory_mcp = MemoryServer()
+            self._log("INFO", "MCP servers initialized")
+        else:
+            self.quality_mcp = None
+            self.memory_mcp = None
+            self._log("WARN", "MCP servers not available")
 
     def _default_config(self) -> Dict:
         """Get default configuration."""
@@ -169,9 +188,42 @@ class AutonomousDaemon:
             self._log("ERROR", f"Quality gate error: {e}")
             return {"status": "FAIL", "reason": str(e)}
 
+    def validate_task_safety(self, task: Dict) -> Dict:
+        """Validate task safety using Quality MCP."""
+        if not self.quality_mcp:
+            self._log("WARN", "Quality MCP not available, skipping safety check")
+            return {"safe_for_autonomous": True, "violations": []}
+
+        # For now, assume no file changes (would need task metadata)
+        # In real implementation, task would specify which files it modifies
+        file_changes = []
+
+        result = self.quality_mcp.validate_autonomous_safety(
+            str(self.project_path),
+            task["description"],
+            file_changes
+        )
+
+        if not result.get("safe_for_autonomous", False):
+            self._log("WARN", f"Safety violations found: {len(result.get('violations', []))}")
+            for violation in result.get("violations", []):
+                self._log("WARN", f"  - {violation.get('violation')}")
+
+        return result
+
     def execute_task(self, task: Dict) -> Dict:
         """Execute a single task safely."""
         self._log("INFO", f"Executing task: {task['id']}")
+
+        # Validate safety first
+        safety_result = self.validate_task_safety(task)
+        if not safety_result.get("safe_for_autonomous", False):
+            return {
+                "success": False,
+                "task_id": task["id"],
+                "reason": "Safety validation failed",
+                "violations": safety_result.get("violations", [])
+            }
 
         checkpoint = self.create_git_checkpoint()
         if not checkpoint:
@@ -261,6 +313,34 @@ class AutonomousDaemon:
         self._log("INFO", f"\n📊 Session Summary:")
         self._log("INFO", f"   Completed: {len(completed)}")
         self._log("INFO", f"   Failed: {len(failed)}")
+
+        # Save to Memory MCP
+        self._save_to_memory_mcp(completed, failed)
+
+        # Save session log file
+        self._save_session_log()
+
+    def _save_to_memory_mcp(self, completed: List, failed: List):
+        """Save session summary to Memory MCP."""
+        if not self.memory_mcp:
+            return
+
+        summary = f"Autonomous session: {len(completed)} completed, {len(failed)} failed"
+        decisions = [f"Task {t['id']}: {t['description']}" for t in completed]
+        next_steps = ["Review autonomous PR" if completed else "Fix failures and retry"]
+        blockers = [f["reason"] for f in failed] if failed else []
+
+        try:
+            self.memory_mcp.save_session_summary(
+                str(self.project_path),
+                summary,
+                decisions,
+                next_steps,
+                blockers
+            )
+            self._log("INFO", "Session saved to Memory MCP")
+        except Exception as e:
+            self._log("ERROR", f"Failed to save to Memory MCP: {e}")
 
         self._save_session_log()
 
