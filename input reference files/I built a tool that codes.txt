@@ -1,0 +1,292 @@
+ I built a tool that codes while I sleep – new update makes it even smarter 💤⚡
+Built with Claude
+
+Hey everyone,
+
+A couple of months ago I shared my project Claude Nights Watch here. Since then, I’ve been refining it based on my own use and some feedback. I wanted to share a small but really helpful update.
+
+The core idea is still the same: it picks up tasks from a markdown file and executes them automatically, usually while I’m away or asleep. But now I’ve added a simple way to preserve context between sessions.
+
+Now for the update: I realized the missing piece was context. If I stopped the daemon and restarted it, I woudd sometimes lose track of what had already been done. To fix that, I started keeping a tasks.md file as the single source of truth.
+
+    After finishing something, I log it in tasks.md (done ✅, pending ⏳, or notes 📝).
+
+    When the daemon starts again, it picks up exactly from that file instead of guessing.
+
+    This makes the whole workflow feel more natural — like leaving a sticky note for myself that gets read and acted on while I’m asleep.
+
+What I like most is that my mornings now start with reviewing pull requests instead of trying to remember what I was doing last night. It’s a small change, but it ties the whole system together.
+
+Why this matters:
+
+    No more losing context after stopping/starting.
+
+    Easy to pick up exactly where you left off.
+
+    Serves as a lightweight log + to-do list in one place.
+
+Repo link (still MIT licensed, open to all):
+👉 Claude Nights Watch on GitHub : https://github.com/aniketkarne/ClaudeNightsWatch
+
+If you decide to try it, my only advice is the same as before: start small, keep your rules strict, and use branches for safety.
+
+Hope this helps anyone else looking to squeeze a bit more productivity out of Claude without burning themselves out.
+
+
+ I built a tool that codes while I sleep – new update makes it even smarter 💤⚡
+
+Hey everyone,
+
+A couple of months ago I shared my project Claude Nights Watch here. Since then, I’ve been refining it based on my own use and some feedback. I wanted to share a small but really helpful update.
+
+The core idea is still the same: it picks up tasks from a markdown file and executes them automatically, usually while I’m away or asleep. But now I’ve added a simple way to preserve context between sessions.
+
+Now for the update: I realized the missing piece was context. If I stopped the daemon and restarted it, I woudd sometimes lose track of what had already been done. To fix that, I started keeping a tasks.md file as the single source of truth.
+
+    After finishing something, I log it in tasks.md (done ✅, pending ⏳, or notes 📝).
+
+    When the daemon starts again, it picks up exactly from that file instead of guessing.
+
+    This makes the whole workflow feel more natural — like leaving a sticky note for myself that gets read and acted on while I’m asleep.
+
+What I like most is that my mornings now start with reviewing pull requests instead of trying to remember what I was doing last night. It’s a small change, but it ties the whole system together.
+
+Why this matters:
+
+    No more losing context after stopping/starting.
+
+    Easy to pick up exactly where you left off.
+
+    Serves as a lightweight log + to-do list in one place.
+
+Repo link (still MIT licensed, open to all):
+👉 Claude Nights Watch on GitHub : https://github.com/aniketkarne/ClaudeNightsWatch
+
+If you decide to try it, my only advice is the same as before: start small, keep your rules strict, and use branches for safety.
+
+Hope this helps anyone else looking to squeeze a bit more productivity out of Claude without burning themselves out.
+
+
+
+
+ A tool that codes while I sleep - new update makes even smarter!
+Built with Claude
+
+Hey everyone,
+
+A couple of months ago I shared my project Claude Nights Watch here. Since then, I’ve been refining it based on my own use and some feedback. I wanted to share a small but really helpful update.
+
+The core idea is still the same: it picks up tasks from a markdown file and executes them automatically, usually while I’m away or asleep. But now I’ve added a simple way to preserve context between sessions.
+
+Now for the update: I realized the missing piece was context. If I stopped the daemon and restarted it, I woudd sometimes lose track of what had already been done. To fix that, I started keeping a tasks.md file as the single source of truth.
+
+    After finishing something, I log it in [tasks.md] (done ✅, pending ⏳, or notes 📝).
+
+    When the daemon starts again, it picks up exactly from that file instead of guessing.
+
+    This makes the whole workflow feel more natural — like leaving a sticky note for myself that gets read and acted on while I’m asleep.
+
+What I like most is that my mornings now start with reviewing pull requests instead of trying to remember what I was doing last night. It’s a small change, but it ties the whole system together.
+
+Why this matters:
+
+    No more losing context after stopping/starting.
+
+    Easy to pick up exactly where you left off.
+
+    Serves as a lightweight log + to-do list in one place.
+
+Repo link (still MIT licensed, open to all):
+👉 Claude Nights Watch on GitHub : https://github.com/aniketkarne/ClaudeNightsWatch
+
+If you decide to try it, my only advice is the same as before: start small, keep your rules strict, and use branches for safety.
+
+Hope this helps anyone else looking to squeeze a bit more productivity out of Claude without burning themselves out.
+
+
+We’ve all been there. You’re deep in the zone, vibe dev mode engaged, hammering Enter on every suggestion until the code either miraculously ships or spectacularly explodes, dropping a one-line “fix it” that earns the classic “You’re absolutely right!”, and then bam: your 5-hour Claude Code window taps out. You’ve already done the 100 push-ups, the vision board, the cold plunge, the gratitude journal; even your notes are color coded. Depending on your plan, that cap can hit sooner than you’d like. Nothing kills momentum like a multi-hour cooldown mid-session.
+
+Meet ccblocks. This lightweight helper schedules Claude Code CLI triggers throughout the day to start new 5-hour windows before you need them. Kick one off at 06:00 while you’re asleep; sit down at 09:00 and you’re already three hours into a fresh window for those hardcore Opus planning tasks, with a usage reset coming much sooner than usual.
+
+Is this a workaround? Not quite; Claude’s limits still apply. ccblocks just optimises when sessions begin so you get maximum coverage during actual working hours.
+
+Read more at: https://github.com/designorant/ccblocks
+
+ccblocks
+Sleepless Agent — Turn Your Unused Claude Credits into an Autonomous AgentOS
+Built with Claude
+
+Ever looked at your Claude u and thought… “man, I’m not even using half of these”?
+
+What if you could turn that unused compute into something that works while you sleep?
+
+That’s what Sleepless Agent is about —
+
+an AgentOS built on Claude Code, designed to capture your random thoughts, half-baked project ideas, or TODOs — and then let your AI finish them overnight.
+How It Works
+
+You just drop an idea like:
+
+    “make me a pitch deck for my new open-source project”
+
+and go to sleep.
+
+By morning, your agent has:
+
+    brainstormed the concept
+
+    written the README
+
+    drafted the slides
+
+    maybe even pushed an initial repo update
+
+All powered by Claude Agent SDK, so it inherits every dev feature:
+
+file access, function tools, structured agents, interactive execution — but now fully automated through an AgentOS daemon that runs your tasks.
+Example Use Cases
+
+    💬 Capture your stray ideas anytime — your agent will pick them up later.
+
+    📊 Want a PPT from your notes? Just drop a one-line prompt.
+
+    🔎 Want to crawl Xiaohongshu for specific posts (like all “相亲” threads)? Add the Xiaohongshu MCP — your agent will find them while you sleep.
+
+    ⚙️ Plug in any Claude Code-compatible toolchain. It just works.
+
+Why “Sleepless”
+
+Because your agent never sleeps — it turns late-night creativity into next-morning results.
+
+It’s like having a background AI cofounder who actually works on your ideas while you rest.
+Check it out
+
+👉 GitHub – context-machine-lab/sleepless-agent
+ A tool that codes while I am sleeping! : Claude Nights Watch
+Productivity
+
+Hey everyone,
+
+So I built this thing called Claude Nights Watch about 2 months ago and it's been working pretty well for me, thought let me share my experience and maybe help some of you automate your workflows too.
+
+What it does: Instead of just keeping Claude sessions alive, it actually executes tasks from a markdown file when your usage window is about to expire. So like, I can write "refactor this function" or "add tests for X module" and it'll do it automatically while I am sleeping or in meetings.
+
+Repository: https://github.com/aniketkarne/ClaudeNightsWatch
+
+I have added example rules which I personally use into repo, so modify or change, use it wisely.
+
+The good stuff:
+
+    Been using it for ~2 months with zero issues
+
+    No bans or problems with Claude (I think timing matters - it executes right before the 5-hour window expires, not spamming) i usually do it at 3.30hour window.
+
+    Actually gets useful work done while I am not around, or went out to get some grocery!
+
+    All conversations are logged so I can see exactly what happened
+
+    Saves me hours of repetitive coding tasks
+
+Well, I really like the Scheduled Start and Smart Timing, This helps me to mostly code at night and by morning my bugs are fixed, a features is done, a workflow is completed.
+
+Really a good night sleep!
+
+just a bit of showoff so this features are really worth it, i think it took me more time to prepare this read me than actually buiding one :D
+
+    Autonomous Execution: Runs tasks without manual intervention
+
+    Task-Based Workflow: Define tasks in a simple markdown file
+
+    Safety Rules: Configure safety constraints in rules.md
+
+    Smart Timing: Uses ccusage for accurate timing or falls back to time-based checking
+
+    Scheduled Start: Can be configured to start at a specific time
+
+    Comprehensive Logging: Track all activities and executions
+
+    Based on Proven Code: Built on the reliable claude-auto-renew daemon
+
+The reality check:
+
+    I DON'T give it massive tasks like "build me a full app" - that's asking for trouble
+
+    I stick to small, focused features. Like "add error handling to this function" or "write unit tests for this module" or "here is the info.md fix this error"
+
+    The rules.md file is CRITICAL. Like, stupidly important. I spent time making mine really restrictive
+
+    I always commit my work before running it and create a feature branch
+
+    Keep backups of everything important
+
+    Not everything works perfectly - maybe 80% success rate for me
+
+My typical workflow:
+
+    Commit current work to git
+
+    Create feature branch (git checkout -b feature/auto-task)
+
+    Write specific task in task.md
+
+    Write/update safety rules in rules.md
+
+    Let it run (./claude-nights-watch-manager.sh start)
+
+    Review the changes and logs when I'm back
+
+    Merge if good, rollback if not
+
+Safety stuff (this is important):
+
+    It uses --dangerously-skip-permissions so it can run without prompts
+
+        My rules.md has like 50 lines of "don't do this" and "never do that"
+
+        I test tasks manually first before automating them
+
+        Never let it touch production code directly
+
+        Always work in feature branches
+
+        The logging shows you EXACTLY what prompt was sent and Claude's full response
+
+Setup is pretty easy:
+
+git clone https://github.com/aniketkarne/ClaudeNightsWatch.git
+cd ClaudeNightsWatch
+chmod +x *.sh
+./setup-nights-watch.sh
+
+The interactive setup walks you through creating your first task and rules files.
+
+What doesn't work well:
+
+    Complex tasks that need back-and-forth - mostly user intervention (obviously)
+
+    Tasks requiring external API keys or credentials
+
+    Anything that needs user input during execution
+
+    Tasks that depend on real-time data
+
+The logging is actually really nice - you can see the exact prompt it sent and Claude's full response. Helped me debug when things went wrong and understand what Claude was thinking.
+
+Well, this is not magic and you need to be careful. But if you're doing repetitive coding tasks and want to automate some of them, it might be worth checking out.
+
+Pro tips from 2 months of usage:
+
+    Start with SUPER simple tasks
+
+    Be paranoid about your rules file
+
+    Always use git branches
+
+    Check the logs after each run
+
+    Don't let it run unsupervised until you trust it
+
+Code is on GitHub, MIT license so do whatever you want with it. There's a test suite and examples to get you started.
+
+Update: Question: Why the hell are we buying max plans? To use it at maximum right? For our use?
+
