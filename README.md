@@ -28,6 +28,25 @@ cd /path/to/your/project
 
 **That's it!** The script does everything automatically based on your answer.
 
+### Alternative: Manual Installation
+
+If you prefer more control:
+
+```bash
+# 1. Clone or download this toolkit
+git clone https://github.com/your-org/best-practice-toolkit.git
+
+# 2. Run install script on your project
+cd best-practice-toolkit
+./install.sh /path/to/your/project
+
+# 3. Define your project objective
+cd /path/to/your/project
+# Follow prompts from Project MCP
+
+# Installation takes <10 minutes ✅
+```
+
 ---
 
 ## ✨ Key Features
