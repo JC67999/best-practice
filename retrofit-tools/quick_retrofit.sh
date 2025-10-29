@@ -420,6 +420,90 @@ if [ "$STASHED" = true ]; then
     echo ""
 fi
 
+# Validation checklist
+echo ""
+echo -e "${BLUE}Validating installation...${NC}"
+echo ""
+
+validation_errors=0
+
+# Check CLAUDE.md
+if [ -f "CLAUDE.md" ]; then
+    echo -e "${GREEN}✅${NC} CLAUDE.md (Project standards)"
+else
+    echo -e "${RED}❌${NC} CLAUDE.md missing"
+    ((validation_errors++))
+fi
+
+# Check PROJECT_PLAN.md
+if [ -f "docs/notes/PROJECT_PLAN.md" ]; then
+    echo -e "${GREEN}✅${NC} PROJECT_PLAN.md (Project objective)"
+else
+    echo -e "${RED}❌${NC} PROJECT_PLAN.md missing"
+    ((validation_errors++))
+fi
+
+# Check docs structure
+if [ -d "docs/notes" ]; then
+    echo -e "${GREEN}✅${NC} docs/notes/ directory"
+else
+    echo -e "${RED}❌${NC} docs/notes/ directory missing"
+    ((validation_errors++))
+fi
+
+# Check MCP servers
+if [ -d "mcp-servers" ]; then
+    echo -e "${GREEN}✅${NC} mcp-servers/ directory"
+
+    # Check individual MCPs
+    for mcp in memory_mcp.py quality_mcp.py project_mcp.py learning_mcp.py; do
+        if [ -f "mcp-servers/$mcp" ]; then
+            echo -e "${GREEN}   ✅${NC} $mcp"
+        else
+            echo -e "${RED}   ❌${NC} $mcp missing"
+            ((validation_errors++))
+        fi
+    done
+else
+    echo -e "${RED}❌${NC} mcp-servers/ directory missing"
+    ((validation_errors++))
+fi
+
+# Check full mode components
+if [ "$MODE" = "FULL" ]; then
+    # Check quality gate
+    if [ -f ".ai-validation/check_quality.sh" ]; then
+        echo -e "${GREEN}✅${NC} .ai-validation/check_quality.sh"
+    else
+        echo -e "${RED}❌${NC} Quality gate missing"
+        ((validation_errors++))
+    fi
+
+    # Check tests directory
+    if [ -d "tests" ]; then
+        echo -e "${GREEN}✅${NC} tests/ directory"
+    else
+        echo -e "${RED}❌${NC} tests/ directory missing"
+        ((validation_errors++))
+    fi
+
+    # Check .gitignore
+    if [ -f ".gitignore" ]; then
+        echo -e "${GREEN}✅${NC} .gitignore"
+    else
+        echo -e "${RED}❌${NC} .gitignore missing"
+        ((validation_errors++))
+    fi
+fi
+
+echo ""
+if [ $validation_errors -eq 0 ]; then
+    echo -e "${GREEN}${BOLD}All components installed successfully!${NC}"
+else
+    echo -e "${RED}${BOLD}⚠️  $validation_errors component(s) missing${NC}"
+    echo "   Please check the installation"
+fi
+
 # Summary
 echo ""
 echo -e "${BOLD}${GREEN}"
