@@ -370,7 +370,7 @@ class ProjectServer:
                 break
 
         # Check if answer is vague
-        is_vague, follow_up = self._detect_vague_answer(answer)
+        is_vague, follow_up = self._detect_vague_answer(answer, question_id)
 
         if is_vague:
             # Generate follow-up question
@@ -442,10 +442,54 @@ class ProjectServer:
                     "weak_areas": self._identify_weak_areas(clarification["answers"])
                 }
 
-    def _detect_vague_answer(self, answer: str) -> Tuple[bool, Optional[str]]:
-        """Detect if answer contains vague language."""
+    def _detect_vague_answer(self, answer: str, question_id: str = None) -> Tuple[bool, Optional[str]]:
+        """Detect if answer contains vague language.
+
+        Args:
+            answer: The answer text to check
+            question_id: The question ID being answered (to prevent loops)
+
+        Returns:
+            Tuple of (is_vague, follow_up_question)
+        """
+        # Don't apply vague detection to deep follow-up chains (prevent infinite loops)
+        if question_id and question_id.count('_followup') >= 2:
+            # After 2 follow-ups, accept the answer
+            return False, None
+
         answer_lower = answer.lower()
 
+        # Only check if answer is very short (likely genuinely vague)
+        # Longer answers with context are likely specific enough
+        if len(answer) > 100:
+            # For longer answers, only check for standalone vague terms
+            # Don't trigger if the word appears in a detailed context
+            vague_words_standalone = ['people', 'users', 'better', 'faster', 'easier', 'improve', 'help']
+            words = answer_lower.split()
+
+            # Check if vague words appear multiple times without much context
+            for vague_word in vague_words_standalone:
+                if vague_word in words:
+                    # Check if it's in a sentence with specific details (numbers, proper nouns, etc)
+                    has_specifics = any([
+                        bool(re.search(r'\d+', answer)),  # Contains numbers
+                        bool(re.search(r'[A-Z][a-z]+\s+[A-Z][a-z]+', answer)),  # Proper nouns
+                        len(answer) > 200,  # Very detailed answer
+                        any(indicator in answer_lower for indicator in ['for example', 'such as', 'specifically', 'including'])
+                    ])
+
+                    if has_specifics:
+                        # Answer has context, don't mark as vague
+                        continue
+                    else:
+                        # Genuinely vague
+                        follow_up = VAGUE_PATTERNS.get(vague_word, "Can you be more specific?")
+                        return True, follow_up
+
+            # Long answer with no vague standalone words
+            return False, None
+
+        # For short answers, check for vague patterns
         for vague_term, follow_up in VAGUE_PATTERNS.items():
             if vague_term in answer_lower:
                 return True, follow_up
