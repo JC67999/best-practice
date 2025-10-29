@@ -50,6 +50,106 @@ These tasks need review before autonomous execution:
   - Status: PENDING
   - Reason: Needs review of retrofit approach
 
+- **[v1_smart_installer]** Create smart installer that auto-detects project status
+  - Alignment score: 95/100
+  - Estimated lines: N/A (multi-task feature)
+  - Description: Single command install that chooses light/full mode automatically
+  - Detection criteria:
+    - Production/live: Check for .git commits in last 7 days, open PRs, deployment configs
+    - Non-production: Empty repo, no recent activity, test/dev branches only
+  - Light mode (production): Only CLAUDE.md, quality gate, objective clarification
+  - Full mode (non-production): Complete retrofit with structure changes
+  - Status: PENDING
+  - Priority: HIGH (matches success metric: "light touch for production")
+  - Breakdown: See sub-tasks below
+
+- **[v1_smart_1]** Create smart_install.sh with project detection logic
+  - Alignment score: 90/100
+  - Estimated lines: 30
+  - Description: Main installer script with auto-detection
+  - Detection checks: git log, gh pr list, deployment files, activity timeline
+  - Tests defined: ✅ Manual testing on different project types
+  - Safety check: ✅ Read-only detection, prompts before changes
+  - Status: PENDING
+  - Reason: Needs approval for detection strategy
+
+- **[v1_smart_2]** Integrate existing retrofit tools into smart installer
+  - Alignment score: 88/100
+  - Estimated lines: 25
+  - Description: Call retrofit_assess.py, retrofit_extract_objective.py from installer
+  - Implementation: Use existing retrofit-tools/ scripts
+  - Tests defined: ⏳ Integration test needed
+  - Safety check: ✅ Uses existing validated tools
+  - Status: PENDING
+  - Reason: Depends on v1_smart_1
+
+- **[v1_smart_3]** Add interactive mode with user confirmation
+  - Alignment score: 92/100
+  - Estimated lines: 20
+  - Description: Show detection results, ask user to confirm light/full mode
+  - Override option: Allow user to manually select mode
+  - Tests defined: ✅ Manual testing
+  - Safety check: ✅ Requires user confirmation
+  - Status: PENDING
+  - Reason: Depends on v1_smart_1
+
+- **[v2_learning_system]** Implement self-learning system with web research
+  - Alignment score: 95/100
+  - Description: Regularly check internet sources for best practices improvements
+  - Research topics: Python, Angular, Redis, Nginx, Claude AI, token optimization, testing
+  - Status: PENDING (V2 feature)
+  - Priority: HIGH (aligns with "self-learning AI assistant" objective)
+  - Breakdown: See sub-tasks below
+
+- **[v2_learn_1]** Design learning system architecture document
+  - Alignment score: 90/100
+  - Estimated lines: N/A (documentation)
+  - Description: Create docs/design/LEARNING_SYSTEM_ARCHITECTURE.md
+  - Content: MCP design, web search strategy, storage format, update workflow
+  - Tests defined: ✅ N/A (documentation)
+  - Safety check: ✅ Documentation only
+  - Status: PENDING
+  - Reason: Needs approval for V2 scope
+
+- **[v2_learn_2]** Create learning_mcp.py skeleton with tool definitions
+  - Alignment score: 92/100
+  - Estimated lines: 25
+  - Description: Create mcp-servers/learning_mcp.py with tool stubs
+  - Tools: search_best_practices, store_learning, get_learnings, generate_report
+  - Tests defined: ⏳ Needs test file
+  - Safety check: ✅ New file, no external calls yet
+  - Status: PENDING
+  - Reason: Depends on v2_learn_1 (architecture)
+
+- **[v2_learn_3]** Implement search_best_practices tool with web search
+  - Alignment score: 85/100
+  - Estimated lines: 30
+  - Description: Add web search functionality to learning_mcp.py
+  - Implementation: Use requests library to search for best practices
+  - Tests defined: ⏳ Needs test with mocked web requests
+  - Safety check: ⚠️ Makes external web requests
+  - Status: PENDING
+  - Reason: Needs security review for web requests
+
+- **[v2_learn_4]** Implement store_learning tool with Memory MCP integration
+  - Alignment score: 88/100
+  - Estimated lines: 20
+  - Description: Store learnings in structured format via Memory MCP
+  - Tests defined: ⏳ Needs integration test
+  - Safety check: ✅ Internal MCP calls only
+  - Status: PENDING
+  - Reason: Depends on v2_learn_2
+
+- **[v2_learn_5]** Add scheduled learning daemon script
+  - Alignment score: 82/100
+  - Estimated lines: 30
+  - Description: Create learning_daemon.py for periodic web searches
+  - Schedule: Daily/weekly configurable searches
+  - Tests defined: ⏳ Needs test with mocked scheduler
+  - Safety check: ⚠️ Runs autonomously, makes web requests
+  - Status: PENDING
+  - Reason: Needs approval for autonomous web access
+
 ### Not Ready ❌
 These tasks cannot be executed autonomously:
 
