@@ -29,7 +29,31 @@ echo ""
 if [ "$is_production" = true ]; then
     echo "✅ PRODUCTION project detected"
     echo "   Mode: LIGHT (safe, minimal changes)"
+    echo ""
+    echo "Installing light mode:"
+    echo "  - CLAUDE.md standards file"
+    echo "  - Quality gate script"
+    echo "  - Project objective setup"
 else
     echo "✅ NON-PRODUCTION project detected"
     echo "   Mode: FULL (complete best practices)"
+    echo ""
+    echo "Installing full mode:"
+    echo "  - All light mode features"
+    echo "  - Complete retrofit (structure, docs, tests)"
+fi
+
+echo ""
+echo "📦 Starting installation..."
+
+# Get toolkit directory
+TOOLKIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Run appropriate retrofit
+if [ "$is_production" = true ]; then
+    # Light mode: Basic installation only
+    bash "$TOOLKIT_DIR/install.sh" "$(pwd)"
+else
+    # Full mode: Complete retrofit
+    bash "$TOOLKIT_DIR/retrofit-tools/quick_retrofit.sh"
 fi
