@@ -30,126 +30,116 @@ Last Updated: 2025-10-29 06:13
 ### Ready for Autonomous Execution ✅
 These tasks can be executed safely without supervision:
 
-_(No tasks currently ready)_
+→ **[v2_learn_6]** Implement get_learnings retrieval tool
+  - Alignment score: 90/100 ✅
+  - Estimated lines: 28 ✅
+  - Description: Retrieve stored learnings by topic/date from ~/.claude_memory/learnings/
+  - Tests defined: ✅ Unit test with mock filesystem
+  - Safety check: ✅ Read-only filesystem operations
+  - Status: READY
+  - Priority: HIGH
+  - Auto-approved: 2025-10-29
+
+→ **[v2_learn_7]** Implement generate_report tool
+  - Alignment score: 88/100 ✅
+  - Estimated lines: 30 ✅
+  - Description: Create markdown summary report of recent learnings
+  - Tests defined: ✅ Unit test with mock data
+  - Safety check: ✅ Report generation only, no external calls
+  - Status: READY
+  - Priority: HIGH
+  - Auto-approved: 2025-10-29
+
+→ **[v2_learn_8]** Add web scraping with beautifulsoup4
+  - Alignment score: 85/100 ✅
+  - Estimated lines: 30 ✅
+  - Description: Parse HTML content from web search results
+  - Implementation: Extract best practices from trusted sources
+  - Tests defined: ✅ Unit test with mocked HTML
+  - Safety check: ✅ Parsing only, requires requests library installed
+  - Status: READY
+  - Priority: MEDIUM
+  - Depends on: requests library installation
+  - Auto-approved: 2025-10-29
 
 ### Pending Approval ⏳
 These tasks need review before autonomous execution:
 
-- **[v1_task_6]** Validate package_toolkit.sh creates correct distribution
-  - Alignment score: 85/100
-  - Estimated lines: 15
-  - Tests defined: ⏳ Manual validation needed
-  - Safety check: ⏳ Reads/tests packaging script
-  - Status: PENDING
-  - Reason: Needs manual validation of tar.gz contents
-
-- **[v1_task_7]** Create retrofit validation script
-  - Alignment score: 88/100
-  - Estimated lines: 28
-  - Tests defined: ⏳ Needs test definition
-  - Safety check: ⏳ Script creates new files
-  - Status: PENDING
-  - Reason: Needs review of retrofit approach
-
-- **[v1_smart_installer]** Create smart installer that auto-detects project status
+→ **[immediate_1]** Test install.sh on actual projects
   - Alignment score: 95/100
-  - Estimated lines: N/A (multi-task feature)
-  - Description: Single command install that chooses light/full mode automatically
-  - Detection criteria:
-    - Production/live: Check for .git commits in last 7 days, open PRs, deployment configs
-    - Non-production: Empty repo, no recent activity, test/dev branches only
-  - Light mode (production): Only CLAUDE.md, quality gate, objective clarification
-  - Full mode (non-production): Complete retrofit with structure changes
+  - Estimated lines: N/A (manual testing)
+  - Description: Run install.sh on 2-3 different projects to validate
+  - Test scenarios: Empty project, existing project, production project
+  - Tests defined: ✅ Manual validation checklist
+  - Safety check: ✅ Read-only testing, no modifications
   - Status: PENDING
-  - Priority: HIGH (matches success metric: "light touch for production")
-  - Breakdown: See sub-tasks below
+  - Priority: CRITICAL
+  - Reason: Needs manual execution and validation
 
-- **[v1_smart_1]** Create smart_install.sh with project detection logic
-  - Alignment score: 90/100
-  - Estimated lines: 30
-  - Description: Main installer script with auto-detection
-  - Detection checks: git log, gh pr list, deployment files, activity timeline
-  - Tests defined: ✅ Manual testing on different project types
-  - Safety check: ✅ Read-only detection, prompts before changes
-  - Status: PENDING
-  - Reason: Needs approval for detection strategy
-
-- **[v1_smart_2]** Integrate existing retrofit tools into smart installer
-  - Alignment score: 88/100
-  - Estimated lines: 25
-  - Description: Call retrofit_assess.py, retrofit_extract_objective.py from installer
-  - Implementation: Use existing retrofit-tools/ scripts
-  - Tests defined: ⏳ Integration test needed
-  - Safety check: ✅ Uses existing validated tools
-  - Status: PENDING
-  - Reason: Depends on v1_smart_1
-
-- **[v1_smart_3]** Add interactive mode with user confirmation
-  - Alignment score: 92/100
-  - Estimated lines: 20
-  - Description: Show detection results, ask user to confirm light/full mode
-  - Override option: Allow user to manually select mode
-  - Tests defined: ✅ Manual testing
-  - Safety check: ✅ Requires user confirmation
-  - Status: PENDING
-  - Reason: Depends on v1_smart_1
-
-- **[v2_learning_system]** Implement self-learning system with web research
+→ **[immediate_2]** Test smart_install.sh in prod/non-prod scenarios
   - Alignment score: 95/100
-  - Description: Regularly check internet sources for best practices improvements
-  - Research topics: Python, Angular, Redis, Nginx, Claude AI, token optimization, testing
-  - Status: PENDING (V2 feature)
-  - Priority: HIGH (aligns with "self-learning AI assistant" objective)
-  - Breakdown: See sub-tasks below
+  - Estimated lines: N/A (manual testing)
+  - Description: Validate auto-detection works correctly
+  - Test scenarios: Active repo, stale repo, with/without deployment configs
+  - Tests defined: ✅ Manual validation checklist
+  - Safety check: ✅ Detection only, no installation
+  - Status: PENDING
+  - Priority: CRITICAL
+  - Reason: Needs manual execution and validation
 
-- **[v2_learn_1]** Design learning system architecture document
+→ **[immediate_3]** Install requests library for web scraping
   - Alignment score: 90/100
-  - Estimated lines: N/A (documentation)
-  - Description: Create docs/design/LEARNING_SYSTEM_ARCHITECTURE.md
-  - Content: MCP design, web search strategy, storage format, update workflow
-  - Tests defined: ✅ N/A (documentation)
-  - Safety check: ✅ Documentation only
+  - Estimated lines: N/A (dependency installation)
+  - Description: pip install requests beautifulsoup4
+  - Tests defined: ✅ Import test
+  - Safety check: ⚠️ Modifies Python environment
   - Status: PENDING
-  - Reason: Needs approval for V2 scope
+  - Priority: HIGH
+  - Reason: Dependency installation requires approval
 
-- **[v2_learn_2]** Create learning_mcp.py skeleton with tool definitions
-  - Alignment score: 92/100
-  - Estimated lines: 25
-  - Description: Create mcp-servers/learning_mcp.py with tool stubs
-  - Tools: search_best_practices, store_learning, get_learnings, generate_report
-  - Tests defined: ⏳ Needs test file
-  - Safety check: ✅ New file, no external calls yet
-  - Status: PENDING
-  - Reason: Depends on v2_learn_1 (architecture)
-
-- **[v2_learn_3]** Implement search_best_practices tool with web search
-  - Alignment score: 85/100
-  - Estimated lines: 30
-  - Description: Add web search functionality to learning_mcp.py
-  - Implementation: Use requests library to search for best practices
-  - Tests defined: ⏳ Needs test with mocked web requests
-  - Safety check: ⚠️ Makes external web requests
-  - Status: PENDING
-  - Reason: Needs security review for web requests
-
-- **[v2_learn_4]** Implement store_learning tool with Memory MCP integration
+→ **[immediate_4]** Run learning_daemon.py to collect first learnings
   - Alignment score: 88/100
-  - Estimated lines: 20
-  - Description: Store learnings in structured format via Memory MCP
-  - Tests defined: ⏳ Needs integration test
-  - Safety check: ✅ Internal MCP calls only
+  - Estimated lines: N/A (execution)
+  - Description: Execute learning daemon and review first results
+  - Tests defined: ✅ Manual review of learnings
+  - Safety check: ⚠️ Makes web requests (after requests installed)
   - Status: PENDING
-  - Reason: Depends on v2_learn_2
+  - Priority: HIGH
+  - Reason: Depends on immediate_3, needs review of results
+  - Depends on: immediate_3
 
-- **[v2_learn_5]** Add scheduled learning daemon script
-  - Alignment score: 82/100
-  - Estimated lines: 30
-  - Description: Create learning_daemon.py for periodic web searches
-  - Schedule: Daily/weekly configurable searches
-  - Tests defined: ⏳ Needs test with mocked scheduler
-  - Safety check: ⚠️ Runs autonomously, makes web requests
+→ **[future_1]** Schedule learning_daemon with cron/systemd
+  - Alignment score: 85/100
+  - Estimated lines: 20
+  - Description: Create cron job or systemd timer for daily execution
+  - Tests defined: ⏳ Manual validation
+  - Safety check: ⚠️ System-level configuration
   - Status: PENDING
-  - Reason: Needs approval for autonomous web access
+  - Priority: MEDIUM
+  - Reason: System configuration requires approval
+
+→ **[future_2]** Apply learnings to update CLAUDE.md
+  - Alignment score: 92/100
+  - Estimated lines: Variable
+  - Description: Review learnings and update CLAUDE.md standards
+  - Tests defined: ✅ Quality gate validation
+  - Safety check: ✅ Manual review required before applying
+  - Status: PENDING
+  - Priority: MEDIUM
+  - Reason: Manual review and judgment required
+  - Depends on: immediate_4
+
+→ **[future_3]** Retrofit 3 existing projects (success metric)
+  - Alignment score: 95/100
+  - Estimated lines: N/A (large multi-step task)
+  - Description: Apply toolkit to 3 different existing projects
+  - Success criteria: All pass quality gates, objectives clarified, <10 min install
+  - Tests defined: ✅ Success metrics validation
+  - Safety check: ✅ Each retrofit requires approval
+  - Status: PENDING
+  - Priority: HIGH (success metric)
+  - Reason: Large task requiring project selection and validation
+
 
 ### Not Ready ❌
 These tasks cannot be executed autonomously:
