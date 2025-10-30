@@ -8,44 +8,51 @@ A complete MCP (Model Context Protocol) server system that **enforces** best pra
 
 ## 🚀 Quick Start
 
-### Retrofit Your Existing Project (One Question!)
+### ONE Command Installation
 
+**Option 1: Full Install (commits to git)**
 ```bash
-# 1. Go to your project
 cd /path/to/your/project
-
-# 2. Run the script
-/home/jc/CascadeProjects/best-practice/retrofit-tools/quick_retrofit.sh
-
-# 3. Answer ONE question:
-#    "Is this a production system?"
-#
-#    Yes → Light touch (safe, minimal changes)
-#    No  → Full implementation (all best practices)
-
-# Done! 🎉
+/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh
 ```
 
-**That's it!** The script does everything automatically based on your answer.
-
-### Alternative: Manual Installation
-
-If you prefer more control:
-
+**Option 2: Local Only (for live projects - NO git commits)**
 ```bash
-# 1. Clone or download this toolkit
-git clone https://github.com/your-org/best-practice-toolkit.git
-
-# 2. Run install script on your project
-cd best-practice-toolkit
-./install.sh /path/to/your/project
-
-# 3. Define your project objective
-cd /path/to/your/project
-# Follow prompts from Project MCP
-
-# Installation takes <10 minutes ✅
+cd /path/to/your/live/project
+/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh --local-only
 ```
+
+**That's it.** Script auto-detects production vs development, asks for confirmation, installs everything safely.
+
+**What it does**:
+- Checks git safety (uncommitted changes, etc)
+- Auto-detects if production (deployment configs, CI/CD, low activity)
+- Asks: "Proceed?" and "Override mode?"
+- Creates safety checkpoint (git tag) - UNLESS --local-only
+- Installs toolkit
+- Commits changes - OR adds to .gitignore if --local-only
+- Shows rollback command
+
+**Takes 2 minutes.**
+
+---
+
+### When to Use --local-only
+
+**Use --local-only for**:
+- Live/production projects
+- Projects you don't want to modify in git
+- Personal development tooling only
+- Testing the toolkit without commitment
+
+**What --local-only does**:
+- Installs all toolkit files locally
+- Adds toolkit to .gitignore automatically
+- Does NOT create git commits
+- Does NOT create git tags
+- Files stay local, never pushed to GitHub
+
+**Perfect for**: Using best practices on live projects without changing the repository.
 
 ---
 
@@ -103,17 +110,28 @@ cd /path/to/your/project
 
 ## 🏗️ What's Included
 
-**MCP Servers** (3):
+**MCP Servers** (4):
 - `memory_mcp.py` - Context persistence
 - `quality_mcp.py` - Quality enforcement
 - `project_mcp.py` - Objective clarification
+- `learning_mcp.py` - Adaptive learning from feedback
+
+**Slash Commands** (8):
+- `/brainstorm` - Structured brainstorming (divergent → convergent)
+- `/plan` - Planning Mode with task breakdown
+- `/spec` - Feature specifications with scope reduction
+- `/tdd` - Test-driven development (RED-GREEN-REFACTOR)
+- `/execute-plan` - Execute plans with auto checkpoints
+- `/debug` - Systematic debugging (root cause → fix)
+- `/checkpoint` - Git safety checkpoints
+- `/mcp` - Scaffold new MCP servers
 
 **Retrofit Tools** (3):
 - `retrofit_assess.py` - Project health assessment
 - `retrofit_extract_objective.py` - Objective extraction
 - `retrofit_structure.py` - Structure migration
 
-**Documentation** (163KB+):
+**Documentation** (180KB+):
 - Complete implementation guide
 - Retrofit methodology
 - CSO framework integration

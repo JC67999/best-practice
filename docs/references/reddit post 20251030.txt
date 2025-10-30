@@ -1,0 +1,46 @@
+ 10 Claude Skills that actually changed how I work (no fluff)
+Built with Claude
+
+Okay so Skills dropped last month and I've been testing them nonstop. Some are genuinely useful, others are kinda whatever. Here's what I actually use:
+
+1. Rube MCP Connector - This one's wild. Connect Claude to like 500 apps (Slack, GitHub, Notion, etc) through ONE server instead of setting up auth for each one separately. Saves so much time if you're doing automation stuff.
+
+2. Superpowers - obra's dev toolkit. Has /brainstorm, /write-plan, /execute-plan commands that basically turn Claude into a proper dev workflow instead of just a chatbot. Game changer if you're coding seriously.
+
+3. Document Suite - Official one. Makes Claude actually good at Word/Excel/PowerPoint/PDF. Not just reading them but ACTUALLY creating proper docs with formatting, formulas, all that. Built-in for Pro users.
+
+4. Theme Factory - Upload your brand guidelines once, every artifact Claude makes follows your colors/fonts automatically. Marketing teams will love this.
+
+5. Algorithmic Art - p5.js generative art but you just describe it. "Blue-purple gradient flow field, 5000 particles, seed 42" and boom, reproducible artwork. Creative coders eating good.
+
+6. Slack GIF Creator - Custom animated GIFs optimized for Slack. Instead of searching Giphy, just tell Claude what you want. Weirdly fun.
+
+7. Webapp Testing - Playwright automation. Tell Claude "test the login flow" and it writes + runs the tests. QA engineers this is for you.
+
+8. MCP Builder - Generates MCP server boilerplate. If you're building custom integrations, this cuts setup time by like 80%.
+
+9. Brand Guidelines - Similar to Theme Factory but handles multiple brands. Switch between them easily.
+
+10. Systematic Debugging - Makes Claude debug like a senior dev. Root cause → hypotheses → fixes → documentation. No more random stabbing.
+
+Quick thoughts:
+
+    Skills are just markdown files with YAML metadata (super easy to make your own)
+
+    They're token-efficient (~30-50 tokens until loaded)
+
+    Work across Claude.ai, Claude Code, and API
+
+    Community ones on GitHub are hit or miss, use at your own risk
+
+The Rube connector and Superpowers are my daily drivers now. Document Suite is clutch when clients send weird file formats.
+
+
+Resources:
+
+    Official Skills repo
+
+    Superpowers
+
+    Rube
+
