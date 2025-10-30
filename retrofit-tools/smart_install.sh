@@ -390,62 +390,115 @@ fi
 # Validation
 echo ""
 echo "════════════════════════════════════════════════════════"
-echo "  Validating installation..."
+echo "  📋 Installation Summary"
 echo "════════════════════════════════════════════════════════"
 echo ""
 
 validation_errors=0
+validation_warnings=0
 
 # Check CLAUDE.md
+echo -n "CLAUDE.md ... "
 if [ -f "CLAUDE.md" ]; then
-    echo "✅ CLAUDE.md"
+    size=$(wc -c < "CLAUDE.md")
+    echo "✅ ($size bytes)"
 else
-    echo "❌ CLAUDE.md missing"
+    echo "❌ MISSING"
     ((validation_errors++))
 fi
 
 # Check PROJECT_PLAN.md
+echo -n "PROJECT_PLAN.md ... "
 if [ -f "docs/notes/PROJECT_PLAN.md" ]; then
-    echo "✅ docs/notes/PROJECT_PLAN.md"
+    size=$(wc -c < "docs/notes/PROJECT_PLAN.md")
+    echo "✅ ($size bytes)"
 else
-    echo "❌ docs/notes/PROJECT_PLAN.md missing"
+    echo "❌ MISSING"
+    ((validation_errors++))
+fi
+
+# Check docs structure
+echo -n "docs/ structure ... "
+if [ -d "docs/notes" ]; then
+    echo "✅"
+else
+    echo "❌ MISSING"
     ((validation_errors++))
 fi
 
 # Check mcp-servers
-if [ -d "mcp-servers" ] && [ -n "$(ls -A mcp-servers/*.py 2>/dev/null)" ]; then
+echo -n "mcp-servers/ ... "
+if [ -d "mcp-servers" ]; then
     mcp_count=$(ls -1 mcp-servers/*.py 2>/dev/null | wc -l)
-    echo "✅ mcp-servers/ ($mcp_count files)"
+    if [ "$mcp_count" -gt 0 ]; then
+        echo "✅ ($mcp_count files)"
+        ls mcp-servers/*.py 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
+    else
+        echo "⚠️  directory exists but empty"
+        ((validation_warnings++))
+    fi
 else
-    echo "❌ mcp-servers/ missing or empty"
+    echo "❌ MISSING"
     ((validation_errors++))
 fi
 
 # Check slash commands
-if [ -d ".claude/commands" ] && [ -n "$(ls -A .claude/commands/*.md 2>/dev/null)" ]; then
+echo -n ".claude/commands/ ... "
+if [ -d ".claude/commands" ]; then
     cmd_count=$(ls -1 .claude/commands/*.md 2>/dev/null | wc -l)
-    echo "✅ .claude/commands/ ($cmd_count commands)"
+    if [ "$cmd_count" -gt 0 ]; then
+        echo "✅ ($cmd_count commands)"
+        ls .claude/commands/*.md 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /' | sed 's/.md$//'
+    else
+        echo "⚠️  directory exists but empty"
+        ((validation_warnings++))
+    fi
 else
-    echo "❌ .claude/commands/ missing or empty"
+    echo "❌ MISSING"
     ((validation_errors++))
 fi
 
 # Check .gitignore (local-only mode)
 if [ "$LOCAL_ONLY" = true ]; then
+    echo -n ".gitignore config ... "
     if grep -q "Best Practice Toolkit" .gitignore 2>/dev/null; then
-        echo "✅ .gitignore configured"
+        echo "✅"
     else
-        echo "❌ .gitignore not configured"
+        echo "❌ NOT CONFIGURED"
         ((validation_errors++))
+    fi
+fi
+
+# Check full mode extras
+if [ "$MODE" = "FULL" ]; then
+    echo -n "tests/ structure ... "
+    if [ -d "tests" ]; then
+        echo "✅"
+    else
+        echo "⚠️  missing"
+        ((validation_warnings++))
+    fi
+
+    echo -n ".ai-validation/ ... "
+    if [ -d ".ai-validation" ] && [ -f ".ai-validation/check_quality.sh" ]; then
+        echo "✅"
+    else
+        echo "⚠️  missing"
+        ((validation_warnings++))
     fi
 fi
 
 echo ""
 echo "════════════════════════════════════════════════════════"
-if [ $validation_errors -eq 0 ]; then
-    echo "  ✅ DONE! All components installed successfully"
+if [ $validation_errors -eq 0 ] && [ $validation_warnings -eq 0 ]; then
+    echo "  ✅ SUCCESS! All components installed"
+elif [ $validation_errors -eq 0 ]; then
+    echo "  ⚠️  DONE with $validation_warnings warning(s)"
 else
-    echo "  ⚠️  DONE with $validation_errors error(s)"
+    echo "  ❌ FAILED with $validation_errors error(s), $validation_warnings warning(s)"
+    echo ""
+    echo "  Run with: bash -x $0 --local-only"
+    echo "  to debug installation issues"
 fi
 echo "════════════════════════════════════════════════════════"
 echo ""
