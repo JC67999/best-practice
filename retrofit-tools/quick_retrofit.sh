@@ -42,7 +42,18 @@ fi
 
 PROJECT_DIR=$(pwd)
 PROJECT_NAME=$(basename "$PROJECT_DIR")
-TOOLKIT_DIR="/home/jc/CascadeProjects/best-practice"
+
+# Auto-detect toolkit directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLKIT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Validate toolkit directory
+if [ ! -f "$TOOLKIT_DIR/CLAUDE.md" ] || [ ! -d "$TOOLKIT_DIR/mcp-servers" ]; then
+    echo -e "${RED}❌ Error: Cannot find toolkit files${NC}"
+    echo "Expected toolkit at: $TOOLKIT_DIR"
+    echo "This script must be run from within the toolkit directory structure"
+    exit 1
+fi
 
 echo -e "${BLUE}Project:${NC} $PROJECT_NAME"
 echo -e "${BLUE}Path:${NC} $PROJECT_DIR"

@@ -5,37 +5,60 @@
 set -e
 
 echo "🔍 Analyzing project..."
+echo ""
 
-# Detection: Check for production indicators
-is_production=false
+# Detection: Score production indicators
+# Higher score = more likely to be production/stable
+production_score=0
 
-# Check 1: Recent commits (last 7 days)
+# Check 1: Recent activity (LOW activity suggests stable/production)
 if [ -d ".git" ]; then
-    recent_commits=$(git log --since="7 days ago" --oneline 2>/dev/null | wc -l)
-    if [ "$recent_commits" -gt 5 ]; then
-        echo "  📊 Active development detected ($recent_commits commits in 7 days)"
-        is_production=true
+    recent_commits=$(git log --since="30 days ago" --oneline 2>/dev/null | wc -l)
+    if [ "$recent_commits" -lt 3 ]; then
+        echo "  💤 Stable/low activity ($recent_commits commits in 30 days)"
+        ((production_score++))
+    else
+        echo "  📊 Active development ($recent_commits commits in 30 days)"
     fi
 fi
 
-# Check 2: Deployment configs
-if [ -f "Dockerfile" ] || [ -f "docker-compose.yml" ] || [ -d ".github/workflows" ]; then
-    echo "  🚀 Deployment configuration found"
+# Check 2: Deployment configs (suggests production-ready)
+if [ -f "Dockerfile" ] || [ -f "docker-compose.yml" ]; then
+    echo "  🐳 Deployment configuration found"
+    ((production_score++))
+fi
+
+# Check 3: CI/CD configuration (suggests production-ready)
+if [ -d ".github/workflows" ] || [ -f ".gitlab-ci.yml" ] || [ -f "Jenkinsfile" ]; then
+    echo "  🔄 CI/CD configuration found"
+    ((production_score++))
+fi
+
+# Check 4: Production environment files
+if [ -f ".env.production" ] || [ -f "config/production.yml" ]; then
+    echo "  ⚙️  Production environment configuration found"
+    ((production_score++))
+fi
+
+# Determine mode (2+ indicators = production)
+is_production=false
+if [ "$production_score" -ge 2 ]; then
     is_production=true
 fi
 
 # Report detection
 echo ""
 if [ "$is_production" = true ]; then
-    echo "✅ PRODUCTION project detected"
+    echo "✅ PRODUCTION project detected (score: $production_score/4)"
     echo "   Mode: LIGHT (safe, minimal changes)"
     echo ""
     echo "Installing light mode:"
     echo "  - CLAUDE.md standards file"
+    echo "  - PROJECT_PLAN.md with objective"
+    echo "  - MCP servers"
     echo "  - Quality gate script"
-    echo "  - Project objective setup"
 else
-    echo "✅ NON-PRODUCTION project detected"
+    echo "✅ DEVELOPMENT project detected (score: $production_score/4)"
     echo "   Mode: FULL (complete best practices)"
     echo ""
     echo "Installing full mode:"
@@ -74,15 +97,22 @@ fi
 
 echo ""
 echo "📦 Starting installation..."
+echo ""
 
 # Get toolkit directory
 TOOLKIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Run appropriate retrofit
+# Validate toolkit
+if [ ! -f "$TOOLKIT_DIR/retrofit-tools/quick_retrofit.sh" ]; then
+    echo "❌ Error: Cannot find retrofit script at $TOOLKIT_DIR"
+    exit 1
+fi
+
+# Run quick_retrofit with appropriate answer piped in
 if [ "$is_production" = true ]; then
-    # Light mode: Basic installation only
-    bash "$TOOLKIT_DIR/install.sh" "$(pwd)"
+    # Answer "y" to production question (Light mode)
+    echo "y" | bash "$TOOLKIT_DIR/retrofit-tools/quick_retrofit.sh"
 else
-    # Full mode: Complete retrofit
-    bash "$TOOLKIT_DIR/retrofit-tools/quick_retrofit.sh"
+    # Answer "n" to production question (Full mode)
+    echo "n" | bash "$TOOLKIT_DIR/retrofit-tools/quick_retrofit.sh"
 fi
