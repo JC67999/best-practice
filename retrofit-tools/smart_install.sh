@@ -70,8 +70,8 @@ reasons=()
 
 # Low commit activity = stable
 if [ -d ".git" ]; then
-    recent_commits=$(git log --since="30 days ago" --oneline 2>/dev/null | wc -l)
-    if [ "$recent_commits" -lt 5 ]; then
+    recent_commits=$(timeout 5 git log --since="30 days ago" --oneline 2>/dev/null | wc -l || echo "0")
+    if [ "$recent_commits" = "0" ] || [ "$recent_commits" -lt 5 ]; then
         ((production_score++))
         reasons+=("Low activity ($recent_commits commits/30d)")
     fi
