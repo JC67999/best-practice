@@ -287,36 +287,38 @@ echo ""
 
 # CLAUDE.md and files
 echo "[4/5] Installing toolkit files..."
-if [ ! -f "CLAUDE.md" ]; then
+
+# CLAUDE.md (always update/overwrite for upgrades)
+if [ -f "CLAUDE.md" ]; then
+    echo -n "CLAUDE.md (updating)... "
     cp "$TOOLKIT_DIR/CLAUDE.md" CLAUDE.md
     sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" CLAUDE.md 2>/dev/null || true
-    echo "✅ CLAUDE.md"
+    echo "✅"
 else
-    echo "✅ CLAUDE.md exists"
+    echo -n "CLAUDE.md (new)... "
+    cp "$TOOLKIT_DIR/CLAUDE.md" CLAUDE.md
+    sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" CLAUDE.md 2>/dev/null || true
+    echo "✅"
 fi
 
-# MCP servers
-if [ ! -d "mcp-servers" ]; then
-    mkdir -p mcp-servers
-    if cp "$TOOLKIT_DIR/mcp-servers/"*.py mcp-servers/ 2>/dev/null; then
-        echo "✅ MCP servers"
-    else
-        echo "⚠️  MCP files not found at $TOOLKIT_DIR/mcp-servers/"
-    fi
+# MCP servers (always update/overwrite for upgrades)
+mkdir -p mcp-servers
+echo -n "MCP servers... "
+if cp "$TOOLKIT_DIR/mcp-servers/"*.py mcp-servers/ 2>/dev/null; then
+    mcp_count=$(ls -1 mcp-servers/*.py 2>/dev/null | wc -l)
+    echo "✅ ($mcp_count files)"
 else
-    echo "✅ MCP servers exist"
+    echo "⚠️  MCP files not found at $TOOLKIT_DIR/mcp-servers/"
 fi
 
-# Slash commands
-if [ ! -d ".claude/commands" ]; then
-    mkdir -p .claude/commands
-    if cp "$TOOLKIT_DIR/.claude/commands/"*.md .claude/commands/ 2>/dev/null; then
-        echo "✅ Slash commands"
-    else
-        echo "⚠️  Slash commands not found at $TOOLKIT_DIR/.claude/commands/"
-    fi
+# Slash commands (always update/overwrite for upgrades)
+mkdir -p .claude/commands
+echo -n "Slash commands... "
+if cp "$TOOLKIT_DIR/.claude/commands/"*.md .claude/commands/ 2>/dev/null; then
+    cmd_count=$(ls -1 .claude/commands/*.md 2>/dev/null | wc -l)
+    echo "✅ ($cmd_count commands)"
 else
-    echo "✅ Slash commands exist"
+    echo "⚠️  Slash commands not found at $TOOLKIT_DIR/.claude/commands/"
 fi
 
 # Full mode extras
