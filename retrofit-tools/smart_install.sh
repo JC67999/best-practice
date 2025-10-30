@@ -62,38 +62,54 @@ fi
 
 echo ""
 echo "🔍 Analyzing project..."
-echo ""
 
 # Auto-detect production indicators
 production_score=0
 reasons=()
 
 # Low commit activity = stable
+echo -n "  Checking git activity... "
 if [ -d ".git" ]; then
     recent_commits=$(timeout 5 git log --since="30 days ago" --oneline 2>/dev/null | wc -l || echo "0")
+    echo "$recent_commits commits/30d"
     if [ "$recent_commits" = "0" ] || [ "$recent_commits" -lt 5 ]; then
         ((production_score++))
         reasons+=("Low activity ($recent_commits commits/30d)")
     fi
+else
+    echo "no git"
 fi
 
 # Deployment configs
+echo -n "  Checking deployment configs... "
 if [ -f "Dockerfile" ] || [ -f "docker-compose.yml" ]; then
     ((production_score++))
     reasons+=("Has deployment config")
+    echo "found"
+else
+    echo "none"
 fi
 
 # CI/CD
+echo -n "  Checking CI/CD... "
 if [ -d ".github/workflows" ] || [ -f ".gitlab-ci.yml" ] || [ -f "Jenkinsfile" ]; then
     ((production_score++))
     reasons+=("Has CI/CD")
+    echo "found"
+else
+    echo "none"
 fi
 
 # Production env files
+echo -n "  Checking production env... "
 if [ -f ".env.production" ] || [ -f "config/production.yml" ]; then
     ((production_score++))
     reasons+=("Has production env")
+    echo "found"
+else
+    echo "none"
 fi
+echo ""
 
 # Determine mode
 MODE="FULL"
