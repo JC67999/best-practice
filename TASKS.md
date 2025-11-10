@@ -9,11 +9,10 @@
 ## Current Tasks
 
 ### In Progress
-- [ ] Update CHANGELOG.md with installation changes
+- [ ] None
 
 ### Pending
-- [ ] Test retrofit on sample project (verification)
-- [ ] Update README.md to explain best-practice/ folder (10 lines)
+- [ ] None
 
 ### Completed Today
 - [x] Create TASKS.md for live task tracking
@@ -22,6 +21,12 @@
 - [x] Modify smart_install.sh to create best-practice/ folder
 - [x] Modify smart_install.sh to install toolkit files to best-practice/
 - [x] Add gitignore handling to smart_install.sh
+- [x] Fix smart_install.sh bash arithmetic for set -e compatibility
+- [x] Test installation on document-generator project
+- [x] Install toolkit to rapid-pm project (LIGHT mode)
+- [x] Update CHANGELOG.md with Skills investigation
+- [x] Update CHANGELOG.md with rapid-pm installation verification
+- [x] Update README.md to explain best-practice/ folder
 
 ---
 

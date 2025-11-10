@@ -29,11 +29,21 @@ cd /path/to/your/live/project
 - Auto-detects if production (deployment configs, CI/CD, low activity)
 - Asks: "Proceed?" and "Override mode?"
 - Creates safety checkpoint (git tag) - UNLESS --local-only
-- Installs toolkit
-- Commits changes - OR adds to .gitignore if --local-only
+- **Creates `best-practice/` folder** with CLAUDE.md, TASKS.md, quality gate
+- **Adds `best-practice/` to .gitignore** (local-only, never committed)
+- Commits changes - OR skips commits if --local-only
 - Shows rollback command
 
 **Takes 2 minutes.**
+
+### The best-practice/ Folder
+
+All toolkit files install to `best-practice/` in your project:
+- **CLAUDE.md**: Project standards and workflow (auto-customized for your project)
+- **TASKS.md**: Live task list for granular change tracking (≤30 lines per task)
+- **.ai-validation/**: Quality gate scripts (FULL mode only)
+
+**Automatic .gitignore**: The folder is automatically excluded from git commits, ensuring toolkit files stay local and never pollute your repository.
 
 ---
 

@@ -18,6 +18,22 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **smart_install.sh**: Fixed arithmetic operations for bash compatibility (set -e issues)
 
+### Investigated
+- **Skills vs MCP tools**: Confirmed current architecture (8 slash commands + 27 MCP tools) is optimal
+- Decision: Do NOT add Skills - would add complexity without value given efficiency focus
+
+### Verified
+- **Successful installation to rapid-pm**: LIGHT mode installed successfully
+- Files created: best-practice/CLAUDE.md (49KB), best-practice/TASKS.md (2.3KB)
+- Added to .gitignore: best-practice/ folder excluded from git
+- Git commit: 9cbbb7f "feat: install best-practice toolkit (LIGHT mode)"
+- Status: Clean working tree, ready for use
+
+### Documentation
+- **README.md**: Added best-practice/ folder explanation (11 lines)
+- Documented: CLAUDE.md, TASKS.md, .ai-validation/ contents
+- Clarified: Automatic .gitignore handling for local-only files
+
 ## [1.1.0] - 2025-11-10
 
 ### Added
