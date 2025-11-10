@@ -2,6 +2,7 @@
 # Smart Install - ONE command, safe installation with smart questions
 
 set -e
+set -o pipefail
 
 TOOLKIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_DIR=$(pwd)
@@ -73,7 +74,7 @@ if [ -d ".git" ]; then
     recent_commits=$(timeout 5 git log --since="30 days ago" --oneline 2>/dev/null | wc -l || echo "0")
     echo "$recent_commits commits/30d"
     if [ "$recent_commits" = "0" ] || [ "$recent_commits" -lt 5 ]; then
-        ((production_score++))
+        production_score=$((production_score + 1))
         reasons+=("Low activity ($recent_commits commits/30d)")
     fi
 else
@@ -83,7 +84,7 @@ fi
 # Deployment configs
 echo -n "  Checking deployment configs... "
 if [ -f "Dockerfile" ] || [ -f "docker-compose.yml" ]; then
-    ((production_score++))
+    production_score=$((production_score + 1))
     reasons+=("Has deployment config")
     echo "found"
 else
@@ -93,7 +94,7 @@ fi
 # CI/CD
 echo -n "  Checking CI/CD... "
 if [ -d ".github/workflows" ] || [ -f ".gitlab-ci.yml" ] || [ -f "Jenkinsfile" ]; then
-    ((production_score++))
+    production_score=$((production_score + 1))
     reasons+=("Has CI/CD")
     echo "found"
 else
@@ -103,7 +104,7 @@ fi
 # Production env files
 echo -n "  Checking production env... "
 if [ -f ".env.production" ] || [ -f "config/production.yml" ]; then
-    ((production_score++))
+    production_score=$((production_score + 1))
     reasons+=("Has production env")
     echo "found"
 else
@@ -413,7 +414,7 @@ if [ -f "CLAUDE.md" ]; then
     echo "✅ ($size bytes)"
 else
     echo "❌ MISSING"
-    ((validation_errors++))
+    validation_errors=$((validation_errors + 1))
 fi
 
 # Check PROJECT_PLAN.md
@@ -423,7 +424,7 @@ if [ -f "docs/notes/PROJECT_PLAN.md" ]; then
     echo "✅ ($size bytes)"
 else
     echo "❌ MISSING"
-    ((validation_errors++))
+    validation_errors=$((validation_errors + 1))
 fi
 
 # Check docs structure
@@ -432,7 +433,7 @@ if [ -d "docs/notes" ]; then
     echo "✅"
 else
     echo "❌ MISSING"
-    ((validation_errors++))
+    validation_errors=$((validation_errors + 1))
 fi
 
 # Check mcp-servers
@@ -444,11 +445,11 @@ if [ -d "mcp-servers" ]; then
         ls mcp-servers/*.py 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
     else
         echo "⚠️  directory exists but empty"
-        ((validation_warnings++))
+        validation_warnings=$((validation_warnings + 1))
     fi
 else
     echo "❌ MISSING"
-    ((validation_errors++))
+    validation_errors=$((validation_errors + 1))
 fi
 
 # Check slash commands
@@ -460,11 +461,11 @@ if [ -d ".claude/commands" ]; then
         ls .claude/commands/*.md 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /' | sed 's/.md$//'
     else
         echo "⚠️  directory exists but empty"
-        ((validation_warnings++))
+        validation_warnings=$((validation_warnings + 1))
     fi
 else
     echo "❌ MISSING"
-    ((validation_errors++))
+    validation_errors=$((validation_errors + 1))
 fi
 
 # Check .gitignore (local-only mode)
@@ -474,7 +475,7 @@ if [ "$LOCAL_ONLY" = true ]; then
         echo "✅"
     else
         echo "❌ NOT CONFIGURED"
-        ((validation_errors++))
+        validation_errors=$((validation_errors + 1))
     fi
 fi
 
@@ -485,7 +486,7 @@ if [ "$MODE" = "FULL" ]; then
         echo "✅"
     else
         echo "⚠️  missing"
-        ((validation_warnings++))
+        validation_warnings=$((validation_warnings + 1))
     fi
 
     echo -n ".ai-validation/ ... "
@@ -493,7 +494,7 @@ if [ "$MODE" = "FULL" ]; then
         echo "✅"
     else
         echo "⚠️  missing"
-        ((validation_warnings++))
+        validation_warnings=$((validation_warnings + 1))
     fi
 fi
 

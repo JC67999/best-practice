@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.2.0] - 2025-11-10 (In Progress)
+## [1.2.0] - 2025-11-10
 
 ### Added
 - gitignore-template.txt: Template for excluding best-practice/ folder from git
@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file.
 - **smart_install.sh**: Installs quality gate to best-practice/.ai-validation/
 - **smart_install.sh**: Automatically adds best-practice/ to .gitignore
 - Toolkit files NO LONGER pollute project root - everything in best-practice/
+
+### Fixed
+- **smart_install.sh**: Fixed arithmetic operations for bash compatibility (set -e issues)
 
 ## [1.1.0] - 2025-11-10
 
