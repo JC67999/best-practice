@@ -1,21 +1,49 @@
 # Project Standards - Best Practice Toolkit
 
-> **Purpose**: Standards and guidelines for AI-assisted development of this project
-> **Last Updated**: 2025-11-05
+> **Purpose**: Enforce changelog, comments, minimal structure - maximum efficiency
+> **Last Updated**: 2025-11-10
 > **Applies To**: Claude Code and all AI assistants working on this codebase
 
 ---
 
-## 📋 Project Overview
+## 🎯 Core Objective
 
-**Project**: Best Practice Toolkit for AI-Assisted Development
-**Type**: MCP server system + retrofit methodology
-**Language**: Python 3.10+
-**License**: MIT
+**Enforce**: Changelog for every change + Well-commented code + Minimal structure
+**Focus**: Speed and frugality - no bloat
+**No**: Unsolicited reports, verbose docs, or folder sprawl
 
-**Objective**: Enforce excellent coding practices and project delivery through mandatory objective clarification, quality gates, and minimal root structure.
+---
 
-**Key Principle**: We practice what we preach - this project uses its own best practices.
+## ✅ MANDATORY: Live Task List (TASKS.md)
+
+**Every change must be tracked as a granular task**
+
+### Task Rules
+1. **Read TASKS.md first** - Always check current tasks before coding
+2. **Task size**: ≤30 lines of code, ≤15 minutes
+3. **One task at a time**: Complete, test, commit before next
+4. **Break down large tasks**: If >30 lines, STOP and break into sub-tasks
+5. **Update TASKS.md**: Mark complete when done, add new tasks as discovered
+
+### Workflow (Required)
+```
+1. Check TASKS.md for current task
+2. Implement (≤30 lines max)
+3. Test change works
+4. Update CHANGELOG.md
+5. Run quality gate: bash .ai-validation/check_quality.sh
+6. Commit with descriptive message
+7. Mark task complete in TASKS.md
+8. Move to next task
+```
+
+### Why Granular Tasks?
+- **Safe**: Small changes = easy rollback if issues
+- **Fast**: Each task ships independently
+- **Testable**: Can verify each change works
+- **Clear**: Always know what's next
+
+**If task feels too large**: STOP, break it down in TASKS.md first, then implement smallest piece.
 
 ---
 
