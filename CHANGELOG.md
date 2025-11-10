@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-11-10 (In Progress)
+
+### Added
+- gitignore-template.txt: Template for excluding best-practice/ folder from git
+
+### Changed
+- **Best-practice folder injection**: All toolkit files will install to best-practice/ (local only, not committed)
+
 ## [1.1.0] - 2025-11-10
 
 ### Added

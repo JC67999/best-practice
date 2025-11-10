@@ -9,13 +9,22 @@
 ## Current Tasks
 
 ### In Progress
-- [ ] None
+- [ ] Modify smart_install.sh to create best-practice/ folder (15 lines)
 
 ### Pending
-- [ ] None
+- [ ] Create best-practice/ structure in retrofitted projects (10 lines)
+- [ ] Move .ai-validation/ to best-practice/.ai-validation/ (path update)
+- [ ] Move CLAUDE.md to best-practice/CLAUDE.md (path update)
+- [ ] Move TASKS.md to best-practice/TASKS.md (path update)
+- [ ] Update quality gate paths to use best-practice/ (8 lines)
+- [ ] Update README.md to explain best-practice/ folder (10 lines)
+- [ ] Test retrofit on new sample project (verification)
+- [ ] Update CHANGELOG.md with folder structure change
 
 ### Completed Today
 - [x] Create TASKS.md for live task tracking
+- [x] Update TASKS.md with retrofit injection requirements
+- [x] Create gitignore-template.txt for best-practice/ folder
 
 ---
 
