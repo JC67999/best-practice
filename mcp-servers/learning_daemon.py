@@ -11,7 +11,7 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).parent / "mcp-servers"))
 
 try:
-    from learning_mcp import search_best_practices, store_learning
+    from learning_mcp import search_best_practices
 except ImportError:
     print("Error: learning_mcp.py not found")
     sys.exit(1)

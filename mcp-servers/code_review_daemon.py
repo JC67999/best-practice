@@ -30,7 +30,7 @@ def run_code_review(project_path: str):
         findings = result["findings"]
         total = sum(len(findings[p]) for p in findings)
 
-        print(f"✅ Review complete:")
+        print("✅ Review complete:")
         print(f"  Critical: {len(findings['critical'])}")
         print(f"  High: {len(findings['high'])}")
         print(f"  Medium: {len(findings['medium'])}")

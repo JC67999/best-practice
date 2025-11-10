@@ -5,7 +5,6 @@ Persistent context across all projects and sessions
 """
 import asyncio
 import json
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -313,7 +312,7 @@ class MemoryServer:
                         "session_count": len(data.get("sessions", [])),
                         "has_objective": data.get("objective") is not None
                     })
-            except:
+            except Exception:
                 pass
 
         # Sort by last activity
@@ -372,7 +371,7 @@ class MemoryServer:
                             "matches": matches[:5]  # Limit to 5 per project
                         })
 
-            except:
+            except Exception:
                 pass
 
         return {

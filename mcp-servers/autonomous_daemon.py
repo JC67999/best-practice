@@ -4,8 +4,6 @@ Autonomous Execution Daemon - Safe overnight task execution
 Implements Phase 3: Production Integration with MCP servers
 """
 import argparse
-import json
-import os
 import re
 import subprocess
 import sys
@@ -30,10 +28,12 @@ class AutonomousDaemon:
         """Initialize daemon."""
         self.project_path = Path(project_path)
         self.config = config or self._default_config()
-        self.session_log = []
-        self.checkpoint_hash = None
+        self.session_log: List[Dict] = []
+        self.checkpoint_hash: Optional[str] = None
 
         # Initialize MCP servers
+        self.quality_mcp: Optional[QualityServer]
+        self.memory_mcp: Optional[MemoryServer]
         if MCP_AVAILABLE:
             self.quality_mcp = QualityServer()
             self.memory_mcp = MemoryServer()
@@ -93,7 +93,7 @@ class AutonomousDaemon:
         """Log message."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_entry = f"{timestamp} - [{level}] {message}"
-        self.session_log.append(log_entry)
+        self.session_log.append({"timestamp": timestamp, "level": level, "message": message})
         print(log_entry)
 
     def create_git_checkpoint(self) -> Optional[str]:
@@ -196,7 +196,7 @@ class AutonomousDaemon:
 
         # For now, assume no file changes (would need task metadata)
         # In real implementation, task would specify which files it modifies
-        file_changes = []
+        file_changes: List[str] = []
 
         result = self.quality_mcp.validate_autonomous_safety(
             str(self.project_path),
@@ -310,7 +310,7 @@ class AutonomousDaemon:
                     self._log("WARN", f"⚠️  {consecutive_failures} consecutive failures, stopping session")
                     break
 
-        self._log("INFO", f"\n📊 Session Summary:")
+        self._log("INFO", "\n📊 Session Summary:")
         self._log("INFO", f"   Completed: {len(completed)}")
         self._log("INFO", f"   Failed: {len(failed)}")
 

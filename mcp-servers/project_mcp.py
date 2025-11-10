@@ -5,7 +5,6 @@ Objective-driven task management with best-practice enforcement
 """
 import asyncio
 import json
-import os
 import re
 from datetime import datetime
 from pathlib import Path
@@ -442,7 +441,7 @@ class ProjectServer:
                     "weak_areas": self._identify_weak_areas(clarification["answers"])
                 }
 
-    def _detect_vague_answer(self, answer: str, question_id: str = None) -> Tuple[bool, Optional[str]]:
+    def _detect_vague_answer(self, answer: str, question_id: Optional[str] = None) -> Tuple[bool, Optional[str]]:
         """Detect if answer contains vague language.
 
         Args:

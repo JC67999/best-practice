@@ -5,7 +5,7 @@ Continuously researches and improves toolkit standards
 """
 import json
 from datetime import datetime
-from typing import List, Dict
+from typing import Optional
 
 def search_best_practices(topic: str, max_results: int = 5) -> dict:
     """Search web for best practices on specific topic.
@@ -56,7 +56,6 @@ def store_learning(topic: str, learning_data: dict) -> dict:
         Dict with success status and storage path
     """
     try:
-        import os
         from pathlib import Path
 
         # Create storage directory
@@ -81,21 +80,21 @@ def store_learning(topic: str, learning_data: dict) -> dict:
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-def get_learnings(topic: str = None, since: str = None) -> dict:
+def get_learnings(topic: Optional[str] = None, since: Optional[str] = None) -> dict:
     """Retrieve stored learnings by topic/date."""
     return {
         "success": False,
         "error": "Not implemented yet"
     }
 
-def generate_report(since: str = None) -> dict:
+def generate_report(since: Optional[str] = None) -> dict:
     """Create summary report of recent learnings."""
     return {
         "success": False,
         "error": "Not implemented yet"
     }
 
-def review_code(project_path: str, file_patterns: list = None) -> dict:
+def review_code(project_path: str, file_patterns: Optional[list] = None) -> dict:
     """Review project code for bugs, inconsistencies, improvements.
 
     Args:
@@ -106,12 +105,11 @@ def review_code(project_path: str, file_patterns: list = None) -> dict:
         Dict with findings categorized by priority
     """
     try:
-        from pathlib import Path
 
         if file_patterns is None:
             file_patterns = ['*.py']
 
-        findings = {
+        findings: dict = {
             "critical": [],
             "high": [],
             "medium": [],

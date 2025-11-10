@@ -8,7 +8,6 @@ import json
 import os
 import subprocess
 import re
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from mcp.server import Server
@@ -285,15 +284,17 @@ class QualityServer:
                     if next_line_idx < len(lines):
                         next_line = lines[next_line_idx].strip()
                         if not next_line.startswith('"""') and not next_line.startswith("'''"):
-                            func_name = re.search(r'def (\w+)', line).group(1)
-                            if not func_name.startswith('_'):  # Public functions only
-                                issues.append({
-                                    "file": file_path,
-                                    "line": i + 1,
-                                    "severity": "warning",
-                                    "issue": f"Missing docstring for function '{func_name}'",
-                                    "suggestion": "Add Google-style docstring"
-                                })
+                            match = re.search(r'def (\w+)', line)
+                            if match:
+                                func_name = match.group(1)
+                                if not func_name.startswith('_'):  # Public functions only
+                                    issues.append({
+                                        "file": file_path,
+                                        "line": i + 1,
+                                        "severity": "warning",
+                                        "issue": f"Missing docstring for function '{func_name}'",
+                                        "suggestion": "Add Google-style docstring"
+                                    })
 
                 # Check for class definitions
                 if re.match(r'^\s*class \w+', line):
@@ -304,14 +305,16 @@ class QualityServer:
                     if next_line_idx < len(lines):
                         next_line = lines[next_line_idx].strip()
                         if not next_line.startswith('"""') and not next_line.startswith("'''"):
-                            class_name = re.search(r'class (\w+)', line).group(1)
-                            issues.append({
-                                "file": file_path,
-                                "line": i + 1,
-                                "severity": "warning",
-                                "issue": f"Missing docstring for class '{class_name}'",
-                                "suggestion": "Add Google-style docstring"
-                            })
+                            match = re.search(r'class (\w+)', line)
+                            if match:
+                                class_name = match.group(1)
+                                issues.append({
+                                    "file": file_path,
+                                    "line": i + 1,
+                                    "severity": "warning",
+                                    "issue": f"Missing docstring for class '{class_name}'",
+                                    "suggestion": "Add Google-style docstring"
+                                })
 
         except Exception as e:
             issues.append({
@@ -342,7 +345,7 @@ class QualityServer:
                         "suggestion": "Use snake_case for function names"
                     })
 
-        except:
+        except Exception:
             pass
 
         return issues
@@ -364,7 +367,7 @@ class QualityServer:
                     "suggestion": "Specify exception types or use 'except Exception as e:'"
                 })
 
-        except:
+        except Exception:
             pass
 
         return issues
@@ -386,10 +389,12 @@ class QualityServer:
             for i, line in enumerate(lines):
                 if re.match(r'^\s*def \w+', line):
                     # Start of function
-                    in_function = True
-                    func_name = re.search(r'def (\w+)', line).group(1)
-                    func_start = i + 1
-                    func_lines = 0
+                    match = re.search(r'def (\w+)', line)
+                    if match:
+                        in_function = True
+                        func_name = match.group(1)
+                        func_start = i + 1
+                        func_lines = 0
                 elif in_function:
                     # Check if function ended
                     if line and not line[0].isspace() and line.strip():
@@ -406,7 +411,7 @@ class QualityServer:
                     else:
                         func_lines += 1
 
-        except:
+        except Exception:
             pass
 
         return issues
@@ -443,7 +448,7 @@ class QualityServer:
 
     def find_obsolete_files(self, project_path: str) -> Dict:
         """Find obsolete files and code."""
-        obsolete_items = {
+        obsolete_items: Dict[str, list] = {
             "unused_imports": [],
             "orphaned_files": [],
             "commented_code": [],
@@ -475,7 +480,7 @@ class QualityServer:
                         "recommendation": "Move to artifacts/.archive/ or delete"
                     })
 
-            except:
+            except Exception:
                 pass
 
         return {
