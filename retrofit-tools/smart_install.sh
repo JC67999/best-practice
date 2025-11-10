@@ -181,10 +181,23 @@ fi
 # Create directories
 echo "[1/5] Creating structure..."
 mkdir -p docs/{design,guides,analysis,references,notes}
+mkdir -p best-practice
 if [ "$MODE" = "FULL" ]; then
-    mkdir -p tests .ai-validation
+    mkdir -p tests
 fi
 echo "✅ Done"
+echo ""
+
+# Add best-practice/ to .gitignore
+if [ -f ".gitignore" ]; then
+    if ! grep -q "best-practice/" .gitignore; then
+        cat "$TOOLKIT_DIR/retrofit-tools/gitignore-template.txt" >> .gitignore
+        echo "✅ Added best-practice/ to .gitignore"
+    fi
+else
+    cp "$TOOLKIT_DIR/retrofit-tools/gitignore-template.txt" .gitignore
+    echo "✅ Created .gitignore with best-practice/ excluded"
+fi
 echo ""
 
 # Organize docs
@@ -288,55 +301,33 @@ echo ""
 # CLAUDE.md and files
 echo "[4/5] Installing toolkit files..."
 
-# CLAUDE.md (always update/overwrite for upgrades)
-if [ -f "CLAUDE.md" ]; then
-    echo -n "CLAUDE.md (updating)... "
-    cp "$TOOLKIT_DIR/CLAUDE.md" CLAUDE.md
-    sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" CLAUDE.md 2>/dev/null || true
-    echo "✅"
-else
-    echo -n "CLAUDE.md (new)... "
-    cp "$TOOLKIT_DIR/CLAUDE.md" CLAUDE.md
-    sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" CLAUDE.md 2>/dev/null || true
-    echo "✅"
-fi
+# Install toolkit files to best-practice/ (local only)
+echo -n "CLAUDE.md (to best-practice/)... "
+cp "$TOOLKIT_DIR/CLAUDE.md" best-practice/CLAUDE.md
+sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" best-practice/CLAUDE.md 2>/dev/null || true
+echo "✅"
 
-# MCP servers (always update/overwrite for upgrades)
-mkdir -p mcp-servers
-echo -n "MCP servers... "
-if cp "$TOOLKIT_DIR/mcp-servers/"*.py mcp-servers/ 2>/dev/null; then
-    mcp_count=$(ls -1 mcp-servers/*.py 2>/dev/null | wc -l)
-    echo "✅ ($mcp_count files)"
-else
-    echo "⚠️  MCP files not found at $TOOLKIT_DIR/mcp-servers/"
-fi
+echo -n "TASKS.md (to best-practice/)... "
+cp "$TOOLKIT_DIR/TASKS.md" best-practice/TASKS.md 2>/dev/null || echo '# Live Task List
 
-# Slash commands (always update/overwrite for upgrades)
-mkdir -p .claude/commands
-echo -n "Slash commands... "
-if cp "$TOOLKIT_DIR/.claude/commands/"*.md .claude/commands/ 2>/dev/null; then
-    cmd_count=$(ls -1 .claude/commands/*.md 2>/dev/null | wc -l)
-    echo "✅ ($cmd_count commands)"
-else
-    echo "⚠️  Slash commands not found at $TOOLKIT_DIR/.claude/commands/"
-fi
+**Purpose**: Granular, testable tasks
+**Rule**: Each task ≤30 lines, ≤15 min
 
-# Full mode extras
+## Current Tasks
+
+### In Progress
+- [ ] None
+
+### Pending
+- [ ] None' > best-practice/TASKS.md
+echo "✅"
+
+# Full mode extras in best-practice/
 if [ "$MODE" = "FULL" ]; then
-    if [ ! -f ".ai-validation/check_quality.sh" ]; then
-        cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" .ai-validation/ 2>/dev/null || true
-        chmod +x .ai-validation/check_quality.sh 2>/dev/null || true
-        echo "✅ Quality gate"
-    fi
-
-    if [ ! -f ".gitignore" ]; then
-        cp "$TOOLKIT_DIR/.gitignore" . 2>/dev/null || echo "*.pyc
-__pycache__/
-.pytest_cache/
-.coverage
-*.log" > .gitignore
-        echo "✅ .gitignore"
-    fi
+    mkdir -p best-practice/.ai-validation
+    cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" best-practice/.ai-validation/ 2>/dev/null || true
+    chmod +x best-practice/.ai-validation/check_quality.sh 2>/dev/null || true
+    echo "✅ Quality gate (best-practice/.ai-validation/)"
 
     if [ ! -d "tests" ]; then
         mkdir -p tests

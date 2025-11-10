@@ -6,9 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - gitignore-template.txt: Template for excluding best-practice/ folder from git
+- **best-practice/ folder structure**: All toolkit files install here (local only, never committed)
 
 ### Changed
-- **Best-practice folder injection**: All toolkit files will install to best-practice/ (local only, not committed)
+- **smart_install.sh**: Now creates best-practice/ folder in target projects
+- **smart_install.sh**: Installs CLAUDE.md, TASKS.md to best-practice/
+- **smart_install.sh**: Installs quality gate to best-practice/.ai-validation/
+- **smart_install.sh**: Automatically adds best-practice/ to .gitignore
+- Toolkit files NO LONGER pollute project root - everything in best-practice/
 
 ## [1.1.0] - 2025-11-10
 
