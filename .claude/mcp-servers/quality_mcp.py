@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import Tool, TextContent, Prompt, PromptArgument, GetPromptResult, PromptMessage
 
 
 class QualityServer:
@@ -227,6 +227,452 @@ class QualityServer:
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 return [TextContent(type="text", text=json.dumps({"error": str(e)}, indent=2))]
+
+        @self.server.list_prompts()
+        async def list_prompts() -> list[Prompt]:
+            """List available quality prompts."""
+            return [
+                Prompt(
+                    name="code_review",
+                    description="Systematic code review for quality, security, and best practices",
+                    arguments=[
+                        PromptArgument(
+                            name="file_paths",
+                            description="Comma-separated list of files to review",
+                            required=True
+                        ),
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="pre_commit_check",
+                    description="Run all pre-commit quality checks before committing",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        ),
+                        PromptArgument(
+                            name="changed_files",
+                            description="Comma-separated list of changed files",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="security_audit",
+                    description="Security-focused code audit for vulnerabilities",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                )
+            ]
+
+        @self.server.get_prompt()
+        async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptResult:
+            """Get a specific prompt template."""
+            if arguments is None:
+                arguments = {}
+
+            if name == "code_review":
+                file_paths = arguments.get("file_paths", "").split(",")
+                project_path = arguments.get("project_path", "")
+
+                prompt_text = f"""You are conducting a systematic code review for files:
+{chr(10).join(f"- {fp.strip()}" for fp in file_paths if fp.strip())}
+
+## Code Review Framework
+
+### 1. Automated Quality Checks
+First, call these MCP tools to get automated analysis:
+- `check_code_quality` with file_paths: {file_paths}
+- Review the automated findings before manual review
+
+### 2. Code Quality Review
+
+**For each file, check**:
+
+#### Structure & Organization
+- [ ] Clear module/class/function organization
+- [ ] Appropriate file size (≤500 lines)
+- [ ] Logical grouping of related code
+- [ ] No duplicate code
+
+#### Naming & Readability
+- [ ] Descriptive variable/function names
+- [ ] Consistent naming conventions
+- [ ] No magic numbers or strings
+- [ ] Clear intent without needing comments
+
+#### Documentation
+- [ ] All public functions have docstrings
+- [ ] Complex logic has explanatory comments
+- [ ] API documentation is accurate
+- [ ] Examples provided for non-obvious usage
+
+#### Error Handling
+- [ ] All error cases handled
+- [ ] No bare except clauses
+- [ ] Errors logged appropriately
+- [ ] User-friendly error messages
+
+### 3. Security Review
+
+**Check for OWASP Top 10**:
+- [ ] No SQL injection vulnerabilities
+- [ ] No XSS vulnerabilities
+- [ ] No command injection risks
+- [ ] Proper input validation
+- [ ] Secure authentication/authorization
+- [ ] No hardcoded secrets
+- [ ] Secure data storage
+- [ ] CSRF protection (web apps)
+
+### 4. Performance Review
+- [ ] No obvious performance bottlenecks
+- [ ] Appropriate data structures used
+- [ ] Database queries optimized
+- [ ] Caching used where appropriate
+- [ ] No N+1 query problems
+
+### 5. Testing
+- [ ] Unit tests exist and pass
+- [ ] Edge cases tested
+- [ ] Error cases tested
+- [ ] Test coverage ≥80%
+
+### 6. Best Practices
+- [ ] DRY principle followed
+- [ ] SOLID principles applied
+- [ ] No premature optimization
+- [ ] Appropriate design patterns
+
+### Output Format
+
+```markdown
+## Code Review: {', '.join(file_paths)}
+
+### Summary
+- Files reviewed: {len(file_paths)}
+- Overall assessment: [APPROVED / NEEDS WORK / BLOCKED]
+- Critical issues: [count]
+- Warnings: [count]
+
+### Automated Findings
+[Results from check_code_quality tool]
+
+### Manual Review
+
+#### {file_paths[0] if file_paths else "file"}
+**Structure**: [assessment]
+**Quality**: [assessment]
+**Security**: [assessment]
+**Performance**: [assessment]
+
+**Issues Found**:
+1. [CRITICAL/WARNING/INFO] [description] (line X)
+   - Recommendation: [fix]
+2. ...
+
+[Repeat for each file...]
+
+### Action Items
+- [ ] [action 1]
+- [ ] [action 2]
+
+### Approval
+- [ ] All critical issues resolved
+- [ ] All tests passing
+- [ ] Ready to commit
+```
+
+**Now begin the code review.**
+"""
+
+                return GetPromptResult(
+                    description=f"Code review for: {', '.join(file_paths)}",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "pre_commit_check":
+                project_path = arguments.get("project_path", "")
+                changed_files = arguments.get("changed_files", "").split(",")
+
+                prompt_text = f"""You are running pre-commit quality checks before committing code.
+
+**Project**: {project_path}
+**Changed Files** ({len(changed_files)}):
+{chr(10).join(f"- {cf.strip()}" for cf in changed_files if cf.strip())}
+
+## Pre-Commit Quality Gate
+
+### Required Checks (All Must Pass)
+
+**Step 1: Run Quality Gate**
+Call `run_quality_gate` with:
+- project_path: {project_path}
+- changes_made: {changed_files}
+
+**Result**: If FAILED, STOP and fix issues before proceeding.
+
+### Step 2: Manual Validation
+
+#### Changelog Updated?
+- [ ] CHANGELOG.md has entry for these changes
+- [ ] Entry describes WHAT changed and WHY
+- [ ] Entry follows format (feat:/fix:/refactor:)
+
+#### Comments Added?
+- [ ] New functions have docstrings
+- [ ] Complex logic has explanatory comments
+- [ ] No TODO comments left behind
+
+#### Tests Added/Updated?
+- [ ] New features have tests
+- [ ] Bug fixes have regression tests
+- [ ] All tests pass locally
+
+#### No Sensitive Data?
+- [ ] No API keys or passwords
+- [ ] No .env files being committed
+- [ ] No credentials in code
+- [ ] No debugging code left in
+
+#### Commit Message Ready?
+- [ ] Descriptive commit message drafted
+- [ ] Follows conventional commits format
+- [ ] References issue numbers if applicable
+
+### Step 3: Final Checklist
+
+Before running `git commit`, verify:
+- [ ] Quality gate: PASSED
+- [ ] Changelog: UPDATED
+- [ ] Tests: PASSING
+- [ ] Comments: ADDED
+- [ ] Secrets: NONE
+- [ ] Commit message: READY
+
+### Output Format
+
+```markdown
+## Pre-Commit Check Results
+
+### Quality Gate Status
+[Result from run_quality_gate]
+
+### Validation Results
+- Changelog: [✅/❌]
+- Comments: [✅/❌]
+- Tests: [✅/❌]
+- Secrets: [✅/❌]
+- Commit message: [✅/❌]
+
+### Issues Found
+1. [issue description]
+   - Fix: [recommendation]
+2. ...
+
+### Verdict
+- [ ] **APPROVED** - Ready to commit
+- [ ] **BLOCKED** - Fix issues first
+
+### Next Steps
+{f'Fix {len([x for x in []])} issues before committing' if False else 'Run: git commit -m "your message"'}
+```
+
+**Run the pre-commit checks now.**
+"""
+
+                return GetPromptResult(
+                    description="Pre-commit quality checks",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "security_audit":
+                project_path = arguments.get("project_path", "")
+
+                prompt_text = f"""You are conducting a security audit for the project at: {project_path}
+
+## Security Audit Framework
+
+### OWASP Top 10 Review
+
+#### 1. Injection Vulnerabilities
+**Check for**:
+- SQL injection (raw SQL queries)
+- Command injection (os.system, subprocess without validation)
+- Code injection (eval, exec, compile)
+- LDAP injection
+- XML injection
+
+**Find with grep**:
+```bash
+# SQL injection risks
+grep -r "execute\|cursor\|raw" --include="*.py" {project_path}
+
+# Command injection risks
+grep -r "os.system\|subprocess\|eval\|exec" --include="*.py" {project_path}
+```
+
+#### 2. Broken Authentication
+**Check for**:
+- Weak password requirements
+- Missing session timeout
+- No account lockout
+- Insecure password storage
+- Session fixation vulnerabilities
+
+#### 3. Sensitive Data Exposure
+**Check for**:
+- Hardcoded secrets (API keys, passwords)
+- Unencrypted data storage
+- Unencrypted data transmission
+- Logging sensitive data
+- Exposing secrets in error messages
+
+**Find with grep**:
+```bash
+# Hardcoded secrets
+grep -ri "password\s*=\|api_key\s*=\|secret\s*=" --include="*.py" {project_path}
+grep -r "os.environ.get" --include="*.py" {project_path}  # Check if properly using env vars
+```
+
+#### 4. XML External Entities (XXE)
+**Check for**:
+- XML parsing without disabling external entities
+- Unsafe XML libraries
+
+#### 5. Broken Access Control
+**Check for**:
+- Missing authorization checks
+- IDOR (Insecure Direct Object Reference)
+- Path traversal vulnerabilities
+- Elevation of privilege
+
+#### 6. Security Misconfiguration
+**Check for**:
+- Debug mode enabled in production
+- Default credentials
+- Unnecessary features enabled
+- Missing security headers
+- Verbose error messages
+
+**Check**:
+```python
+# Look for DEBUG = True
+grep -r "DEBUG\s*=\s*True" --include="*.py" {project_path}
+```
+
+#### 7. Cross-Site Scripting (XSS)
+**Check for**:
+- Unescaped user input in templates
+- innerHTML usage
+- Unsafe rendering of user data
+
+#### 8. Insecure Deserialization
+**Check for**:
+- pickle.loads without validation
+- eval on user data
+- YAML loading without safe_load
+
+```bash
+grep -r "pickle.loads\|yaml.load[^_]" --include="*.py" {project_path}
+```
+
+#### 9. Using Components with Known Vulnerabilities
+**Check**:
+- Run dependency audit
+- Check requirements.txt for outdated packages
+
+```bash
+pip list --outdated
+safety check  # If safety is installed
+```
+
+#### 10. Insufficient Logging & Monitoring
+**Check for**:
+- Security events not logged
+- Logs not monitored
+- No alerting on suspicious activity
+
+### Output Format
+
+```markdown
+## Security Audit: {project_path}
+
+### Executive Summary
+- Severity: [CRITICAL / HIGH / MEDIUM / LOW]
+- Vulnerabilities Found: [count]
+- Recommendations: [count]
+
+### Findings by OWASP Category
+
+#### 1. Injection
+- Status: [✅ Secure / ⚠️ Warnings / ❌ Vulnerable]
+- Issues: [count]
+- Details:
+  - [file:line] [description]
+  - Recommendation: [fix]
+
+[Repeat for all 10 categories...]
+
+### Critical Vulnerabilities
+1. **[Type]** in [file:line]
+   - Risk: [description]
+   - Impact: [what could happen]
+   - Fix: [specific recommendation]
+
+### Action Items (Prioritized)
+1. [CRITICAL] [action]
+2. [HIGH] [action]
+3. [MEDIUM] [action]
+
+### Clean Bill of Health
+- [ ] No hardcoded secrets
+- [ ] All inputs validated
+- [ ] Authentication secure
+- [ ] Authorization in place
+- [ ] Data encrypted
+- [ ] Dependencies up to date
+- [ ] Logging enabled
+- [ ] Error handling secure
+```
+
+**Begin the security audit now.**
+"""
+
+                return GetPromptResult(
+                    description="Security audit",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            else:
+                raise ValueError(f"Unknown prompt: {name}")
 
     def check_code_quality(self, file_paths: List[str]) -> Dict:
         """Check code quality for specific files."""

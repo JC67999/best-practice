@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - MCP Prompts (Reusable Templates)
+- **10 MCP prompts** across Memory, Quality, and Project MCPs
+- **Project MCP prompts** (4 total):
+  - `plan_feature` - Break down features into tasks aligned with objective
+  - `daily_standup` - Review progress, identify blockers
+  - `refocus` - Cut non-essential work ruthlessly
+  - `task_breakdown` - Break large tasks into ≤30 line pieces
+- **Quality MCP prompts** (3 total):
+  - `code_review` - Systematic review (structure, security, performance, OWASP Top 10)
+  - `pre_commit_check` - Pre-commit quality gate with checklist
+  - `security_audit` - Full security audit with OWASP Top 10 framework
+- **Memory MCP prompts** (3 total):
+  - `session_start` - Load context and plan session
+  - `session_end` - Guided session summary
+  - `document_decision` - Document decisions with rationale
+- **Context-aware templates**: Prompts load project data dynamically
+- **User-initiated**: Invoke with `/mcp__server__promptname` syntax
+- **Completes MCP primitives**: Tools + Resources + Prompts (all 3 primitives now implemented)
+
 ### Changed - BREAKING: Source Structure Consistency
 - **mcp-servers/ moved to .claude/mcp-servers/** in source toolkit repository
 - Source structure now mirrors installed structure for consistency

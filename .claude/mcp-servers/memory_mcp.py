@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import Tool, TextContent, Prompt, PromptArgument, GetPromptResult, PromptMessage
 
 
 # Storage location
@@ -180,6 +180,381 @@ class MemoryServer:
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 return [TextContent(type="text", text=json.dumps({"error": str(e)}, indent=2))]
+
+        @self.server.list_prompts()
+        async def list_prompts() -> list[Prompt]:
+            """List available memory prompts."""
+            return [
+                Prompt(
+                    name="session_start",
+                    description="Load project context and summarize for session start",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="session_end",
+                    description="Guided session summary before ending work",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="document_decision",
+                    description="Document an architectural or technical decision with rationale",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        ),
+                        PromptArgument(
+                            name="topic",
+                            description="Topic or decision area (e.g., 'authentication', 'database choice')",
+                            required=True
+                        )
+                    ]
+                )
+            ]
+
+        @self.server.get_prompt()
+        async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptResult:
+            """Get a specific prompt template."""
+            if arguments is None:
+                arguments = {}
+
+            if name == "session_start":
+                project_path = arguments.get("project_path", "")
+
+                # Load project context
+                context_summary = ""
+                try:
+                    result = self.load_project_context(project_path=project_path)
+
+                    if "error" not in result:
+                        objective = result.get("objective", {})
+                        recent_sessions = result.get("recent_sessions", [])
+                        decisions = result.get("decisions", [])
+
+                        context_summary = f"""
+**Project Context Loaded**:
+
+**Objective**:
+- Problem: {objective.get('problem', 'Not defined')}
+- Target Users: {objective.get('target_users', 'Not defined')}
+- Solution: {objective.get('solution', 'Not defined')}
+- Clarity Score: {objective.get('clarity_score', 0)}/100
+
+**Recent Sessions** (last 3):
+{chr(10).join(f"- {s.get('summary', 'No summary')}" for s in recent_sessions[-3:]) if recent_sessions else "- None"}
+
+**Key Decisions** (last 3):
+{chr(10).join(f"- {d.get('decision', 'No decision')}" for d in decisions[-3:]) if decisions else "- None"}
+
+**Next Steps from Last Session**:
+{chr(10).join(f"- {step}" for step in recent_sessions[-1].get('next_steps', [])) if recent_sessions else "- None"}
+
+**Current Blockers**:
+{chr(10).join(f"- {blocker}" for blocker in recent_sessions[-1].get('blockers', [])) if recent_sessions and recent_sessions[-1].get('blockers') else "- None"}
+"""
+                    else:
+                        context_summary = "\n**Note**: No previous context found. This may be a new project.\n"
+                except:
+                    context_summary = "\n**Note**: Could not load project context.\n"
+
+                prompt_text = f"""You are starting a new session for the project at: {project_path}
+{context_summary}
+## Session Start Checklist
+
+### 1. Review Context
+- Understand the project objective
+- Review recent work (last sessions)
+- Note key decisions made
+- Identify next steps from last session
+- Check for blockers
+
+### 2. Set Session Goal
+Based on the context above, what should this session accomplish?
+- Is there a specific task to complete?
+- Are we continuing from where we left off?
+- Are there any blockers to address first?
+
+### 3. Load Detailed Status
+You may want to call:
+- `get_current_status` (Project MCP) - See current task list
+- `score_objective_clarity` (Project MCP) - Check if objective needs clarification
+- `search_memory` - Search for specific past context
+
+### 4. Plan This Session
+Given the context and next steps, create a plan for THIS session:
+1. What will we accomplish?
+2. What's the success criteria?
+3. What risks or unknowns exist?
+
+### Output Format
+
+```markdown
+## Session Start: {project_path}
+
+### Context Summary
+- Objective Clarity: {context_summary.split('Clarity Score: ')[1].split('/100')[0] if 'Clarity Score:' in context_summary else '0'}/100
+- Last Session: [date/summary if available]
+- Current Phase: [infer from next steps]
+
+### Session Goal
+**What we'll accomplish today**:
+- [goal 1]
+- [goal 2]
+
+**Success Criteria**:
+- [ ] [criterion 1]
+- [ ] [criterion 2]
+
+### Action Plan
+1. [First task]
+2. [Second task]
+3. [Third task]
+
+### Blockers to Address
+{chr(10).join(f"- {blocker}" for blocker in (recent_sessions[-1].get('blockers', []) if recent_sessions else [])) if recent_sessions else "- None identified"}
+
+### Next Steps
+[After reviewing context, what should we tackle first?]
+```
+
+**Now provide the session start summary and plan.**
+"""
+
+                return GetPromptResult(
+                    description="Session start with context loading",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "session_end":
+                project_path = arguments.get("project_path", "")
+
+                prompt_text = f"""You are ending a work session for the project at: {project_path}
+
+## Session End - Save Context for Next Time
+
+### Required: Complete Session Summary
+
+You MUST call `save_session_summary` with the following information:
+
+**project_path**: {project_path}
+
+**summary**: (Required) Brief overview of what was accomplished
+- 1-3 sentences max
+- Focus on WHAT was done, not HOW
+- Example: "Implemented user authentication with JWT tokens and added password reset functionality"
+
+**decisions**: (Optional) List of key decisions made
+- Format as array of strings
+- Example: ["Using bcrypt for password hashing", "JWT tokens expire after 24 hours"]
+- Only include significant decisions that affect future work
+
+**next_steps**: (Required) What should be done in the next session
+- Format as array of strings
+- Concrete, actionable items
+- Example: ["Add email verification", "Implement rate limiting on login", "Add password strength requirements"]
+
+**blockers**: (Optional) Current blockers or issues
+- Format as array of strings
+- Example: ["Need API key for email service", "Unclear password strength requirements"]
+
+### Session End Checklist
+
+#### 1. What Was Accomplished?
+- List completed tasks
+- Highlight wins
+- Note any partial work
+
+#### 2. What Decisions Were Made?
+- Technical decisions
+- Architectural choices
+- Trade-offs accepted
+- Why these decisions were made
+
+#### 3. What's Next?
+- Immediate next tasks
+- Priorities for next session
+- Dependencies to unblock
+
+#### 4. Any Blockers?
+- What's blocking progress?
+- What needs clarification?
+- What external dependencies exist?
+
+### Output Format
+
+```markdown
+## Session End Summary
+
+### Accomplished
+- [completed task 1]
+- [completed task 2]
+- [partial work if any]
+
+### Key Decisions
+1. **[Decision]**: [Rationale]
+2. **[Decision]**: [Rationale]
+
+### Next Session
+**Priority tasks**:
+1. [task 1] - [why it's next]
+2. [task 2] - [dependency info]
+3. [task 3]
+
+### Blockers
+- [blocker 1]: [what's needed to unblock]
+- [blocker 2]: [action required]
+
+### Ready to Save
+Now call `save_session_summary` with:
+- summary: "[your 1-3 sentence summary]"
+- decisions: [list of decision strings]
+- next_steps: [list of next step strings]
+- blockers: [list of blocker strings]
+```
+
+**Now create your session end summary and call save_session_summary.**
+"""
+
+                return GetPromptResult(
+                    description="Session end with guided summary",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "document_decision":
+                project_path = arguments.get("project_path", "")
+                topic = arguments.get("topic", "")
+
+                prompt_text = f"""You are documenting a decision for: **{topic}**
+
+Project: {project_path}
+
+## Decision Documentation Framework
+
+### Why Document Decisions?
+- Future you won't remember why
+- Team members need context
+- Prevents re-litigating settled questions
+- Builds institutional knowledge
+
+### Required Information
+
+#### 1. What Decision Was Made?
+- Clear statement of the decision
+- Be specific and actionable
+- Example: "Use PostgreSQL for primary database" (not "Use SQL database")
+
+#### 2. What Were the Options Considered?
+- List alternatives that were evaluated
+- Example: PostgreSQL vs MySQL vs MongoDB
+
+#### 3. Why This Decision?
+- Technical rationale
+- Business constraints
+- Trade-offs accepted
+- Example: "PostgreSQL chosen for JSONB support, strong ACID guarantees, and team familiarity"
+
+#### 4. What Trade-offs Were Accepted?
+- What did we give up?
+- What limitations does this introduce?
+- Example: "Accepted complexity of PostgreSQL vs simpler NoSQL options"
+
+#### 5. When Can This Be Revisited?
+- Under what conditions should we reconsider?
+- What would trigger a review?
+- Example: "Revisit if we need horizontal scaling beyond 10M records"
+
+### Output Format
+
+```markdown
+## Decision: {topic}
+
+### Context
+**Date**: {datetime.now().strftime('%Y-%m-%d')}
+**Project**: {project_path}
+**Topic**: {topic}
+
+### Decision Made
+[Clear, specific statement of what was decided]
+
+### Options Considered
+1. **[Option A]**
+   - Pros: [list]
+   - Cons: [list]
+2. **[Option B]**
+   - Pros: [list]
+   - Cons: [list]
+3. **[Option C]**
+   - Pros: [list]
+   - Cons: [list]
+
+### Rationale
+**Why we chose [Option X]**:
+1. [Reason 1]
+2. [Reason 2]
+3. [Reason 3]
+
+**Trade-offs accepted**:
+- [Trade-off 1]: [Why acceptable]
+- [Trade-off 2]: [Why acceptable]
+
+### Constraints Considered
+- [Constraint 1]
+- [Constraint 2]
+
+### Review Triggers
+**Revisit this decision if**:
+- [Condition 1]
+- [Condition 2]
+
+### Next Steps
+- [ ] [Action item 1]
+- [ ] [Action item 2]
+
+### Ready to Save
+Now call `save_decision` with:
+- project_path: "{project_path}"
+- decision: "[your decision statement]"
+- rationale: "[your full rationale with options, trade-offs, etc.]"
+```
+
+**Now document the decision for: {topic}**
+"""
+
+                return GetPromptResult(
+                    description=f"Document decision: {topic}",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            else:
+                raise ValueError(f"Unknown prompt: {name}")
 
     def get_storage_dir(self) -> Path:
         """Get memory storage directory path."""

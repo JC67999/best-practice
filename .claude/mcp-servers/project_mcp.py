@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import Tool, TextContent, Prompt, PromptArgument, GetPromptResult, PromptMessage
 
 
 # Vague answer patterns
@@ -271,6 +271,423 @@ class ProjectServer:
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 return [TextContent(type="text", text=json.dumps({"error": str(e)}, indent=2))]
+
+        @self.server.list_prompts()
+        async def list_prompts() -> list[Prompt]:
+            """List available project management prompts."""
+            return [
+                Prompt(
+                    name="plan_feature",
+                    description="Break down a feature into small, testable tasks aligned with project objective",
+                    arguments=[
+                        PromptArgument(
+                            name="feature",
+                            description="Feature to plan (e.g., 'user authentication', 'payment processing')",
+                            required=True
+                        ),
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="daily_standup",
+                    description="Review current project status, progress, and identify blockers",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="refocus",
+                    description="Review all tasks against project objective and cut non-essential work",
+                    arguments=[
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                ),
+                Prompt(
+                    name="task_breakdown",
+                    description="Break down a large task into smaller tasks (≤30 lines, ≤15 min each)",
+                    arguments=[
+                        PromptArgument(
+                            name="task_description",
+                            description="Description of the task to break down",
+                            required=True
+                        ),
+                        PromptArgument(
+                            name="project_path",
+                            description="Absolute path to project directory",
+                            required=True
+                        )
+                    ]
+                )
+            ]
+
+        @self.server.get_prompt()
+        async def get_prompt(name: str, arguments: dict[str, str] | None) -> GetPromptResult:
+            """Get a specific prompt template."""
+            if arguments is None:
+                arguments = {}
+
+            if name == "plan_feature":
+                feature = arguments.get("feature", "")
+                project_path = arguments.get("project_path", "")
+
+                # Load project objective if available
+                objective_context = ""
+                try:
+                    data = self._load_project_data(project_path)
+                    obj = data.get("objective", {})
+                    if obj:
+                        objective_context = f"""
+**Project Objective**:
+- Problem: {obj.get('problem', 'Not defined')}
+- Target Users: {obj.get('target_users', 'Not defined')}
+- Solution: {obj.get('solution', 'Not defined')}
+- Success Metrics: {', '.join(obj.get('success_metrics', ['Not defined']))}
+- Constraints: {', '.join(obj.get('constraints', ['Not defined']))}
+- Clarity Score: {obj.get('clarity_score', 0)}/100
+"""
+                except:
+                    objective_context = "\n**Note**: No project objective found. Consider running objective clarification first.\n"
+
+                prompt_text = f"""You are a senior software architect planning the feature: **{feature}**
+{objective_context}
+## Your Task
+
+Break down "{feature}" into small, testable tasks following these strict rules:
+
+### Task Requirements
+1. **Size**: Each task ≤30 lines of code, ≤15 minutes to complete
+2. **Testability**: Each task must be independently testable
+3. **Atomicity**: Each task delivers one specific capability
+4. **Alignment**: Every task must serve the project objective
+
+### Planning Process
+
+**Step 1: Validate Alignment**
+- Does this feature serve the project objective?
+- If clarity score <70, should we clarify objective first?
+- What's the MINIMAL version that delivers value?
+
+**Step 2: Break Down Tasks**
+Create a numbered list of tasks, each with:
+- **Task description** (what to build)
+- **Acceptance criteria** (how to verify it works)
+- **Estimated effort** (lines of code, time)
+- **Dependencies** (which tasks must complete first)
+- **Testing approach** (how to test this task)
+
+**Step 3: Identify Risks**
+- What edge cases must be handled?
+- What could go wrong?
+- What assumptions are we making?
+
+**Step 4: Call MCP Tools**
+For each task, you should:
+- Call `validate_task_alignment` to check if it serves the objective
+- Call `validate_task_size` to ensure it's small enough
+- Adjust tasks that are too large or misaligned
+
+### Output Format
+
+```markdown
+## Feature: {feature}
+
+### Alignment Check
+- Serves objective: [YES/NO]
+- Minimal version: [describe]
+- Value delivered: [describe]
+
+### Task Breakdown
+
+#### Task 1: [description]
+- **Acceptance Criteria**:
+  - [ ] [criterion 1]
+  - [ ] [criterion 2]
+- **Estimated Effort**: X lines, Y minutes
+- **Dependencies**: None / Task N
+- **Testing**: [test approach]
+- **Alignment Score**: [will call MCP tool]
+
+[Repeat for each task...]
+
+### Risks & Edge Cases
+- [risk 1]
+- [risk 2]
+
+### Execution Order
+1. Task N (no dependencies)
+2. Task M (depends on Task N)
+...
+```
+
+**Now begin your analysis and create the task breakdown.**
+"""
+
+                return GetPromptResult(
+                    description=f"Feature planning for: {feature}",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "daily_standup":
+                project_path = arguments.get("project_path", "")
+
+                # Load current status
+                status_summary = ""
+                try:
+                    data = self._load_project_data(project_path)
+                    objective = data.get("objective", {})
+                    tasks = data.get("tasks", [])
+
+                    completed = [t for t in tasks if t.get("status") == "completed"]
+                    in_progress = [t for t in tasks if t.get("status") == "in_progress"]
+                    pending = [t for t in tasks if t.get("status") == "pending"]
+
+                    status_summary = f"""
+**Current Status**:
+- Objective Clarity: {objective.get('clarity_score', 0)}/100
+- Tasks Completed: {len(completed)}/{len(tasks)}
+- Tasks In Progress: {len(in_progress)}
+- Tasks Pending: {len(pending)}
+
+**In Progress Tasks**:
+{chr(10).join(f"- {t.get('description', 'No description')}" for t in in_progress) if in_progress else "- None"}
+
+**Recent Completions**:
+{chr(10).join(f"- {t.get('description', 'No description')}" for t in completed[-3:]) if completed else "- None"}
+"""
+                except:
+                    status_summary = "\n**Note**: Could not load project status.\n"
+
+                prompt_text = f"""You are conducting a daily standup for the project at: {project_path}
+{status_summary}
+## Daily Standup Framework
+
+Review the current status and provide a structured standup update:
+
+### 1. What Was Completed Yesterday?
+- List completed tasks
+- Highlight wins and progress
+- Note any quality gate passes
+
+### 2. What's In Progress Today?
+- Current task(s)
+- Expected completion time
+- Confidence level (high/medium/low)
+
+### 3. Blockers & Risks
+- What's blocking progress?
+- What risks have emerged?
+- What decisions are needed?
+
+### 4. Alignment Check
+- Are current tasks serving the objective?
+- Should we call `identify_scope_creep` to find non-essential work?
+- Should we call `challenge_task_priority` to verify we're working on highest priority?
+
+### 5. Next Steps
+- What should be tackled next?
+- What preparation is needed?
+- What questions need answering?
+
+**Action Items**:
+After reviewing, you may want to:
+- Call `get_current_status` for detailed status
+- Call `identify_scope_creep` if focus seems lost
+- Call `challenge_task_priority` for current task
+- Call `save_session_summary` (Memory MCP) to document this standup
+
+**Now provide your standup update.**
+"""
+
+                return GetPromptResult(
+                    description="Daily standup review",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "refocus":
+                project_path = arguments.get("project_path", "")
+
+                prompt_text = f"""You are refocusing the project at: {project_path}
+
+## Objective: Cut Non-Essential Work
+
+**Your mission**: Identify and eliminate tasks that don't serve the project objective.
+
+### Process
+
+**Step 1: Load Current State**
+Call these MCP tools to understand the situation:
+- `get_current_status` - Get all tasks and objective
+- `identify_scope_creep` - Find non-essential tasks
+- `score_objective_clarity` - Check if objective is clear enough
+
+**Step 2: Review Each Task**
+For every task, ask:
+- Does this directly serve the objective?
+- Is this the MINIMAL version needed?
+- What value does this deliver to users?
+- What happens if we DON'T do this?
+
+**Step 3: Cut Ruthlessly**
+Tasks to CUT:
+- "Nice to have" features
+- Premature optimizations
+- Features for hypothetical future users
+- Infrastructure for "scalability" before needed
+- Anything that doesn't serve success metrics
+
+Tasks to KEEP:
+- Core features that solve the stated problem
+- Features that serve defined target users
+- Work that measures success metrics
+- Tasks required by constraints
+
+**Step 4: Execute Refocus**
+- Call `refocus_on_objective` to reorder tasks by alignment
+- Document decisions with `save_decision` (Memory MCP)
+
+### Output Format
+
+```markdown
+## Refocus Analysis
+
+### Objective Summary
+[Restate problem, users, solution]
+
+### Scope Creep Found
+- Task: [description] - **VERDICT**: Cut (reason)
+- Task: [description] - **VERDICT**: Keep (reason)
+...
+
+### Recommendations
+- Cut: [N] tasks
+- Refocus: [N] tasks to align better
+- Keep: [N] tasks unchanged
+
+### Actions Taken
+- [ ] Called identify_scope_creep
+- [ ] Called refocus_on_objective
+- [ ] Documented decisions
+- [ ] Updated task list
+```
+
+**Begin the refocus analysis now.**
+"""
+
+                return GetPromptResult(
+                    description="Refocus project on objective",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "task_breakdown":
+                task_description = arguments.get("task_description", "")
+                project_path = arguments.get("project_path", "")
+
+                prompt_text = f"""You are breaking down a large task into smaller tasks.
+
+**Large Task**: {task_description}
+
+## Task Breakdown Rules
+
+**Target**: Each sub-task ≤30 lines of code, ≤15 minutes to complete
+
+### Process
+
+**Step 1: Validate Size**
+- Call `validate_task_size` with the current task description
+- If it returns `too_large: false`, this task doesn't need breaking down
+- If it returns `too_large: true`, proceed with breakdown
+
+**Step 2: Identify Sub-Tasks**
+Break down the task by:
+- **Logical steps**: What must happen in sequence?
+- **Components**: What separate pieces can be built independently?
+- **Layers**: Data model → Logic → UI → Tests
+- **Increments**: What's the smallest working version?
+
+**Step 3: Define Each Sub-Task**
+For each sub-task:
+- Clear description (one sentence)
+- Acceptance criteria (how to verify done)
+- Estimated size (lines, minutes)
+- Dependencies (what must complete first)
+- Independent testability
+
+**Step 4: Validate Sub-Tasks**
+For each sub-task, call:
+- `validate_task_size` to ensure it's small enough
+- `validate_task_alignment` to ensure it serves objective
+- If still too large, break it down further
+
+### Output Format
+
+```markdown
+## Breaking Down: {task_description}
+
+### Original Task Analysis
+- Estimated size: [lines, time]
+- Complexity: [high/medium/low]
+- Can be broken down: [yes/no]
+
+### Sub-Tasks
+
+#### Sub-Task 1: [description]
+- Acceptance Criteria: [criteria]
+- Estimated: X lines, Y minutes
+- Dependencies: None / Task N
+- Testable: [how to test]
+- Size validation: [result of validate_task_size]
+- Alignment: [result of validate_task_alignment]
+
+[Repeat for each sub-task...]
+
+### Execution Order
+1. [Task] - No dependencies
+2. [Task] - Depends on #1
+...
+```
+
+**Now break down the task into small, manageable pieces.**
+"""
+
+                return GetPromptResult(
+                    description=f"Break down task: {task_description}",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            else:
+                raise ValueError(f"Unknown prompt: {name}")
 
     def _get_project_data_path(self, project_path: str) -> Path:
         """Get path to project data file."""
