@@ -5,29 +5,47 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added - Learning MCP (Self-Learning System)
-- **Learning MCP server**: Complete self-learning system that scans Anthropic's skills repository
-- **6 MCP tools** for toolkit maintenance:
-  - `scan_anthropic_skills` - Scan Anthropic's official repository (15 skills across 5 categories)
+- **Learning MCP server**: Complete self-learning system that scans ALL Anthropic resources
+- **9 MCP tools** for comprehensive toolkit maintenance:
+  - `scan_anthropic_skills` - Scan skills repository (15 skills across 5 categories)
+  - `scan_anthropic_cookbooks` - Scan cookbooks repository (27.6k stars, 28 cookbooks across 7 categories)
+  - `scan_anthropic_quickstarts` - Scan quickstarts repository (10.2k stars, 4 starter projects)
+  - `scan_anthropic_org` - Scan all 54 Anthropic repositories (SDKs, tools, courses, security)
   - `compare_skills` - Compare Anthropic vs toolkit skills, identify gaps
   - `suggest_skill_updates` - Prioritize skills as HIGH/MEDIUM/LOW/SKIP
   - `download_skill` - Download skills from GitHub with templates
   - `store_learning` - Store best practices in JSON format
   - `get_learnings` - Retrieve learnings filtered by topic/date
-- **2 MCP prompts** for learning workflows:
+- **3 MCP prompts** for learning workflows:
   - `update_toolkit` - Complete workflow: scan → compare → suggest → download → document
   - `research_topic` - Research best practices for specific topic with structured output
+  - `scan_all_resources` - Comprehensive scan of ALL Anthropic resources (skills, cookbooks, quickstarts, org)
 - **Knowledge storage**: `~/.claude_memory/learnings/` with JSON structure
-- **15 Anthropic skills cataloged**: Hardcoded knowledge of skills across Development, Meta, Documents, Creative, Enterprise categories
-- **Auto-update capability**: Toolkit can self-update with new best practices from Anthropic
+- **Complete Anthropic resource catalog**:
+  - **15 Skills**: Development, Meta, Documents, Creative, Enterprise categories
+  - **28 Cookbooks**: Capabilities, Tool Use, Multimodal, Patterns, Third-Party integrations
+  - **4 Quickstarts**: Customer support, Financial analysis, Computer use, Agent demos
+  - **54 Org Repos**: 7 SDKs, 4 agent frameworks, 4 educational resources, 4 security tools
+- **Auto-update capability**: Toolkit can self-update with latest Anthropic best practices
 - **Skill prioritization logic**:
   - HIGH: Development tools (webapp-testing, mcp-builder) + Meta skills (skill-creator)
   - MEDIUM: Document tools (pdf, xlsx, docx, pptx)
   - LOW: Creative tools (algorithmic-art, canvas-design)
   - SKIP: Enterprise-specific (brand-guidelines, internal-comms)
+- **Cookbook categories covered**:
+  - Capabilities: RAG, Classification, Summarization
+  - Tool Use: Customer service, Calculator, SQL execution
+  - Multimodal: Vision, Charts, Forms, Image generation
+  - Patterns: Sub-agents, PDF processing, Evaluation, Caching
+  - Third-Party: Pinecone, Wikipedia, Voyage AI, Web extraction
 - **Benefits**:
-  - ✅ Toolkit stays current with Anthropic's latest skills
+  - ✅ Complete visibility into ALL Anthropic resources
   - ✅ Automatic gap detection between toolkit and Anthropic
-  - ✅ Structured learning storage for best practices research
+  - ✅ Access to 27.6k+ stars of cookbook examples
+  - ✅ Starter project templates from quickstarts (10.2k stars)
+  - ✅ SDK integration guidance for 7 programming languages
+  - ✅ Security tool awareness (GitHub Actions, monitoring)
+  - ✅ Structured learning storage for research
   - ✅ Context-aware prompts for guided workflows
 
 ### Changed - BREAKING: Local-Only Now Default

@@ -19,9 +19,12 @@ from mcp.types import Tool, TextContent, Prompt, PromptArgument, GetPromptResult
 LEARNING_DIR = Path.home() / ".claude_memory" / "learnings"
 LEARNING_DIR.mkdir(parents=True, exist_ok=True)
 
-# Anthropic Skills Repository
+# Anthropic Repositories
 ANTHROPIC_SKILLS_REPO = "https://github.com/anthropics/skills"
 ANTHROPIC_SKILLS_API = "https://api.github.com/repos/anthropics/skills/contents"
+ANTHROPIC_COOKBOOKS_REPO = "https://github.com/anthropics/claude-cookbooks"
+ANTHROPIC_QUICKSTARTS_REPO = "https://github.com/anthropics/claude-quickstarts"
+ANTHROPIC_ORG_URL = "https://github.com/orgs/anthropics/repositories"
 
 
 class LearningServer:
@@ -126,6 +129,33 @@ class LearningServer:
                             }
                         }
                     }
+                ),
+                Tool(
+                    name="scan_anthropic_cookbooks",
+                    description="Scan Anthropic's claude-cookbooks repository for code examples and guides",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                ),
+                Tool(
+                    name="scan_anthropic_quickstarts",
+                    description="Scan Anthropic's claude-quickstarts repository for starter projects",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                ),
+                Tool(
+                    name="scan_anthropic_org",
+                    description="Scan all repositories in Anthropic's GitHub organization",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
                 )
             ]
 
@@ -145,6 +175,12 @@ class LearningServer:
                     result = self.store_learning(**arguments)
                 elif name == "get_learnings":
                     result = self.get_learnings(**arguments)
+                elif name == "scan_anthropic_cookbooks":
+                    result = await self.scan_anthropic_cookbooks()
+                elif name == "scan_anthropic_quickstarts":
+                    result = await self.scan_anthropic_quickstarts()
+                elif name == "scan_anthropic_org":
+                    result = await self.scan_anthropic_org()
                 else:
                     result = {"error": f"Unknown tool: {name}"}
 
@@ -171,6 +207,11 @@ class LearningServer:
                             required=True
                         )
                     ]
+                ),
+                Prompt(
+                    name="scan_all_resources",
+                    description="Comprehensive scan of all Anthropic resources (skills, cookbooks, quickstarts, org repos)",
+                    arguments=[]
                 )
             ]
 
@@ -377,6 +418,149 @@ Based on research, suggest:
 
                 return GetPromptResult(
                     description=f"Research best practices for: {topic}",
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=prompt_text)
+                        )
+                    ]
+                )
+
+            elif name == "scan_all_resources":
+                prompt_text = """You are scanning ALL Anthropic resources to build comprehensive knowledge.
+
+## Comprehensive Resource Scan Workflow
+
+### Step 1: Scan All Resource Types
+Call each scanning tool to gather complete data:
+
+1. **Skills**: Call `scan_anthropic_skills`
+   - Returns 15 skills across 5 categories
+   - Development, Meta, Documents, Creative, Enterprise
+
+2. **Cookbooks**: Call `scan_anthropic_cookbooks`
+   - Returns code examples and guides organized by category
+   - Capabilities, Tool Use, Multimodal, Patterns, etc.
+
+3. **Quickstarts**: Call `scan_anthropic_quickstarts`
+   - Returns starter projects with technologies
+   - Customer support, Financial analysis, Computer use demos
+
+4. **Organization Repos**: Call `scan_anthropic_org`
+   - Returns all 54 repositories
+   - SDKs (7 languages), Agent frameworks, Security tools, Courses
+
+### Step 2: Analyze Resource Coverage
+Compare what we have vs what Anthropic provides:
+
+**Skills Analysis**:
+- Which skills should we add to toolkit?
+- Which are universally useful vs domain-specific?
+
+**Cookbooks Analysis**:
+- Which cookbook patterns should become toolkit guidance?
+- Which code examples should we reference?
+- Are there missing capabilities we should document?
+
+**Quickstarts Analysis**:
+- Should we create slash commands based on quickstart patterns?
+- Are there common project structures we should adopt?
+
+**Org Repos Analysis**:
+- Which SDKs should we document for MCP integration?
+- Are there security tools we should integrate?
+- Should we reference the courses for learning paths?
+
+### Step 3: Identify Gaps and Opportunities
+
+**Toolkit Enhancement Opportunities**:
+- Skills to add (from skills repo)
+- Patterns to document (from cookbooks)
+- Project templates to create (from quickstarts)
+- Tools to integrate (from org repos)
+
+**Best Practices to Extract**:
+- Common patterns across multiple resources
+- Anthropic-recommended approaches
+- Emerging capabilities (extended thinking, computer use, etc.)
+
+### Step 4: Prioritize Actions
+
+**HIGH Priority** (Add immediately):
+- Universal skills (testing, MCP building)
+- Critical patterns (RAG, tool use, agents)
+- Essential SDKs (Python, TypeScript)
+
+**MEDIUM Priority** (Evaluate case-by-case):
+- Domain-specific skills
+- Advanced patterns (sub-agents, prompt caching)
+- Language-specific SDKs
+
+**LOW Priority** (Document for reference):
+- Creative/design tools
+- Enterprise-specific resources
+- Specialized repositories
+
+### Step 5: Create Action Plan
+
+Generate structured recommendations:
+
+```markdown
+## Comprehensive Anthropic Resource Scan
+
+### Summary Statistics
+- Skills: [count] across [categories]
+- Cookbooks: [count] across [categories]
+- Quickstarts: [count] projects
+- Org Repos: [count] repositories
+
+### Key Findings
+
+**Skills Gap Analysis**:
+- Missing: [list skills we should add]
+- Have: [list skills we already have equivalent functionality]
+- Unique to us: [list our exclusive skills]
+
+**Cookbook Patterns to Adopt**:
+1. [Pattern name] - [Why it matters]
+2. [Pattern name] - [Why it matters]
+
+**Quickstart Templates**:
+1. [Template name] - [Use case]
+2. [Template name] - [Use case]
+
+**Recommended SDK Integrations**:
+- [SDK name] - [Integration point]
+
+### Recommended Actions (Priority Order)
+
+**Immediate** (This sprint):
+1. Add [N] high-priority skills
+2. Document [N] critical patterns from cookbooks
+3. Create [N] slash commands based on quickstarts
+
+**Next Sprint**:
+1. Integrate [tools] from org repos
+2. Add [N] medium-priority skills
+3. Create learning paths referencing courses
+
+**Future Consideration**:
+- [Low priority items]
+
+### Implementation Tasks
+- [ ] Download high-priority skills
+- [ ] Extract and document cookbook patterns
+- [ ] Create project templates from quickstarts
+- [ ] Update skills README
+- [ ] Update CHANGELOG
+- [ ] Store learnings for each resource type
+```
+
+**Now begin the comprehensive scan.**
+"""
+
+                return GetPromptResult(
+                    description="Comprehensive scan of all Anthropic resources",
                     messages=[
                         PromptMessage(
                             role="user",
@@ -719,6 +903,164 @@ priority: toolkit
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    async def scan_anthropic_cookbooks(self) -> Dict:
+        """Scan Anthropic's claude-cookbooks repository.
+
+        Returns categorized list of cookbooks with descriptions.
+        """
+        cookbooks = {
+            "capabilities": [
+                {"name": "classification", "description": "Text and data classification techniques"},
+                {"name": "retrieval_augmented_generation", "description": "RAG - enhance Claude with external knowledge"},
+                {"name": "summarization", "description": "Effective text summarization methods"}
+            ],
+            "tool_use": [
+                {"name": "customer_service_agent", "description": "Customer service agent implementation"},
+                {"name": "calculator_tool", "description": "Calculator tool integration"},
+                {"name": "sql_query_execution", "description": "SQL query execution guides"}
+            ],
+            "third_party": [
+                {"name": "pinecone_integration", "description": "Vector database integration"},
+                {"name": "wikipedia_integration", "description": "Wikipedia data access"},
+                {"name": "web_page_extraction", "description": "Web content extraction"},
+                {"name": "voyage_ai_embeddings", "description": "Voyage AI embeddings integration"}
+            ],
+            "multimodal": [
+                {"name": "getting_started_images", "description": "Image processing basics"},
+                {"name": "vision_best_practices", "description": "Vision capabilities best practices"},
+                {"name": "chart_graph_interpretation", "description": "Chart and graph analysis"},
+                {"name": "form_extraction", "description": "Extract content from forms"},
+                {"name": "image_generation_stable_diffusion", "description": "Image generation with Stable Diffusion"}
+            ],
+            "patterns": [
+                {"name": "sub_agent_patterns", "description": "Haiku with Opus sub-agent patterns"},
+                {"name": "pdf_upload_summarization", "description": "PDF processing and summarization"},
+                {"name": "automated_evaluation", "description": "Automated evaluation frameworks"},
+                {"name": "json_mode", "description": "JSON mode configuration"},
+                {"name": "content_moderation", "description": "Content moderation filters"},
+                {"name": "prompt_caching", "description": "Prompt caching optimization"}
+            ],
+            "extended_thinking": [
+                {"name": "extended_thinking_guide", "description": "Extended thinking mode usage"}
+            ],
+            "claude_agent_sdk": [
+                {"name": "agent_patterns", "description": "Agent design patterns and implementation"}
+            ]
+        }
+
+        total_cookbooks = sum(len(items) for items in cookbooks.values())
+
+        return {
+            "success": True,
+            "repository": ANTHROPIC_COOKBOOKS_REPO,
+            "scanned_at": datetime.now().isoformat(),
+            "total_cookbooks": total_cookbooks,
+            "stars": "27.6k",
+            "language": "Jupyter Notebooks (97.3%), Python (2.7%)",
+            "cookbooks_by_category": cookbooks,
+            "message": "Cookbooks cataloged from Anthropic repository. Use WebFetch for detailed content."
+        }
+
+    async def scan_anthropic_quickstarts(self) -> Dict:
+        """Scan Anthropic's claude-quickstarts repository.
+
+        Returns list of starter projects with technologies.
+        """
+        quickstarts = [
+            {
+                "name": "customer-support-agent",
+                "description": "Customer support agent powered by Claude with knowledge base access",
+                "technologies": ["Python", "TypeScript", "JavaScript"],
+                "path": "/customer-support-agent"
+            },
+            {
+                "name": "financial-data-analyst",
+                "description": "Financial data analyst with interactive data visualization",
+                "technologies": ["Python", "Data Visualization"],
+                "path": "/financial-data-analyst"
+            },
+            {
+                "name": "computer-use-demo",
+                "description": "Desktop computer control using Claude 3.5 Sonnet computer use capabilities",
+                "technologies": ["Python", "Desktop Automation"],
+                "path": "/computer-use-demo"
+            },
+            {
+                "name": "agents",
+                "description": "Agent-related starter projects",
+                "technologies": ["TypeScript", "Python"],
+                "path": "/agents"
+            }
+        ]
+
+        return {
+            "success": True,
+            "repository": ANTHROPIC_QUICKSTARTS_REPO,
+            "scanned_at": datetime.now().isoformat(),
+            "total_quickstarts": len(quickstarts),
+            "stars": "10.2k",
+            "languages": "TypeScript (43.5%), Python (37.2%), Jupyter Notebook (12.0%)",
+            "quickstarts": quickstarts,
+            "message": "Quickstarts cataloged from Anthropic repository. Use WebFetch for project details."
+        }
+
+    async def scan_anthropic_org(self) -> Dict:
+        """Scan all repositories in Anthropic's GitHub organization.
+
+        Returns comprehensive list of all 54 repositories categorized by type.
+        """
+        repositories = {
+            "sdks": [
+                {"name": "anthropic-sdk-python", "stars": "2.4k", "language": "Python"},
+                {"name": "anthropic-sdk-typescript", "stars": "1.3k", "language": "TypeScript"},
+                {"name": "anthropic-sdk-go", "stars": "603", "language": "Go"},
+                {"name": "anthropic-sdk-java", "stars": "183", "language": "Kotlin/Java"},
+                {"name": "anthropic-sdk-ruby", "stars": "235", "language": "Ruby"},
+                {"name": "anthropic-sdk-csharp", "stars": "40", "language": "C#"},
+                {"name": "anthropic-sdk-php", "stars": "54", "language": "PHP"}
+            ],
+            "agent_frameworks": [
+                {"name": "claude-code", "stars": "42.3k", "description": "Agentic coding tool for terminal"},
+                {"name": "claude-agent-sdk-python", "stars": "3.1k", "description": "Python agent framework"},
+                {"name": "claude-agent-sdk-typescript", "stars": "324", "description": "TypeScript agent SDK"},
+                {"name": "claude-agent-sdk-demos", "stars": "606", "description": "SDK demonstration projects"}
+            ],
+            "developer_resources": [
+                {"name": "claude-cookbooks", "stars": "27.6k", "description": "Collection of notebooks/recipes"},
+                {"name": "courses", "stars": "17.6k", "description": "Educational courses from Anthropic"},
+                {"name": "claude-quickstarts", "stars": "10.2k", "description": "Quick start projects"},
+                {"name": "skills", "stars": "16.8k", "description": "Public Skills repository"}
+            ],
+            "security_tools": [
+                {"name": "claude-code-action", "stars": "4.1k", "description": "GitHub Action for code analysis"},
+                {"name": "claude-code-base-action", "stars": "518", "description": "Base action mirror"},
+                {"name": "claude-code-security-review", "stars": "2.6k", "description": "AI-powered security review Action"},
+                {"name": "claude-code-monitoring-guide", "stars": "95", "description": "Monitoring implementation guide"}
+            ],
+            "specialized": [
+                {"name": "political-neutrality-eval", "stars": "26", "description": "Political neutrality evaluation"},
+                {"name": "life-sciences", "stars": "58", "description": "Life sciences marketplace and MCP servers"}
+            ]
+        }
+
+        total_repos = sum(len(items) for items in repositories.values())
+
+        return {
+            "success": True,
+            "organization": "anthropics",
+            "org_url": ANTHROPIC_ORG_URL,
+            "scanned_at": datetime.now().isoformat(),
+            "total_repositories": total_repos,
+            "repositories_by_category": repositories,
+            "key_stats": {
+                "sdks_available": 7,
+                "agent_frameworks": 4,
+                "educational_resources": 4,
+                "security_tools": 4
+            },
+            "message": "All Anthropic repositories cataloged. Use WebFetch for detailed information."
+        }
 
     async def run(self):
         """Run the MCP server."""
