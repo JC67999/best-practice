@@ -511,7 +511,7 @@ Before running `git commit`, verify:
             elif name == "security_audit":
                 project_path = arguments.get("project_path", "")
 
-                prompt_text = f"""You are conducting a security audit for the project at: {project_path}
+                prompt_text = rf"""You are conducting a security audit for the project at: {project_path}
 
 ## Security Audit Framework
 
