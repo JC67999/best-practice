@@ -8,11 +8,12 @@
 
 ## Overview
 
-Three production-ready MCP servers that enforce excellent coding practices:
+Four production-ready MCP servers that enforce excellent coding practices:
 
 1. **Memory MCP** - Persistent context across sessions
 2. **Quality MCP** - Automated quality enforcement
 3. **Project MCP** - Objective-driven task management
+4. **Learning MCP** - Self-learning from Anthropic resources (scans GitHub for latest best practices)
 
 ---
 
@@ -27,6 +28,7 @@ mkdir -p ~/.mcp-servers
 cp memory_mcp.py ~/.mcp-servers/
 cp quality_mcp.py ~/.mcp-servers/
 cp project_mcp.py ~/.mcp-servers/
+cp learning_mcp.py ~/.mcp-servers/
 
 # 3. Make executable
 chmod +x ~/.mcp-servers/*.py
@@ -64,6 +66,7 @@ mkdir -p ~/.mcp-servers
 cp memory_mcp.py ~/.mcp-servers/
 cp quality_mcp.py ~/.mcp-servers/
 cp project_mcp.py ~/.mcp-servers/
+cp learning_mcp.py ~/.mcp-servers/
 
 # Make executable
 chmod +x ~/.mcp-servers/*.py
@@ -106,6 +109,13 @@ ls -la ~/.mcp-servers/
       "command": "python3",
       "args": [
         "/Users/YOUR_USERNAME/.mcp-servers/project_mcp.py"
+      ],
+      "disabled": false
+    },
+    "learning": {
+      "command": "python3",
+      "args": [
+        "/Users/YOUR_USERNAME/.mcp-servers/learning_mcp.py"
       ],
       "disabled": false
     }
@@ -227,6 +237,328 @@ decided to use JWT tokens, next steps: add password reset"
 # Complete task
 "Mark task_1 complete (quality gate passed: true)"
 ```
+
+### Learning MCP
+
+**Purpose**: Self-learning system that keeps toolkit up-to-date with latest Anthropic best practices
+
+**Key Tools**:
+- `scan_anthropic_skills` - Scan official skills repository (15 skills)
+- `scan_anthropic_cookbooks` - Scan cookbooks (28 cookbooks, 27.6k stars)
+- `scan_anthropic_quickstarts` - Scan quickstarts (4 projects, 10.2k stars)
+- `scan_anthropic_org` - Scan all 54 Anthropic repositories
+- `compare_skills` - Compare Anthropic vs toolkit skills
+- `suggest_skill_updates` - Prioritize updates (HIGH/MEDIUM/LOW/SKIP)
+- `download_skill` - Download skills from GitHub
+- `store_learning` - Store best practices in JSON
+- `get_learnings` - Retrieve learnings by topic/date
+
+**Key Prompts**:
+- `update_toolkit` - Complete workflow: scan → compare → suggest → download
+- `research_topic` - Research best practices for specific topic
+- `scan_all_resources` - Comprehensive scan of ALL Anthropic resources
+
+**Example**:
+```
+# Update toolkit with latest Anthropic skills
+"Use the update_toolkit prompt to scan for new skills"
+
+# Research specific topic
+"Use research_topic prompt for 'prompt engineering'"
+
+# Scan all resources
+"Use scan_all_resources prompt"
+
+# Manual workflow
+"Scan Anthropic skills repository"
+"Compare with toolkit skills at .claude/skills"
+"Suggest skill updates based on comparison"
+"Download skill: mcp-builder to .claude/skills/"
+```
+
+**Automation**:
+```bash
+# Set up daily auto-updates (2 AM)
+cd /path/to/toolkit/.claude/mcp-servers
+./auto_update_toolkit.sh --setup
+
+# Check status
+./auto_update_toolkit.sh --status
+
+# Manual scan
+./auto_update_toolkit.sh
+```
+
+**Storage**: `~/.claude_memory/learnings/`
+- `anthropic_skills.json` - Scanned skills catalog
+- `anthropic_cookbooks.json` - Cookbooks catalog
+- `best_practices.json` - Stored learnings by topic
+
+**Benefits**:
+- ✅ Toolkit stays current with Anthropic's latest practices
+- ✅ Automatic gap detection between toolkit and official skills
+- ✅ Access to 27.6k+ stars of cookbook examples
+- ✅ Structured learning storage for research
+- ✅ Scheduled automation for hands-off updates
+
+---
+
+## MCP Prompts - Reusable Workflow Templates
+
+> **NEW**: MCP Prompts provide structured, context-aware workflows for common tasks
+
+### What Are MCP Prompts?
+
+MCP Prompts are **reusable templates** that provide Claude with structured instructions for complex workflows. Unlike tools (which perform actions), prompts guide Claude through systematic processes while automatically loading relevant project context.
+
+**Benefits**:
+- 🎯 **Structured workflows** - Ensure thorough, systematic execution
+- 📊 **Context-aware** - Automatically load project objective, status, decisions
+- ♻️ **Reusable** - Same prompt works across all projects
+- 🔗 **Tool integration** - Prompts reference MCP tools to call
+- 📝 **Templated** - Consistent format and quality every time
+
+### Available Prompts (10 Total)
+
+#### Project Management Prompts (4)
+
+**1. `plan_feature`** - Break down feature into small tasks
+```
+Usage: /mcp__project__plan_feature
+Arguments:
+  - feature: "user authentication"
+  - project_path: "/path/to/project"
+
+What it does:
+- Loads project objective for alignment checking
+- Breaks feature into tasks ≤30 lines, ≤15 min each
+- Validates each task with MCP tools
+- Identifies risks and edge cases
+- Provides execution order with dependencies
+```
+
+**2. `daily_standup`** - Review project status and identify blockers
+```
+Usage: /mcp__project__daily_standup
+Arguments:
+  - project_path: "/path/to/project"
+
+What it does:
+- Loads current task status (completed, in progress, pending)
+- Reviews recent completions
+- Identifies blockers and risks
+- Checks if tasks align with objective
+- Suggests next steps and priorities
+```
+
+**3. `refocus`** - Cut non-essential work and realign with objective
+```
+Usage: /mcp__project__refocus
+Arguments:
+  - project_path: "/path/to/project"
+
+What it does:
+- Loads objective and all tasks
+- Identifies scope creep (non-essential tasks)
+- Reviews each task against objective
+- Recommends what to cut, keep, or refine
+- Calls refocus_on_objective to reorder tasks
+```
+
+**4. `task_breakdown`** - Break large task into smaller sub-tasks
+```
+Usage: /mcp__project__task_breakdown
+Arguments:
+  - task_description: "Implement payment processing"
+  - project_path: "/path/to/project"
+
+What it does:
+- Validates if task is too large
+- Breaks down by logical steps, components, layers
+- Ensures each sub-task ≤30 lines
+- Validates alignment and size for each sub-task
+- Provides execution order
+```
+
+#### Quality Assurance Prompts (3)
+
+**5. `code_review`** - Systematic code review for quality and security
+```
+Usage: /mcp__quality__code_review
+Arguments:
+  - file_paths: "src/auth.py,src/models.py"
+  - project_path: "/path/to/project"
+
+What it does:
+- Runs automated quality checks first
+- Reviews structure, naming, documentation
+- Checks error handling and security (OWASP Top 10)
+- Evaluates performance and testing
+- Provides actionable feedback with line numbers
+```
+
+**6. `pre_commit_check`** - Run all quality checks before committing
+```
+Usage: /mcp__quality__pre_commit_check
+Arguments:
+  - project_path: "/path/to/project"
+  - changed_files: "src/auth.py,tests/test_auth.py"
+
+What it does:
+- Calls run_quality_gate (MANDATORY)
+- Validates changelog updated
+- Checks comments/docstrings added
+- Ensures tests pass
+- Verifies no sensitive data
+- Confirms commit message ready
+```
+
+**7. `security_audit`** - Security-focused audit for vulnerabilities
+```
+Usage: /mcp__quality__security_audit
+Arguments:
+  - project_path: "/path/to/project"
+
+What it does:
+- Reviews all OWASP Top 10 categories
+- Provides grep commands to find issues
+- Checks for hardcoded secrets
+- Validates authentication/authorization
+- Identifies insecure dependencies
+- Prioritized action items by severity
+```
+
+#### Session Management Prompts (3)
+
+**8. `session_start`** - Load context and plan session
+```
+Usage: /mcp__memory__session_start
+Arguments:
+  - project_path: "/path/to/project"
+
+What it does:
+- Loads project objective and clarity score
+- Shows recent sessions (last 3)
+- Lists key decisions made
+- Displays next steps from last session
+- Identifies current blockers
+- Helps set goals for this session
+```
+
+**9. `session_end`** - Guided session summary before ending
+```
+Usage: /mcp__memory__session_end
+Arguments:
+  - project_path: "/path/to/project"
+
+What it does:
+- Guides through session summary creation
+- Prompts for accomplishments
+- Captures decisions made
+- Identifies next steps
+- Documents blockers
+- Calls save_session_summary with structured data
+```
+
+**10. `document_decision`** - Record architectural/technical decision
+```
+Usage: /mcp__memory__document_decision
+Arguments:
+  - project_path: "/path/to/project"
+  - topic: "database choice"
+
+What it does:
+- Structures decision documentation
+- Captures options considered with pros/cons
+- Records rationale and trade-offs
+- Documents constraints
+- Defines review triggers (when to reconsider)
+- Calls save_decision to persist
+```
+
+### How to Use Prompts
+
+**Method 1: Via Slash Commands** (Easiest)
+```
+/mcp__project__plan_feature
+/mcp__quality__code_review
+/mcp__memory__session_start
+```
+
+**Method 2: Ask Claude Directly**
+```
+"Use the plan_feature prompt to break down user authentication"
+"Run the pre_commit_check prompt for this project"
+"Start session using the session_start prompt"
+```
+
+**Method 3: Claude Auto-Selects**
+When appropriate, Claude will automatically use prompts for structured workflows.
+
+### Prompt Workflows
+
+#### New Feature Development
+```
+1. /mcp__project__plan_feature → Break down feature
+2. Implement first task
+3. /mcp__quality__code_review → Review code
+4. /mcp__quality__pre_commit_check → Before commit
+5. Repeat for each task
+6. /mcp__memory__session_end → Save progress
+```
+
+#### Session Management
+```
+# Start of day
+1. /mcp__memory__session_start → Load context
+
+# During work
+2. /mcp__project__daily_standup → Check status
+3. /mcp__memory__document_decision → Record decisions
+
+# End of day
+4. /mcp__memory__session_end → Save summary
+```
+
+#### Refocusing Project
+```
+1. /mcp__project__daily_standup → See current state
+2. /mcp__project__refocus → Cut non-essential work
+3. /mcp__memory__document_decision → Record why we cut tasks
+```
+
+#### Quality Assurance
+```
+1. /mcp__quality__code_review → Review files
+2. Fix issues found
+3. /mcp__quality__security_audit → Check security
+4. Fix vulnerabilities
+5. /mcp__quality__pre_commit_check → Final check
+6. Commit
+```
+
+### Prompts vs Tools
+
+**Tools** (perform actions):
+- `save_session_summary` - Saves data
+- `run_quality_gate` - Runs checks
+- `validate_task_alignment` - Validates alignment
+
+**Prompts** (guide workflows):
+- `session_end` - Guides through creating summary, then calls save_session_summary
+- `pre_commit_check` - Guides through quality checks, calls run_quality_gate
+- `plan_feature` - Guides through planning, calls validate_task_alignment
+
+**Use tools when**: You know exactly what action to take
+**Use prompts when**: You want structured guidance through a workflow
+
+### Tips for Using Prompts
+
+1. **Let prompts guide you** - They include checklists and frameworks
+2. **Answer all sections** - Prompts ensure nothing is missed
+3. **Call suggested tools** - Prompts reference specific MCP tools to call
+4. **Follow output format** - Prompts provide markdown templates
+5. **Customize as needed** - Edit prompt code in `*_mcp.py` files
 
 ---
 
