@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed - BREAKING: Source Structure Consistency
+- **mcp-servers/ moved to .claude/mcp-servers/** in source toolkit repository
+- Source structure now mirrors installed structure for consistency
+- All references updated: smart_install.sh, package_toolkit.sh, tests, docs
+- No impact on installed projects - they already use .claude/mcp-servers/
+
 ### Changed - BREAKING: New Installation Structure
 - **ALL toolkit files now install to `.claude/` folder** (automatically gitignored by Claude Code)
 - **CLAUDE.md renamed to best-practice.md** when installed to projects

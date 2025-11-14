@@ -196,7 +196,7 @@ MIT License - see [LICENSE](LICENSE) for details
 ## 🔗 Links
 
 - **Documentation**: [docs/README.md](docs/README.md)
-- **MCP Servers**: [mcp-servers/](mcp-servers/)
+- **MCP Servers**: [.claude/mcp-servers/](.claude/mcp-servers/)
 - **Project Plan**: [docs/notes/PROJECT_PLAN.md](docs/notes/PROJECT_PLAN.md)
 - **Standards**: [CLAUDE.md](CLAUDE.md)
 

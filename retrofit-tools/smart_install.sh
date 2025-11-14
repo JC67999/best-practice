@@ -332,8 +332,8 @@ if [ "$MODE" = "FULL" ]; then
 
     echo -n "MCP servers (to .claude/mcp-servers/)... "
     mkdir -p .claude/mcp-servers
-    if [ -d "$TOOLKIT_DIR/mcp-servers" ]; then
-        cp -r "$TOOLKIT_DIR/mcp-servers"/* .claude/mcp-servers/ 2>/dev/null || true
+    if [ -d "$TOOLKIT_DIR/.claude/mcp-servers" ]; then
+        cp -r "$TOOLKIT_DIR/.claude/mcp-servers"/* .claude/mcp-servers/ 2>/dev/null || true
         echo "✅ (Memory, Quality, Project MCPs)"
     else
         echo "⚠️  MCP servers not found"
@@ -423,20 +423,22 @@ else
     validation_errors=$((validation_errors + 1))
 fi
 
-# Check mcp-servers
-echo -n "mcp-servers/ ... "
-if [ -d "mcp-servers" ]; then
-    mcp_count=$(ls -1 mcp-servers/*.py 2>/dev/null | wc -l)
-    if [ "$mcp_count" -gt 0 ]; then
-        echo "✅ ($mcp_count files)"
-        ls mcp-servers/*.py 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
+# Check mcp-servers (in .claude/ for FULL mode)
+if [ "$MODE" = "FULL" ]; then
+    echo -n ".claude/mcp-servers/ ... "
+    if [ -d ".claude/mcp-servers" ]; then
+        mcp_count=$(ls -1 .claude/mcp-servers/*.py 2>/dev/null | wc -l)
+        if [ "$mcp_count" -gt 0 ]; then
+            echo "✅ ($mcp_count files)"
+            ls .claude/mcp-servers/*.py 2>/dev/null | xargs -n 1 basename | sed 's/^/  - /'
+        else
+            echo "⚠️  directory exists but empty"
+            validation_warnings=$((validation_warnings + 1))
+        fi
     else
-        echo "⚠️  directory exists but empty"
-        validation_warnings=$((validation_warnings + 1))
+        echo "❌ MISSING"
+        validation_errors=$((validation_errors + 1))
     fi
-else
-    echo "❌ MISSING"
-    validation_errors=$((validation_errors + 1))
 fi
 
 # Check slash commands
@@ -506,8 +508,8 @@ fi
 echo ""
 echo "Next:"
 echo "  1. Review: docs/notes/PROJECT_PLAN.md"
-echo "  2. Copy MCPs: cp mcp-servers/*.py ~/.mcp-servers/"
-$([ "$MODE" = "FULL" ] && echo "  3. Run: .ai-validation/check_quality.sh")
+$([ "$MODE" = "FULL" ] && echo "  2. Copy MCPs: cp .claude/mcp-servers/*.py ~/.mcp-servers/")
+$([ "$MODE" = "FULL" ] && echo "  3. Run: .claude/quality-gate/check_quality.sh")
 echo ""
 if [ "$LOCAL_ONLY" = true ]; then
     echo "⚠️  Toolkit installed locally only"

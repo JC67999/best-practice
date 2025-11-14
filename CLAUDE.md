@@ -917,7 +917,7 @@ Track these to improve:
 
 **Allowed Folders** (5 maximum):
 ```
-/mcp-servers/     - MCP server implementations
+/.claude/         - Toolkit files (skills, commands, mcp-servers, quality-gate)
 /tests/           - Test suite for all code
 /docs/            - ALL documentation
 /dist/            - Distribution packages (generated)
@@ -965,9 +965,9 @@ Track these to improve:
 
 ### Source Code Structure
 
-**MCP Servers** (`/mcp-servers/`):
+**MCP Servers** (`/.claude/mcp-servers/`):
 ```
-/mcp-servers/
+/.claude/mcp-servers/
 ├── memory_mcp.py       - Context persistence MCP
 ├── quality_mcp.py      - Quality enforcement MCP
 ├── project_mcp.py      - Objective clarification MCP
@@ -1390,13 +1390,13 @@ class TestMemoryMCP:
 
 ```bash
 # Run all tests
-pytest tests/ -v --cov=mcp-servers --cov-report=term-missing
+pytest tests/ -v --cov=.claude/mcp-servers --cov-report=term-missing
 
 # Run specific test file
 pytest tests/test_memory_mcp.py -v
 
 # Run with coverage report
-pytest --cov=mcp-servers --cov-report=html
+pytest --cov=.claude/mcp-servers --cov-report=html
 ```
 
 ---
@@ -1407,10 +1407,10 @@ pytest --cov=mcp-servers --cov-report=html
 
 ```bash
 # Check for linting issues
-ruff check mcp-servers/
+ruff check .claude/mcp-servers/
 
 # Auto-fix issues
-ruff check --fix mcp-servers/
+ruff check --fix .claude/mcp-servers/
 ```
 
 **Configuration** (pyproject.toml or ruff.toml):
@@ -1425,7 +1425,7 @@ select = ["E", "F", "W", "I", "N"]
 
 ```bash
 # Check types
-mypy mcp-servers/
+mypy .claude/mcp-servers/
 ```
 
 **Configuration** (pyproject.toml):
@@ -1441,7 +1441,7 @@ warn_unused_configs = true
 
 ```bash
 # Check for security issues
-bandit -r mcp-servers/
+bandit -r .claude/mcp-servers/
 ```
 
 ---
@@ -1920,7 +1920,7 @@ def validate_project_path(path: str) -> bool:
 **Always keep updated**:
 - docs/notes/PROJECT_PLAN.md - Current status and roadmap
 - docs/README.md - Comprehensive system documentation
-- mcp-servers/README.md - MCP installation and usage
+- .claude/mcp-servers/README.md - MCP installation and usage
 - tests/README.md - Testing documentation
 
 **Review before starting work**:

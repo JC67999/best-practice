@@ -11,12 +11,12 @@ from typing import Generator
 import pytest
 
 # Add project root to Python path and create mcp_servers module alias
-# This allows importing from mcp-servers despite the hyphenated name
+# This allows importing from .claude/mcp-servers despite the hyphenated name
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-# Create module alias for mcp-servers -> mcp_servers
-mcp_servers_init = project_root / "mcp-servers" / "__init__.py"
+# Create module alias for .claude/mcp-servers -> mcp_servers
+mcp_servers_init = project_root / ".claude" / "mcp-servers" / "__init__.py"
 if mcp_servers_init.exists():
     spec = importlib.util.spec_from_file_location("mcp_servers", mcp_servers_init)
     if spec and spec.loader:

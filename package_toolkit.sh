@@ -18,12 +18,12 @@ PACKAGE_NAME="${TOOLKIT_NAME}-v${VERSION}"
 echo "📦 Creating package directory..."
 mkdir -p "${OUTPUT_DIR}/${PACKAGE_NAME}"
 
-# Copy MCP servers
-echo "📋 Copying MCP servers..."
-mkdir -p "${OUTPUT_DIR}/${PACKAGE_NAME}/mcp-servers"
-cp mcp-servers/*.py "${OUTPUT_DIR}/${PACKAGE_NAME}/mcp-servers/"
-cp mcp-servers/README.md "${OUTPUT_DIR}/${PACKAGE_NAME}/mcp-servers/"
-cp mcp-servers/requirements.txt "${OUTPUT_DIR}/${PACKAGE_NAME}/mcp-servers/"
+# Copy .claude directory structure
+echo "📋 Copying .claude directory..."
+mkdir -p "${OUTPUT_DIR}/${PACKAGE_NAME}/.claude/mcp-servers"
+cp .claude/mcp-servers/*.py "${OUTPUT_DIR}/${PACKAGE_NAME}/.claude/mcp-servers/"
+cp .claude/mcp-servers/README.md "${OUTPUT_DIR}/${PACKAGE_NAME}/.claude/mcp-servers/"
+cp .claude/mcp-servers/requirements.txt "${OUTPUT_DIR}/${PACKAGE_NAME}/.claude/mcp-servers/"
 
 # Copy retrofit tools
 echo "📋 Copying retrofit tools..."
@@ -92,7 +92,7 @@ pip3 install mcp || {
 echo ""
 echo "📋 Installing MCP servers..."
 mkdir -p ~/.mcp-servers
-cp mcp-servers/*.py ~/.mcp-servers/
+cp .claude/mcp-servers/*.py ~/.mcp-servers/
 chmod +x ~/.mcp-servers/*.py
 echo "✅ MCP servers installed to ~/.mcp-servers/"
 
@@ -170,7 +170,7 @@ echo ""
 echo "📚 Documentation:"
 echo "   - README.md - Complete overview"
 echo "   - docs/ - Detailed guides"
-echo "   - mcp-servers/README.md - MCP usage"
+echo "   - .claude/mcp-servers/README.md - MCP usage"
 echo ""
 echo "🚀 Ready to enforce excellence!"
 INSTALL_SCRIPT_EOF
@@ -242,7 +242,7 @@ git commit -m "Safe state"
 
 - `README.md` - Complete system overview
 - `docs/` - Detailed guides
-- `mcp-servers/README.md` - MCP documentation
+- `.claude/mcp-servers/README.md` - MCP documentation
 
 ## Success!
 
