@@ -14,6 +14,16 @@ All notable changes to this project will be documented in this file.
 - Detailed migration plan and skill creation templates
 - Project skill examples (e-commerce, ML projects)
 - Integration strategy for smart_install.sh to create skill templates
+- **.claude/skills/** directory structure with 8 skill folders
+- **quality-standards skill** (6.75KB): Code quality, testing, documentation standards
+- **tdd-workflow skill** (7.3KB): Test-driven development cycle (Red-Green-Refactor)
+- **problem-solving skill** (7.8KB): 10 mandatory systematic debugging techniques
+- **git-workflow skill**: Git commits, checkpoints, branch strategy, rollback patterns
+
+### In Progress
+- Remaining 4 skills: file-placement, planning-mode, mcp-usage, context-management
+- Project skill template and creation guide
+- Smart install integration for skill templates
 
 ## [1.2.0] - 2025-11-10
 
