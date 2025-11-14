@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - Learning MCP (Self-Learning System)
+- **Learning MCP server**: Complete self-learning system that scans Anthropic's skills repository
+- **6 MCP tools** for toolkit maintenance:
+  - `scan_anthropic_skills` - Scan Anthropic's official repository (15 skills across 5 categories)
+  - `compare_skills` - Compare Anthropic vs toolkit skills, identify gaps
+  - `suggest_skill_updates` - Prioritize skills as HIGH/MEDIUM/LOW/SKIP
+  - `download_skill` - Download skills from GitHub with templates
+  - `store_learning` - Store best practices in JSON format
+  - `get_learnings` - Retrieve learnings filtered by topic/date
+- **2 MCP prompts** for learning workflows:
+  - `update_toolkit` - Complete workflow: scan → compare → suggest → download → document
+  - `research_topic` - Research best practices for specific topic with structured output
+- **Knowledge storage**: `~/.claude_memory/learnings/` with JSON structure
+- **15 Anthropic skills cataloged**: Hardcoded knowledge of skills across Development, Meta, Documents, Creative, Enterprise categories
+- **Auto-update capability**: Toolkit can self-update with new best practices from Anthropic
+- **Skill prioritization logic**:
+  - HIGH: Development tools (webapp-testing, mcp-builder) + Meta skills (skill-creator)
+  - MEDIUM: Document tools (pdf, xlsx, docx, pptx)
+  - LOW: Creative tools (algorithmic-art, canvas-design)
+  - SKIP: Enterprise-specific (brand-guidelines, internal-comms)
+- **Benefits**:
+  - ✅ Toolkit stays current with Anthropic's latest skills
+  - ✅ Automatic gap detection between toolkit and Anthropic
+  - ✅ Structured learning storage for best practices research
+  - ✅ Context-aware prompts for guided workflows
+
 ### Changed - BREAKING: Local-Only Now Default
 - **smart_install.sh now defaults to LOCAL_ONLY=true** (toolkit files NOT committed)
 - **New --commit flag** to explicitly commit toolkit files to git
