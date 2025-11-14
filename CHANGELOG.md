@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - MANDATORY GitHub Issue Requirement
+- **New workflow requirement**: ALL code changes going to GitHub MUST have a corresponding GitHub issue
+- **When required**:
+  - ✅ New features or functionality
+  - ✅ Bug fixes
+  - ✅ Refactoring that changes behavior
+  - ✅ Performance improvements
+  - ✅ Security fixes
+  - ✅ Any code change that will be committed and pushed
+- **When NOT required**:
+  - ❌ Documentation-only changes
+  - ❌ Local experiments not intended for GitHub
+  - ❌ Trivial changes (typo fixes, formatting)
+- **Workflow**:
+  1. Create GitHub issue BEFORE starting work (`gh issue create`)
+  2. Create branch with issue number (`git checkout -b feature/auth-#42`)
+  3. Work on task (following all standards)
+  4. Reference issue in commits (`git commit -m "feat: ... Closes #42"`)
+  5. Create PR linking to issue (`gh pr create`)
+- **Enforcement**:
+  - Added to Pre-Commit Checklist
+  - Must verify issue exists and is referenced in commit message
+- **Benefits**:
+  - ✅ Complete traceability of all code changes
+  - ✅ Forces planning before coding
+  - ✅ Team visibility into work in progress
+  - ✅ Permanent record of why changes were made
+  - ✅ Automatic linking between commits, PRs, and issues
+- **Documentation**: Complete workflow examples and issue templates added to CLAUDE.md (line 1023)
+- **gh CLI integration**: Examples for creating issues, listing, viewing, and closing via command line
+
 ### Fixed - Syntax Error in smart_install.sh
 - **Bug**: Missing `if [ "$LOCAL_ONLY" = true ]; then` statement before gitignore section
 - **Impact**: Script failed with "syntax error near unexpected token 'else'" at line 397

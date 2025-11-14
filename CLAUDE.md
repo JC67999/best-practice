@@ -1020,6 +1020,140 @@ Review PROJECT_PLAN.md → Current Sprint section to understand current work.
 - **Planning tasks** (architecture, breaking down features) → Use max mode
 - **Implementation tasks** (writing code, tests, docs) → Use standard mode
 
+### MANDATORY: Create GitHub Issue Before Code Changes
+
+**CRITICAL**: Before starting ANY task that involves code changes going to GitHub, you MUST create a GitHub issue.
+
+**When to Create an Issue**:
+- ✅ New features or functionality
+- ✅ Bug fixes
+- ✅ Refactoring that changes behavior
+- ✅ Performance improvements
+- ✅ Security fixes
+- ✅ Any code change that will be committed and pushed
+
+**When NOT to Create an Issue**:
+- ❌ Documentation-only changes (README updates, comments)
+- ❌ Local experiments not intended for GitHub
+- ❌ Trivial changes (typo fixes, formatting)
+
+**Issue Creation Workflow**:
+
+```bash
+# 1. Create issue on GitHub BEFORE starting work
+gh issue create --title "feat: Add user authentication" \
+  --body "## Description
+Implement JWT-based authentication system
+
+## Acceptance Criteria
+- [ ] User can register with email/password
+- [ ] User can login and receive JWT token
+- [ ] Token expires after 24 hours
+- [ ] Protected routes require valid token
+
+## Tasks (≤30 lines each)
+- [ ] Create User model
+- [ ] Add registration endpoint
+- [ ] Add login endpoint
+- [ ] Add JWT middleware
+
+## Definition of Done
+- [ ] All tests pass (≥80% coverage)
+- [ ] Quality gate passes
+- [ ] Code reviewed
+- [ ] Documentation updated"
+
+# 2. Note the issue number (e.g., #42)
+
+# 3. Create branch with issue number
+git checkout -b feature/auth-#42
+
+# 4. Work on task (following all other standards)
+
+# 5. Link commits to issue
+git commit -m "feat: add user registration endpoint
+
+Implements registration with email/password validation.
+
+Closes #42"
+
+# 6. Create PR referencing issue
+gh pr create --title "feat: Add user authentication (closes #42)" \
+  --body "Closes #42
+
+## Changes
+- User registration endpoint
+- JWT token generation
+- Login endpoint
+- Protected route middleware
+
+## Testing
+- All tests pass
+- Quality gate passed
+- Manual testing completed"
+```
+
+**Issue Template**:
+
+```markdown
+## Description
+[Brief description of what needs to be done]
+
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+## Tasks (≤30 lines each)
+- [ ] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+## Definition of Done
+- [ ] All tests pass (≥80% coverage)
+- [ ] Quality gate passes
+- [ ] Code reviewed
+- [ ] Documentation updated
+- [ ] CHANGELOG.md updated
+```
+
+**Why This Matters**:
+1. **Traceability**: Every code change has context and justification
+2. **Planning**: Forces you to think through requirements before coding
+3. **Communication**: Team knows what you're working on
+4. **History**: GitHub issues create permanent record of why changes were made
+5. **Integration**: Automatic linking between commits, PRs, and issues
+
+**Enforcement**:
+- ❌ **DO NOT** start coding without an issue number
+- ❌ **DO NOT** commit code without referencing the issue
+- ❌ **DO NOT** create PRs without linking to an issue
+- ✅ **ALWAYS** create issue first, then branch, then code
+
+**Using gh CLI**:
+
+```bash
+# Install gh if needed
+# See: https://cli.github.com/
+
+# Create issue
+gh issue create
+
+# List your issues
+gh issue list --assignee @me
+
+# View issue
+gh issue view 42
+
+# Close issue (or use "Closes #42" in commit message)
+gh issue close 42
+
+# Create PR that closes issue
+gh pr create --fill
+```
+
+---
+
 ### Working on Tasks
 
 **Task Size Limits**:
@@ -1936,6 +2070,8 @@ def validate_project_path(path: str) -> bool:
 
 Before committing ANY code:
 
+- [ ] **GitHub issue created** (for code changes going to GitHub)
+- [ ] **Commit message references issue number** (e.g., "Closes #42")
 - [ ] All tests pass (`pytest tests/ -v`)
 - [ ] No linting errors (run quality gate)
 - [ ] No type errors (run quality gate)
