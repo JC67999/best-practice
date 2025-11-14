@@ -8,18 +8,29 @@ A complete MCP (Model Context Protocol) server system that **enforces** best pra
 
 ## 🚀 Quick Start
 
-### ONE Command Installation
+### ONE Command Installation (Two Methods)
 
-**Default: Local Only (NOT committed to git)**
+**Method 1: inject.sh** - Run from toolkit (RECOMMENDED)
 ```bash
-cd /path/to/your/project
-/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh
+cd /path/to/best-practice
+./inject.sh /path/to/your-project
 ```
 
-**Optional: Commit Toolkit Files (add --commit flag)**
+**Method 2: smart_install.sh** - Run from target
 ```bash
-cd /path/to/your/project
-/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh --commit
+cd /path/to/your-project
+/path/to/best-practice/retrofit-tools/smart_install.sh
+```
+
+**Both methods identical** - just different workflows. Use whichever you prefer.
+
+**With commit flag** (optional - commits toolkit to git):
+```bash
+# Method 1
+./inject.sh /path/to/project --commit
+
+# Method 2
+cd /path/to/project && /path/to/smart_install.sh --commit
 ```
 
 **That's it.** Script auto-detects production vs development, asks for confirmation, installs everything safely.
@@ -28,25 +39,37 @@ cd /path/to/your/project
 - Checks git safety (uncommitted changes, etc)
 - Auto-detects if production (deployment configs, CI/CD, low activity)
 - Asks: "Proceed?" and "Override mode?"
-- **Creates `.claude/` folder** with best-practice.md, TASKS.md, skills, MCP servers
-- **By default: .claude/ is gitignored** (Claude Code ignores it automatically)
+- **Creates toolkit folders**: `.claude/`, `docs/`, `tests/` (FULL mode), `CLAUDE.md`
+- **By default: ALL folders gitignored** (added to .gitignore automatically)
 - **With --commit flag: Commits toolkit files** to git repository
 - Creates safety checkpoint (git tag) when committing
 - Shows rollback command
 
 **Takes 2 minutes.**
 
-### The .claude/ Folder
+### Folders Created
 
-All toolkit files install to `.claude/` in your project:
-- **best-practice.md**: Project standards and workflow (CLAUDE.md renamed)
-- **TASKS.md**: Live task list for granular change tracking (≤30 lines per task)
-- **skills/**: 9 toolkit skills + template for project-specific skills
-- **mcp-servers/**: Memory, Quality, Project MCPs with 10 prompts (FULL mode)
+**All toolkit folders gitignored by default** (clean git status):
+
+**.claude/** - Core toolkit (GITIGNORED)
+- **best-practice.md**: Project standards and workflow
+- **TASKS.md**: Live task list (≤30 lines per task)
+- **skills/**: 10 toolkit skills + template for project-specific skills
+- **USER_GUIDE.md**: 500+ line complete toolkit guide
+- **mcp-servers/**: Memory, Quality, Project, Learning MCPs (FULL mode)
 - **quality-gate/**: Quality gate scripts (FULL mode)
-- **commands/**: Slash commands for workflow automation
 
-**Automatic .gitignore (DEFAULT)**: Claude Code automatically ignores `.claude/` folder, ensuring toolkit files stay local and never pollute your repository.
+**docs/** - Documentation (GITIGNORED)
+- **notes/PROJECT_PLAN.md**: Always-current project plan
+- **design/**: Architecture docs
+- **guides/**: How-to guides
+- **analysis/**: Assessments
+
+**tests/** - Test structure, FULL mode only (GITIGNORED)
+
+**CLAUDE.md** - Root reference (GITIGNORED)
+
+**Automatic .gitignore (DEFAULT)**: All toolkit folders added to .gitignore automatically, ensuring clean git history with zero toolkit clutter.
 
 ---
 
