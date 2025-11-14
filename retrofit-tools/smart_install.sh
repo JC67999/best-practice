@@ -317,6 +317,14 @@ cp "$TOOLKIT_DIR/TASKS.md" .claude/TASKS.md 2>/dev/null || echo '# Live Task Lis
 - [ ] None' > .claude/TASKS.md
 echo "✅"
 
+echo -n "USER_GUIDE.md (to .claude/)... "
+if [ -f "$TOOLKIT_DIR/.claude/USER_GUIDE.md" ]; then
+    cp "$TOOLKIT_DIR/.claude/USER_GUIDE.md" .claude/USER_GUIDE.md
+    echo "✅"
+else
+    echo "⚠️  User guide not found"
+fi
+
 echo -n "Claude Skills (to .claude/skills/)... "
 mkdir -p .claude/skills
 if [ -d "$TOOLKIT_DIR/.claude/skills" ]; then
@@ -413,6 +421,43 @@ if [ -f "CLAUDE.md" ]; then
 else
     echo "❌ MISSING"
     validation_errors=$((validation_errors + 1))
+fi
+
+# Check .claude/ folder structure
+echo -n ".claude/best-practice.md ... "
+if [ -f ".claude/best-practice.md" ]; then
+    size=$(wc -c < ".claude/best-practice.md")
+    echo "✅ ($size bytes)"
+else
+    echo "❌ MISSING"
+    validation_errors=$((validation_errors + 1))
+fi
+
+echo -n ".claude/USER_GUIDE.md ... "
+if [ -f ".claude/USER_GUIDE.md" ]; then
+    size=$(wc -c < ".claude/USER_GUIDE.md")
+    echo "✅ ($size bytes)"
+else
+    echo "⚠️  missing (optional)"
+    validation_warnings=$((validation_warnings + 1))
+fi
+
+echo -n ".claude/TASKS.md ... "
+if [ -f ".claude/TASKS.md" ]; then
+    size=$(wc -c < ".claude/TASKS.md")
+    echo "✅ ($size bytes)"
+else
+    echo "❌ MISSING"
+    validation_errors=$((validation_errors + 1))
+fi
+
+echo -n ".claude/skills/ ... "
+if [ -d ".claude/skills" ]; then
+    skill_count=$(ls -1d .claude/skills/*/ 2>/dev/null | wc -l)
+    echo "✅ ($skill_count skills)"
+else
+    echo "⚠️  missing"
+    validation_warnings=$((validation_warnings + 1))
 fi
 
 # Check PROJECT_PLAN.md

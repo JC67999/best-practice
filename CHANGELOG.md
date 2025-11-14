@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - Comprehensive User Guide
+- **USER_GUIDE.md**: Complete 500+ line guide for using the toolkit (`.claude/USER_GUIDE.md`)
+- **10 major sections**: What is it, Quick Start, Components, Workflows, Tools, Skills, Learning, Commands, Use Cases, Troubleshooting
+- **MCP Tools Reference**: Complete documentation of all 27 MCP tools across 4 servers
+- **Skills System Explanation**: How skills work, auto-discovery, creating project-specific skills
+- **Learning MCP Guide**: How to scan and integrate Anthropic resources
+- **Common Use Cases**: 5 detailed workflows (new feature, debugging, updating toolkit, code review, refactoring)
+- **Troubleshooting Section**: Solutions for common issues
+- **Daily Workflow**: Step-by-step guide from session start to session end
+- **Command Reference**: Quick reference for all slash commands and MCP prompts
+- **Benefits**:
+  - ✅ Complete onboarding guide for new users
+  - ✅ Quick reference for experienced users
+  - ✅ Troubleshooting solutions built-in
+  - ✅ Real examples and workflows
+  - ✅ Installs to `.claude/USER_GUIDE.md` for easy access
+
 ### Added - Learning MCP (Self-Learning System)
 - **Learning MCP server**: Complete self-learning system that scans ALL Anthropic resources
 - **9 MCP tools** for comprehensive toolkit maintenance:
