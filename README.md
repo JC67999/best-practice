@@ -10,16 +10,16 @@ A complete MCP (Model Context Protocol) server system that **enforces** best pra
 
 ### ONE Command Installation
 
-**Option 1: Full Install (commits to git)**
+**Default: Local Only (NOT committed to git)**
 ```bash
 cd /path/to/your/project
 /home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh
 ```
 
-**Option 2: Local Only (for live projects - NO git commits)**
+**Optional: Commit Toolkit Files (add --commit flag)**
 ```bash
-cd /path/to/your/live/project
-/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh --local-only
+cd /path/to/your/project
+/home/jc/CascadeProjects/best-practice/retrofit-tools/smart_install.sh --commit
 ```
 
 **That's it.** Script auto-detects production vs development, asks for confirmation, installs everything safely.
@@ -28,41 +28,49 @@ cd /path/to/your/live/project
 - Checks git safety (uncommitted changes, etc)
 - Auto-detects if production (deployment configs, CI/CD, low activity)
 - Asks: "Proceed?" and "Override mode?"
-- Creates safety checkpoint (git tag) - UNLESS --local-only
-- **Creates `best-practice/` folder** with CLAUDE.md, TASKS.md, quality gate
-- **Adds `best-practice/` to .gitignore** (local-only, never committed)
-- Commits changes - OR skips commits if --local-only
+- **Creates `.claude/` folder** with best-practice.md, TASKS.md, skills, MCP servers
+- **By default: .claude/ is gitignored** (Claude Code ignores it automatically)
+- **With --commit flag: Commits toolkit files** to git repository
+- Creates safety checkpoint (git tag) when committing
 - Shows rollback command
 
 **Takes 2 minutes.**
 
-### The best-practice/ Folder
+### The .claude/ Folder
 
-All toolkit files install to `best-practice/` in your project:
-- **CLAUDE.md**: Project standards and workflow (auto-customized for your project)
+All toolkit files install to `.claude/` in your project:
+- **best-practice.md**: Project standards and workflow (CLAUDE.md renamed)
 - **TASKS.md**: Live task list for granular change tracking (≤30 lines per task)
-- **.ai-validation/**: Quality gate scripts (FULL mode only)
+- **skills/**: 9 toolkit skills + template for project-specific skills
+- **mcp-servers/**: Memory, Quality, Project MCPs with 10 prompts (FULL mode)
+- **quality-gate/**: Quality gate scripts (FULL mode)
+- **commands/**: Slash commands for workflow automation
 
-**Automatic .gitignore**: The folder is automatically excluded from git commits, ensuring toolkit files stay local and never pollute your repository.
+**Automatic .gitignore (DEFAULT)**: Claude Code automatically ignores `.claude/` folder, ensuring toolkit files stay local and never pollute your repository.
 
 ---
 
-### When to Use --local-only
+### When to Use --commit Flag
 
-**Use --local-only for**:
-- Live/production projects
-- Projects you don't want to modify in git
-- Personal development tooling only
-- Testing the toolkit without commitment
+**Default behavior (no flag)**: Toolkit installed locally, NOT committed to git
+- ✅ Files stay local to each developer
+- ✅ No merge conflicts from toolkit updates
+- ✅ Clean git history
+- ✅ Each developer can customize toolkit independently
 
-**What --local-only does**:
-- Installs all toolkit files locally
-- Adds toolkit to .gitignore automatically
-- Does NOT create git commits
-- Does NOT create git tags
-- Files stay local, never pushed to GitHub
+**Use --commit flag when**:
+- You want the entire team to use the same toolkit configuration
+- You want toolkit files version-controlled
+- You want to track toolkit changes in git history
+- You're using toolkit as part of your project documentation
 
-**Perfect for**: Using best practices on live projects without changing the repository.
+**What --commit does**:
+- Installs toolkit files to `.claude/` folder
+- **Commits .claude/ to git repository**
+- Creates git tags for safety checkpoint
+- All team members receive toolkit files via git pull
+
+**Note**: Only use --commit if you specifically want toolkit in version control.
 
 ---
 

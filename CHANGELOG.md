@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed - BREAKING: Local-Only Now Default
+- **smart_install.sh now defaults to LOCAL_ONLY=true** (toolkit files NOT committed)
+- **New --commit flag** to explicitly commit toolkit files to git
+- **Reverses previous behavior**: Old default committed files, now default does NOT commit
+- **Claude Code's gitignore**: .claude/ folder automatically ignored by Claude Code
+- **Benefits**:
+  - ✅ Toolkit files stay local to each developer (no git pollution)
+  - ✅ No merge conflicts from toolkit updates
+  - ✅ Clean git history
+  - ✅ Each developer can customize toolkit independently
+- **Migration**: Projects using old default behavior unaffected (already committed)
+- **Usage**:
+  - Default: `bash smart_install.sh` (local only, NOT committed)
+  - Commit: `bash smart_install.sh --commit` (commits to git)
+
 ### Added - MCP Prompts (Reusable Templates)
 - **10 MCP prompts** across Memory, Quality, and Project MCPs
 - **Project MCP prompts** (4 total):

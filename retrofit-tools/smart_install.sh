@@ -9,16 +9,20 @@ PROJECT_DIR=$(pwd)
 PROJECT_NAME=$(basename "$PROJECT_DIR")
 
 # Parse flags
-LOCAL_ONLY=false
-if [[ "$1" == "--local-only" ]]; then
-    LOCAL_ONLY=true
+# Default: LOCAL_ONLY=true (toolkit files in .claude/ are NOT committed to git)
+# Use --commit flag to explicitly commit toolkit files
+LOCAL_ONLY=true
+if [[ "$1" == "--commit" ]]; then
+    LOCAL_ONLY=false
 fi
 
 clear
 echo "════════════════════════════════════════════════════════"
 echo "  Best Practice Toolkit - Smart Install"
-if [ "$LOCAL_ONLY" = true ]; then
-    echo "  Mode: LOCAL ONLY (no git commits)"
+if [ "$LOCAL_ONLY" = false ]; then
+    echo "  Mode: COMMIT (toolkit files WILL be committed to git)"
+else
+    echo "  Mode: LOCAL ONLY (default - toolkit files NOT committed)"
 fi
 echo "════════════════════════════════════════════════════════"
 echo ""
@@ -350,32 +354,39 @@ def test_placeholder():
 fi
 echo ""
 
-# .claude/ is automatically gitignored by Claude Code
+# .claude/ is automatically gitignored by Claude Code (default behavior)
 echo "[5/5] Verifying .claude/ is gitignored..."
-echo "✅ .claude/ folder automatically ignored by Claude Code"
+echo "✅ .claude/ folder automatically ignored by Claude Code (DEFAULT)"
 echo "   All toolkit files installed locally, won't be committed"
+echo "   Use --commit flag if you want to commit toolkit files to git"
 echo ""
 else
-    echo "[5/5] Committing changes..."
+    # --commit flag was used - commit toolkit files to git
+    echo "[5/5] Committing changes (--commit flag used)..."
     git add -A
 
     if git diff --cached --quiet; then
         echo "✅ No changes (already installed)"
     else
-        git commit -m "feat: install best-practice toolkit ($MODE mode)
+        git commit -m "feat: install best-practice toolkit ($MODE mode) - COMMITTED
 
-- PROJECT_PLAN.md created
-- CLAUDE.md standards
-- MCP servers
-$([ "$MODE" = "FULL" ] && echo "- Quality gate
-- Test structure")
+⚠️  Toolkit files committed to git (--commit flag used)
+.claude/ folder is now tracked in the repository
+
+Installed files:
+- .claude/best-practice.md - Project standards
+- .claude/TASKS.md - Live task list
+- .claude/skills/ - 9 toolkit skills + template
+$([ "$MODE" = "FULL" ] && echo "- .claude/mcp-servers/ - MCP servers with prompts
+- .claude/quality-gate/ - Quality gate scripts")
+- docs/notes/PROJECT_PLAN.md - Project planning
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
 
         git tag -f retrofit-complete 2>/dev/null || true
-        echo "✅ Committed"
+        echo "✅ Committed to git"
     fi
 
     # Restore stash
@@ -512,13 +523,20 @@ $([ "$MODE" = "FULL" ] && echo "  2. Copy MCPs: cp .claude/mcp-servers/*.py ~/.m
 $([ "$MODE" = "FULL" ] && echo "  3. Run: .claude/quality-gate/check_quality.sh")
 echo ""
 if [ "$LOCAL_ONLY" = true ]; then
-    echo "⚠️  Toolkit installed locally only"
-    echo "   Files will NOT be pushed to git"
-    echo "   Added to .gitignore for safety"
+    echo "✅ Toolkit installed locally only (DEFAULT)"
+    echo "   .claude/ folder is gitignored by Claude Code"
+    echo "   Files will NOT be committed or pushed to git"
+    echo "   Each developer can have toolkit locally without affecting others"
     echo ""
     echo "To verify:"
-    echo "  git status    # Should not show toolkit files"
+    echo "  git status    # Should not show .claude/ folder"
+    echo ""
+    echo "To commit toolkit files: re-run with --commit flag"
 else
+    echo "⚠️  Toolkit files COMMITTED to git"
+    echo "   .claude/ folder is now tracked in repository"
+    echo "   All team members will receive toolkit files"
+    echo ""
     echo "Rollback: git reset --hard retrofit-start"
 fi
 echo ""
