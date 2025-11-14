@@ -1,75 +1,21 @@
 # Project Standards - Best Practice Toolkit
 
-> **Purpose**: Enforce changelog, comments, minimal structure - maximum efficiency
-> **Last Updated**: 2025-11-10
+> **Purpose**: Standards and guidelines for AI-assisted development of this project
+> **Last Updated**: 2025-11-05
 > **Applies To**: Claude Code and all AI assistants working on this codebase
 
 ---
 
-## 🎯 Core Objective
+## 📋 Project Overview
 
-**Enforce**: Changelog for every change + Well-commented code + Minimal structure
-**Focus**: Speed and frugality - no bloat
-**No**: Unsolicited reports, verbose docs, or folder sprawl
+**Project**: Best Practice Toolkit for AI-Assisted Development
+**Type**: MCP server system + retrofit methodology
+**Language**: Python 3.10+
+**License**: MIT
 
----
+**Objective**: Enforce excellent coding practices and project delivery through mandatory objective clarification, quality gates, and minimal root structure.
 
-## 💡 Skills-Based Architecture (NEW!)
-
-> **This CLAUDE.md is now complemented by modular Skills for progressive disclosure**
-
-**Claude automatically loads relevant skills based on your task**:
-- Quality standards (when testing or checking code)
-- TDD workflow (when writing tests)
-- Problem-solving (when debugging)
-- Git workflow (when committing)
-- File placement (when creating files)
-- Planning mode (when planning features)
-- MCP usage (when using MCP tools)
-- Context management (when managing tokens)
-
-**Skills location**: `.claude/skills/` folder
-**Benefits**: Load only what's needed (~3KB) vs entire CLAUDE.md (49KB)
-**See**: `.claude/skills/README.md` for details
-
-**Two-tier system**:
-1. **Toolkit skills** (provided) - Universal best practices
-2. **Project skills** (you create) - Your domain-specific patterns
-
-**Create your own skills** using the template at `.claude/skills/template/skill.md`
-
----
-
-## ✅ MANDATORY: Live Task List (TASKS.md)
-
-**Every change must be tracked as a granular task**
-
-### Task Rules
-1. **Read TASKS.md first** - Always check current tasks before coding
-2. **Task size**: ≤30 lines of code, ≤15 minutes
-3. **One task at a time**: Complete, test, commit before next
-4. **Break down large tasks**: If >30 lines, STOP and break into sub-tasks
-5. **Update TASKS.md**: Mark complete when done, add new tasks as discovered
-
-### Workflow (Required)
-```
-1. Check TASKS.md for current task
-2. Implement (≤30 lines max)
-3. Test change works
-4. Update CHANGELOG.md
-5. Run quality gate: bash .ai-validation/check_quality.sh
-6. Commit with descriptive message
-7. Mark task complete in TASKS.md
-8. Move to next task
-```
-
-### Why Granular Tasks?
-- **Safe**: Small changes = easy rollback if issues
-- **Fast**: Each task ships independently
-- **Testable**: Can verify each change works
-- **Clear**: Always know what's next
-
-**If task feels too large**: STOP, break it down in TASKS.md first, then implement smallest piece.
+**Key Principle**: We practice what we preach - this project uses its own best practices.
 
 ---
 

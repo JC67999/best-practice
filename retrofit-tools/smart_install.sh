@@ -323,6 +323,15 @@ cp "$TOOLKIT_DIR/TASKS.md" best-practice/TASKS.md 2>/dev/null || echo '# Live Ta
 - [ ] None' > best-practice/TASKS.md
 echo "✅"
 
+echo -n "Claude Skills (to best-practice/.claude/skills/)... "
+mkdir -p best-practice/.claude/skills
+if [ -d "$TOOLKIT_DIR/.claude/skills" ]; then
+    cp -r "$TOOLKIT_DIR/.claude/skills"/* best-practice/.claude/skills/ 2>/dev/null || true
+    echo "✅ (8 toolkit skills + template)"
+else
+    echo "⚠️  Skills not found in toolkit"
+fi
+
 # Full mode extras in best-practice/
 if [ "$MODE" = "FULL" ]; then
     mkdir -p best-practice/.ai-validation

@@ -6,24 +6,29 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **docs/references/claude-skills-explained.md**: Reference guide explaining Claude's agentic ecosystem (Skills, Projects, MCP, Subagents, Prompts)
-- Comprehensive comparison of when to use each component
-- Practical integration examples and implications for toolkit architecture
-- **docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md**: Comprehensive architecture review comparing our toolkit to Skills model
-- Two-tier skills architecture proposal (toolkit skills + project-specific skills)
-- Token efficiency analysis (78% reduction potential)
-- Detailed migration plan and skill creation templates
-- Project skill examples (e-commerce, ML projects)
-- Integration strategy for smart_install.sh to create skill templates
-- **.claude/skills/** directory structure with 8 skill folders
-- **quality-standards skill** (6.75KB): Code quality, testing, documentation standards
-- **tdd-workflow skill** (7.3KB): Test-driven development cycle (Red-Green-Refactor)
-- **problem-solving skill** (7.8KB): 10 mandatory systematic debugging techniques
-- **git-workflow skill**: Git commits, checkpoints, branch strategy, rollback patterns
+- **docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md**: Comprehensive architecture review comparing our toolkit to Skills model (78% token reduction potential)
+- **.claude/skills/** - Complete Skills-based architecture with two-tier system
+- **8 Toolkit Skills** (28.5KB total vs 49KB monolithic CLAUDE.md):
+  1. **quality-standards** (6.75KB) - Code quality, testing, documentation standards
+  2. **tdd-workflow** (7.3KB) - Test-driven development (Red-Green-Refactor)
+  3. **problem-solving** (7.8KB) - 10 mandatory systematic debugging techniques
+  4. **git-workflow** - Git commits, checkpoints, branch strategy, rollback patterns
+  5. **file-placement** - Minimal root structure and file organization rules
+  6. **planning-mode** - Discovery-first planning (Shift+Tab×2)
+  7. **mcp-usage** - When/how to use Memory, Quality, Project MCPs
+  8. **context-management** - 60% rule and token optimization strategies
+- **Project skill template** - Template for creating domain-specific skills
+- **.claude/skills/README.md** - Complete guide for creating and maintaining skills
+- **smart_install.sh** - Updated to install skills folder to projects
 
-### In Progress
-- Remaining 4 skills: file-placement, planning-mode, mcp-usage, context-management
-- Project skill template and creation guide
-- Smart install integration for skill templates
+### Changed
+- **CLAUDE.md** - Now references Skills for detailed content (deprecation notice added)
+- Skills-based architecture enables:
+  - Progressive disclosure (metadata first, details on demand)
+  - Two-tier system (toolkit + project-specific skills)
+  - Auto-discovery via trigger keywords
+  - Token efficiency (~70% reduction in loaded content)
+  - Projects can create domain-specific skills
 
 ## [1.2.0] - 2025-11-10
 
