@@ -8,6 +8,12 @@ All notable changes to this project will be documented in this file.
 - **docs/references/claude-skills-explained.md**: Reference guide explaining Claude's agentic ecosystem (Skills, Projects, MCP, Subagents, Prompts)
 - Comprehensive comparison of when to use each component
 - Practical integration examples and implications for toolkit architecture
+- **docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md**: Comprehensive architecture review comparing our toolkit to Skills model
+- Two-tier skills architecture proposal (toolkit skills + project-specific skills)
+- Token efficiency analysis (78% reduction potential)
+- Detailed migration plan and skill creation templates
+- Project skill examples (e-commerce, ML projects)
+- Integration strategy for smart_install.sh to create skill templates
 
 ## [1.2.0] - 2025-11-10
 
