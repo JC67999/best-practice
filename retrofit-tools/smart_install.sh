@@ -362,15 +362,55 @@ def test_placeholder():
 fi
 echo ""
 
-# .claude/ is automatically gitignored by Claude Code (default behavior)
-echo "[5/5] Verifying .claude/ is gitignored..."
-echo "✅ .claude/ folder automatically ignored by Claude Code (DEFAULT)"
-echo "   All toolkit files installed locally, won't be committed"
-echo "   Use --commit flag if you want to commit toolkit files to git"
+# Step 5: Handle git behavior based on LOCAL_ONLY flag
+if [ "$LOCAL_ONLY" = true ]; then
+    # Add all toolkit folders to .gitignore (clean git history)
+    echo "[5/5] Adding toolkit folders to .gitignore..."
+
+    # Create or update .gitignore
+    touch .gitignore
+
+# Add toolkit folders if not already present
+add_to_gitignore() {
+    local pattern="$1"
+    if ! grep -qxF "$pattern" .gitignore 2>/dev/null; then
+        echo "$pattern" >> .gitignore
+        echo "  ✅ Added: $pattern"
+    else
+        echo "  ✓  Exists: $pattern"
+    fi
+}
+
+echo ""
+echo "Adding toolkit folders to .gitignore (no git clutter):"
+add_to_gitignore "# Best Practice Toolkit - gitignored"
+add_to_gitignore ".claude/"
+add_to_gitignore "docs/"
+add_to_gitignore "CLAUDE.md"
+if [ "$MODE" = "FULL" ]; then
+    add_to_gitignore "tests/"
+fi
+
+echo ""
+echo "✅ All toolkit files gitignored"
+echo "   Clean git status - no toolkit clutter"
+echo "   Toolkit is local-only, not committed to repository"
 echo ""
 else
-    # --commit flag was used - commit toolkit files to git
-    echo "[5/5] Committing changes (--commit flag used)..."
+    # --commit flag was used - override gitignore and commit toolkit files
+    echo "[5/5] Committing changes (--commit flag overrides gitignore)..."
+
+    # Remove toolkit entries from .gitignore if present
+    if [ -f ".gitignore" ]; then
+        sed -i.bak '/# Best Practice Toolkit - gitignored/d' .gitignore 2>/dev/null || true
+        sed -i.bak '/^\.claude\/$/d' .gitignore 2>/dev/null || true
+        sed -i.bak '/^docs\/$/d' .gitignore 2>/dev/null || true
+        sed -i.bak '/^CLAUDE\.md$/d' .gitignore 2>/dev/null || true
+        sed -i.bak '/^tests\/$/d' .gitignore 2>/dev/null || true
+        rm -f .gitignore.bak
+        echo "  Removed toolkit entries from .gitignore"
+    fi
+
     git add -A
 
     if git diff --cached --quiet; then
@@ -379,15 +419,17 @@ else
         git commit -m "feat: install best-practice toolkit ($MODE mode) - COMMITTED
 
 ⚠️  Toolkit files committed to git (--commit flag used)
-.claude/ folder is now tracked in the repository
+All toolkit folders are tracked in the repository
 
 Installed files:
 - .claude/best-practice.md - Project standards
 - .claude/TASKS.md - Live task list
 - .claude/skills/ - 9 toolkit skills + template
 $([ "$MODE" = "FULL" ] && echo "- .claude/mcp-servers/ - MCP servers with prompts
-- .claude/quality-gate/ - Quality gate scripts")
+- .claude/quality-gate/ - Quality gate scripts
+- tests/ - Test structure")
 - docs/notes/PROJECT_PLAN.md - Project planning
+- CLAUDE.md - Root standards reference
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -516,10 +558,18 @@ fi
 # Check .gitignore (local-only mode)
 if [ "$LOCAL_ONLY" = true ]; then
     echo -n ".gitignore config ... "
-    if grep -q "Best Practice Toolkit" .gitignore 2>/dev/null; then
-        echo "✅"
+    if grep -q ".claude/" .gitignore 2>/dev/null && \
+       grep -q "docs/" .gitignore 2>/dev/null && \
+       grep -q "CLAUDE.md" .gitignore 2>/dev/null; then
+        echo "✅ (all toolkit folders gitignored)"
+        echo "  - .claude/ ✓"
+        echo "  - docs/ ✓"
+        echo "  - CLAUDE.md ✓"
+        if [ "$MODE" = "FULL" ] && grep -q "tests/" .gitignore 2>/dev/null; then
+            echo "  - tests/ ✓"
+        fi
     else
-        echo "❌ NOT CONFIGURED"
+        echo "❌ NOT FULLY CONFIGURED"
         validation_errors=$((validation_errors + 1))
     fi
 fi
@@ -563,18 +613,28 @@ if [ "$LOCAL_ONLY" = true ]; then
 fi
 echo ""
 echo "Next:"
-echo "  1. Review: docs/notes/PROJECT_PLAN.md"
-$([ "$MODE" = "FULL" ] && echo "  2. Copy MCPs: cp .claude/mcp-servers/*.py ~/.mcp-servers/")
-$([ "$MODE" = "FULL" ] && echo "  3. Run: .claude/quality-gate/check_quality.sh")
+echo "  1. Review: docs/notes/PROJECT_PLAN.md (define your project objective)"
+echo "  2. Open in Claude Code: code . (standards automatically loaded)"
+$([ "$MODE" = "FULL" ] && echo "  3. Copy MCPs: cp .claude/mcp-servers/*.py ~/.mcp-servers/")
+$([ "$MODE" = "FULL" ] && echo "  4. Run quality gate: .claude/quality-gate/check_quality.sh")
 echo ""
 if [ "$LOCAL_ONLY" = true ]; then
     echo "✅ Toolkit installed locally only (DEFAULT)"
-    echo "   .claude/ folder is gitignored by Claude Code"
+    echo "   ALL toolkit folders added to .gitignore:"
+    echo "     • .claude/ (standards, skills, MCP servers)"
+    echo "     • docs/ (documentation)"
+    echo "     • CLAUDE.md (root reference)"
+    if [ "$MODE" = "FULL" ]; then
+        echo "     • tests/ (test structure)"
+    fi
+    echo ""
     echo "   Files will NOT be committed or pushed to git"
-    echo "   Each developer can have toolkit locally without affecting others"
+    echo "   Clean git status - no toolkit clutter"
+    echo "   Each developer can have toolkit locally without affecting team"
     echo ""
     echo "To verify:"
-    echo "  git status    # Should not show .claude/ folder"
+    echo "  git status        # Should show: nothing to commit, working tree clean"
+    echo "  cat .gitignore    # Should show toolkit folders listed"
     echo ""
     echo "To commit toolkit files: re-run with --commit flag"
 else

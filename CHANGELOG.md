@@ -4,6 +4,88 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed - Syntax Error in smart_install.sh
+- **Bug**: Missing `if [ "$LOCAL_ONLY" = true ]; then` statement before gitignore section
+- **Impact**: Script failed with "syntax error near unexpected token 'else'" at line 397
+- **Fix**: Added opening `if` statement to properly wrap LOCAL_ONLY conditional logic
+- **Testing**: Successfully injected toolkit into rapid-pm project (LIGHT mode, all folders gitignored)
+- **Result**: Installation completes successfully, all toolkit folders properly gitignored
+- **Verified**:
+  - ✅ .claude/ folder created with all toolkit files
+  - ✅ All toolkit folders added to .gitignore (.claude/, docs/, CLAUDE.md)
+  - ✅ git status shows only .gitignore modified (no toolkit clutter)
+  - ✅ 10 skills installed correctly
+  - ✅ 8 slash commands installed correctly
+
+### Changed - All Toolkit Folders Now Gitignored by Default
+- **smart_install.sh now gitignores ALL toolkit folders** (not just .claude/)
+- **Automatic .gitignore entries**: .claude/, docs/, tests/, CLAUDE.md
+- **Clean git status**: No toolkit clutter in git - everything stays local
+- **Rationale**: Toolkit files don't add value to end product, only to development process
+- **Override**: Use --commit flag to explicitly track toolkit files in git
+- **Benefits**:
+  - ✅ Zero git pollution from toolkit
+  - ✅ Clean git history (only product code)
+  - ✅ No merge conflicts from toolkit updates
+  - ✅ Each developer independent
+  - ✅ Toolkit is pure development tooling (local only)
+- **Breaking change**: Previously only .claude/ was gitignored, now docs/ and tests/ are also gitignored by default
+
+### Added - Injectable Installation Script (inject.sh)
+- **inject.sh**: Run toolkit injection FROM toolkit directory (recommended method)
+- **Usage**: `./inject.sh /path/to/target-project [--commit]`
+- **Better UX**: Colored output, help text, pre-flight validation, error handling
+- **Path validation**: Validates target exists before attempting injection
+- **Returns to toolkit**: After injection completes, returns to original directory
+- **Two installation methods**:
+  - **Method 1 (NEW)**: `cd ~/best-practice && ./inject.sh ~/target` - Run from toolkit
+  - **Method 2 (Classic)**: `cd ~/target && ~/best-practice/retrofit-tools/smart_install.sh` - Run from target
+- **INJECTION_METHODS.md**: Complete comparison of both methods with examples
+- **Benefits**:
+  - ✅ Cleaner workflow (stay in toolkit, inject to multiple projects)
+  - ✅ Built-in help (`./inject.sh --help`)
+  - ✅ Better error messages and validation
+  - ✅ Easier to remember than full path to smart_install.sh
+  - ✅ Both methods produce identical results
+
+### Added - Comprehensive Injection Documentation
+- **INJECTION_GUIDE.md**: Complete 500+ line guide explaining toolkit injection process
+- **INJECTION_QUICK_REF.md**: One-page visual reference for quick lookup
+- **GITIGNORE_BEHAVIOR.md**: Detailed explanation of why all folders are gitignored
+- **Explains injection process**: One command installation, folder structure created, usage workflow
+- **Two mode comparison**: LIGHT (production-safe) vs FULL (complete retrofit)
+- **Git behavior**: Local-only (default, gitignored) vs --commit (tracked in git)
+- **Before/After examples**: Visual diagrams showing folder structure changes
+- **Safety features**: Git checkpoints, non-destructive installation, validation
+- **Usage workflows**: How projects use injected toolkit (auto-discovery, skills, MCP, quality gates)
+- **Team scenarios**: Examples for production apps, new projects, team projects
+- **Decision trees**: Visual guides for choosing mode and git strategy
+- **Troubleshooting**: Common issues and solutions
+- **Benefits**:
+  - ✅ Clear understanding of injection process for new users
+  - ✅ Visual before/after comparisons
+  - ✅ Quick reference for experienced users
+  - ✅ Answers "what folders get created" and "how do I use it"
+
+### Added - Self-Learning System ACTIVATED
+- **Learning MCP now configured and operational** in Claude Code
+- **Auto-update script**: `auto_update_toolkit.sh` for scheduled scans
+- **Automation support**: Daily cron job setup (runs at 2 AM)
+- **Status monitoring**: `--status` flag to check learning system health
+- **Updated README**: Comprehensive Learning MCP documentation added
+- **Claude Code config**: Learning MCP added to `~/.config/claude/claude_desktop_config.json`
+- **Installed MCPs**: Updated `~/.mcp-servers/` with latest toolkit versions (includes Learning MCP)
+- **Benefits**:
+  - ✅ Toolkit can now self-update from Anthropic resources
+  - ✅ Automatic scanning of skills, cookbooks, quickstarts, org repos
+  - ✅ Scheduled automation for hands-off updates
+  - ✅ Learning data stored in `~/.claude_memory/learnings/`
+  - ✅ Ready to scan 54 Anthropic repositories + 28 cookbooks + 15 skills
+- **Usage**:
+  - Manual: `/mcp__learning__scan_all_resources` in Claude Code
+  - Automated: `./auto_update_toolkit.sh --setup` (daily at 2 AM)
+  - Status: `./auto_update_toolkit.sh --status`
+
 ### Added - Comprehensive User Guide
 - **USER_GUIDE.md**: Complete 500+ line guide for using the toolkit (`.claude/USER_GUIDE.md`)
 - **10 major sections**: What is it, Quick Start, Components, Workflows, Tools, Skills, Learning, Commands, Use Cases, Troubleshooting
