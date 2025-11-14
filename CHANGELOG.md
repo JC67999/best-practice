@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **docs/references/claude-skills-explained.md**: Reference guide explaining Claude's agentic ecosystem (Skills, Projects, MCP, Subagents, Prompts)
+- Comprehensive comparison of when to use each component
+- Practical integration examples and implications for toolkit architecture
+
 ## [1.2.0] - 2025-11-10
 
 ### Added
@@ -21,6 +28,8 @@ All notable changes to this project will be documented in this file.
 ### Investigated
 - **Skills vs MCP tools**: Confirmed current architecture (8 slash commands + 27 MCP tools) is optimal
 - Decision: Do NOT add Skills - would add complexity without value given efficiency focus
+- **Kimi K2 integration**: Evaluated dual-model workflow (Claude + Kimi K2 for QA verification)
+- Decision: Do NOT integrate Kimi K2 - violates efficiency-first objective, adds complexity without solving actual problems, contradicts "minimal enforcement" goal
 
 ### Verified
 - **Successful installation to rapid-pm**: LIGHT mode installed successfully
@@ -28,6 +37,11 @@ All notable changes to this project will be documented in this file.
 - Added to .gitignore: best-practice/ folder excluded from git
 - Git commit: 9cbbb7f "feat: install best-practice toolkit (LIGHT mode)"
 - Status: Clean working tree, ready for use
+- **Successful installation to ai-task-optimisation-MVP**: FULL mode installed successfully
+- Files created: best-practice/CLAUDE.md (49.6KB), best-practice/TASKS.md (2.5KB), best-practice/.ai-validation/check_quality.sh
+- MCP servers: 8 files copied (memory_mcp.py, project_mcp.py, quality_mcp.py, learning_mcp.py, autonomous_daemon.py, code_review_daemon.py, learning_daemon.py, __init__.py)
+- Added to .gitignore: best-practice/ folder excluded from tracking
+- Status: Toolkit ready for use (local development only)
 
 ### Documentation
 - **README.md**: Added best-practice/ folder explanation (11 lines)
