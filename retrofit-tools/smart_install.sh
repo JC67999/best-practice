@@ -182,23 +182,12 @@ fi
 # Create directories
 echo "[1/5] Creating structure..."
 mkdir -p docs/{design,guides,analysis,references,notes}
-mkdir -p best-practice
+# Create .claude/ directory (automatically gitignored by Claude Code)
+mkdir -p .claude
 if [ "$MODE" = "FULL" ]; then
     mkdir -p tests
 fi
 echo "✅ Done"
-echo ""
-
-# Add best-practice/ to .gitignore
-if [ -f ".gitignore" ]; then
-    if ! grep -q "best-practice/" .gitignore; then
-        cat "$TOOLKIT_DIR/retrofit-tools/gitignore-template.txt" >> .gitignore
-        echo "✅ Added best-practice/ to .gitignore"
-    fi
-else
-    cp "$TOOLKIT_DIR/retrofit-tools/gitignore-template.txt" .gitignore
-    echo "✅ Created .gitignore with best-practice/ excluded"
-fi
 echo ""
 
 # Organize docs
@@ -300,16 +289,17 @@ fi
 echo ""
 
 # CLAUDE.md and files
-echo "[4/5] Installing toolkit files..."
+echo "[4/5] Installing toolkit files to .claude/..."
 
-# Install toolkit files to best-practice/ (local only)
-echo -n "CLAUDE.md (to best-practice/)... "
-cp "$TOOLKIT_DIR/CLAUDE.md" best-practice/CLAUDE.md
-sed -i "s/Best Practice Toolkit/$PROJECT_NAME/g" best-practice/CLAUDE.md 2>/dev/null || true
+# Install toolkit files to .claude/ (automatically gitignored by Claude Code)
+echo -n "best-practice.md (to .claude/)... "
+mkdir -p .claude
+cp "$TOOLKIT_DIR/CLAUDE.md" .claude/best-practice.md
+sed -i "s/Best Practice Toolkit/$PROJECT_NAME Best Practice/g" .claude/best-practice.md 2>/dev/null || true
 echo "✅"
 
-echo -n "TASKS.md (to best-practice/)... "
-cp "$TOOLKIT_DIR/TASKS.md" best-practice/TASKS.md 2>/dev/null || echo '# Live Task List
+echo -n "TASKS.md (to .claude/)... "
+cp "$TOOLKIT_DIR/TASKS.md" .claude/TASKS.md 2>/dev/null || echo '# Live Task List
 
 **Purpose**: Granular, testable tasks
 **Rule**: Each task ≤30 lines, ≤15 min
@@ -320,24 +310,34 @@ cp "$TOOLKIT_DIR/TASKS.md" best-practice/TASKS.md 2>/dev/null || echo '# Live Ta
 - [ ] None
 
 ### Pending
-- [ ] None' > best-practice/TASKS.md
+- [ ] None' > .claude/TASKS.md
 echo "✅"
 
-echo -n "Claude Skills (to best-practice/.claude/skills/)... "
-mkdir -p best-practice/.claude/skills
+echo -n "Claude Skills (to .claude/skills/)... "
+mkdir -p .claude/skills
 if [ -d "$TOOLKIT_DIR/.claude/skills" ]; then
-    cp -r "$TOOLKIT_DIR/.claude/skills"/* best-practice/.claude/skills/ 2>/dev/null || true
-    echo "✅ (8 toolkit skills + template)"
+    cp -r "$TOOLKIT_DIR/.claude/skills"/* .claude/skills/ 2>/dev/null || true
+    echo "✅ (9 toolkit skills + template)"
 else
     echo "⚠️  Skills not found in toolkit"
 fi
 
-# Full mode extras in best-practice/
+# Full mode extras in .claude/
 if [ "$MODE" = "FULL" ]; then
-    mkdir -p best-practice/.ai-validation
-    cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" best-practice/.ai-validation/ 2>/dev/null || true
-    chmod +x best-practice/.ai-validation/check_quality.sh 2>/dev/null || true
-    echo "✅ Quality gate (best-practice/.ai-validation/)"
+    echo -n "Quality gate (to .claude/quality-gate/)... "
+    mkdir -p .claude/quality-gate
+    cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" .claude/quality-gate/ 2>/dev/null || true
+    chmod +x .claude/quality-gate/check_quality.sh 2>/dev/null || true
+    echo "✅"
+
+    echo -n "MCP servers (to .claude/mcp-servers/)... "
+    mkdir -p .claude/mcp-servers
+    if [ -d "$TOOLKIT_DIR/mcp-servers" ]; then
+        cp -r "$TOOLKIT_DIR/mcp-servers"/* .claude/mcp-servers/ 2>/dev/null || true
+        echo "✅ (Memory, Quality, Project MCPs)"
+    else
+        echo "⚠️  MCP servers not found"
+    fi
 
     if [ ! -d "tests" ]; then
         mkdir -p tests
@@ -350,33 +350,11 @@ def test_placeholder():
 fi
 echo ""
 
-# Commit or add to .gitignore
-if [ "$LOCAL_ONLY" = true ]; then
-    echo "[5/5] Adding to .gitignore..."
-
-    # Check if .gitignore exists, create if not
-    if [ ! -f ".gitignore" ]; then
-        touch .gitignore
-    fi
-
-    # Add toolkit files to .gitignore (only if not already there)
-    if ! grep -q "Best Practice Toolkit" .gitignore 2>/dev/null; then
-        cat >> .gitignore <<'GITIGNORE_EOF'
-
-# Best Practice Toolkit (local development only)
-CLAUDE.md
-.claude/
-mcp-servers/
-docs/notes/PROJECT_PLAN.md
-.ai-validation/
-GITIGNORE_EOF
-        echo "✅ Added toolkit to .gitignore"
-    else
-        echo "✅ Toolkit already in .gitignore"
-    fi
-
-    echo ""
-    echo "⚠️  Files installed locally but NOT tracked by git"
+# .claude/ is automatically gitignored by Claude Code
+echo "[5/5] Verifying .claude/ is gitignored..."
+echo "✅ .claude/ folder automatically ignored by Claude Code"
+echo "   All toolkit files installed locally, won't be committed"
+echo ""
 else
     echo "[5/5] Committing changes..."
     git add -A

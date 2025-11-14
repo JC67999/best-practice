@@ -1,6 +1,17 @@
 # Claude Skills - Toolkit and Project-Specific Knowledge
 
+**Location**: `.claude/skills/` (automatically gitignored by Claude Code)
 **Purpose**: Progressive disclosure of domain knowledge for token efficiency and modular maintenance
+
+---
+
+## 🎯 Important: Gitignored by Default
+
+All toolkit files are installed to `.claude/` folder which is **automatically gitignored by Claude Code**. This means:
+- ✅ Toolkit files won't pollute your git commits
+- ✅ Each developer can have toolkit locally without affecting others
+- ✅ No "best-practice" folder in your repo
+- ✅ Clean project structure
 
 ---
 
@@ -330,12 +341,33 @@ Result:
 
 ---
 
+## Installation
+
+Skills are installed via `smart_install.sh` to `.claude/skills/`:
+```bash
+bash retrofit-tools/smart_install.sh [LIGHT|FULL]
+```
+
+**Installed structure**:
+```.claude/
+├── best-practice.md    # Project standards (renamed from CLAUDE.md)
+├── TASKS.md            # Live task list
+├── skills/             # This folder - 9 toolkit skills + template
+├── commands/           # Slash commands
+├── quality-gate/       # Quality gate scripts (FULL mode)
+└── mcp-servers/        # MCP servers (FULL mode)
+```
+
+All automatically gitignored - won't appear in your commits!
+
+---
+
 ## Resources
 
-- **Architecture Review**: See `/docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md`
-- **Skills Explained**: See `/docs/references/claude-skills-explained.md`
+- **Architecture Review**: See toolkit's `/docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md`
+- **Skills Explained**: See toolkit's `/docs/references/claude-skills-explained.md`
 - **Template**: Use `.claude/skills/template/skill.md`
-- **CLAUDE.md**: Full project standards (references skills)
+- **Standards**: `.claude/best-practice.md` (full project standards)
 
 ---
 

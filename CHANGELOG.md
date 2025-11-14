@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed - BREAKING: New Installation Structure
+- **ALL toolkit files now install to `.claude/` folder** (automatically gitignored by Claude Code)
+- **CLAUDE.md renamed to best-practice.md** when installed to projects
+- **No more `best-practice/` folder** - everything in `.claude/` which is already gitignored
+- **smart_install.sh completely rewritten** to use `.claude/` structure
+- **Quality gate moved** from `.ai-validation/` to `.claude/quality-gate/`
+- **MCP servers moved** to `.claude/mcp-servers/` (FULL mode only)
+- **TASKS.md moved** to `.claude/TASKS.md`
+
+### Benefits of New Structure
+- ✅ **Completely gitignored** - No toolkit files in your commits
+- ✅ **No .gitignore pollution** - `.claude/` already ignored by Claude Code
+- ✅ **Clean project root** - No `best-practice/` folder
+- ✅ **Each developer independent** - Toolkit files local only
+- ✅ **No merge conflicts** - Toolkit changes don't affect team
+- ✅ **Single location** - Everything in `.claude/`
+
+### Migration Guide
+For projects with old `best-practice/` folder:
+1. Remove old folder: `rm -rf best-practice/`
+2. Re-run installer: `bash .../smart_install.sh`
+3. New structure installs to `.claude/`
+4. Old .gitignore entries can be cleaned up
+
 ### Added
 - **docs/references/claude-skills-explained.md**: Reference guide explaining Claude's agentic ecosystem (Skills, Projects, MCP, Subagents, Prompts)
 - **docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md**: Comprehensive architecture review comparing our toolkit to Skills model (78% token reduction potential)

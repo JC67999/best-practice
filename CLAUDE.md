@@ -53,13 +53,13 @@
 
 ### Workflow (Required)
 ```
-1. Check TASKS.md for current task
+1. Check .claude/TASKS.md for current task
 2. Implement (≤30 lines max)
 3. Test change works
 4. Update CHANGELOG.md
-5. Run quality gate: bash .ai-validation/check_quality.sh
+5. Run quality gate: bash .claude/quality-gate/check_quality.sh
 6. Commit with descriptive message
-7. Mark task complete in TASKS.md
+7. Mark task complete in .claude/TASKS.md
 8. Move to next task
 ```
 
@@ -989,8 +989,13 @@ Track these to improve:
 
 **Configuration**:
 ```
-/.claude/            - Claude Code configuration
-/.ai-validation/     - Quality gate scripts
+/.claude/            - Claude Code configuration (gitignored)
+    ├── skills/      - Toolkit and project skills
+    ├── commands/    - Slash commands
+    ├── mcp-servers/ - MCP server implementations (FULL mode)
+    ├── quality-gate/ - Quality gate scripts (FULL mode)
+    ├── best-practice.md - Project standards
+    └── TASKS.md     - Live task list
 /.git/               - Git repository
 ```
 
@@ -1039,7 +1044,7 @@ Review PROJECT_PLAN.md → Current Sprint section to understand current work.
 **MANDATORY Before Any Commit**:
 ```bash
 # Run quality gate
-cd .ai-validation && bash check_quality.sh
+bash .claude/quality-gate/check_quality.sh
 
 # Must see:
 # ✅ All tests pass
@@ -1868,12 +1873,8 @@ def process_data(
 
 **Parallelization**:
 ```bash
-# Run checks in parallel
-pytest & \
-ruff check & \
-mypy & \
-bandit -r mcp-servers/ &
-wait
+# Run quality gate (handles all checks)
+bash .claude/quality-gate/check_quality.sh
 ```
 
 ---
@@ -1925,6 +1926,9 @@ def validate_project_path(path: str) -> bool:
 **Review before starting work**:
 - docs/design/MCP_IMPLEMENTATION_APPROACH.md - System design
 - docs/guides/RETROFIT_METHODOLOGY.md - Retrofit process
+- .claude/best-practice.md - This file (injected standards)
+
+**Note**: When toolkit is injected into your project, all standards are in `.claude/` folder which is automatically gitignored.
 
 ---
 
@@ -1933,12 +1937,12 @@ def validate_project_path(path: str) -> bool:
 Before committing ANY code:
 
 - [ ] All tests pass (`pytest tests/ -v`)
-- [ ] No linting errors (`ruff check mcp-servers/`)
-- [ ] No type errors (`mypy mcp-servers/`)
-- [ ] No security issues (`bandit -r mcp-servers/`)
+- [ ] No linting errors (run quality gate)
+- [ ] No type errors (run quality gate)
+- [ ] No security issues (run quality gate)
 - [ ] Structure compliance (≤5 root folders)
 - [ ] Documentation updated (if API changed)
-- [ ] PROJECT_PLAN.md updated (if status changed)
+- [ ] docs/notes/PROJECT_PLAN.md updated (if status changed)
 - [ ] Commit message follows format
 - [ ] Changes are ≤30 lines (or checkpointed)
 
