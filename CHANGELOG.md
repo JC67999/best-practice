@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 - **docs/references/claude-skills-explained.md**: Reference guide explaining Claude's agentic ecosystem (Skills, Projects, MCP, Subagents, Prompts)
 - **docs/analysis/ARCHITECTURE_REVIEW_SKILLS_MODEL.md**: Comprehensive architecture review comparing our toolkit to Skills model (78% token reduction potential)
 - **.claude/skills/** - Complete Skills-based architecture with two-tier system
-- **8 Toolkit Skills** (28.5KB total vs 49KB monolithic CLAUDE.md):
+- **9 Toolkit Skills** (28.5KB total vs 49KB monolithic CLAUDE.md):
   1. **quality-standards** (6.75KB) - Code quality, testing, documentation standards
   2. **tdd-workflow** (7.3KB) - Test-driven development (Red-Green-Refactor)
   3. **problem-solving** (7.8KB) - 10 mandatory systematic debugging techniques
@@ -17,6 +17,13 @@ All notable changes to this project will be documented in this file.
   6. **planning-mode** - Discovery-first planning (Shift+Tab×2)
   7. **mcp-usage** - When/how to use Memory, Quality, Project MCPs
   8. **context-management** - 60% rule and token optimization strategies
+  9. **domain-learning** - Autonomous research and knowledge base building (NEW!)
+- **Domain Knowledge Base** - Autonomous self-learning system
+  - `docs/references/domain-knowledge/` - Stores researched topics
+  - `index.md` - Master index of all researched topics
+  - Auto-fetches documentation when encountering unfamiliar concepts
+  - Builds project-specific expertise over time
+  - Example: AI optimization knowledge (transformer attention, quantization, etc.)
 - **Project skill template** - Template for creating domain-specific skills
 - **.claude/skills/README.md** - Complete guide for creating and maintaining skills
 - **smart_install.sh** - Updated to install skills folder to projects
