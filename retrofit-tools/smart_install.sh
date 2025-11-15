@@ -4,6 +4,20 @@
 set -e
 set -o pipefail
 
+# Parse arguments
+AUTO_YES=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -y|--yes)
+            AUTO_YES=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
 TOOLKIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJECT_DIR=$(pwd)
 PROJECT_NAME=$(basename "$PROJECT_DIR")
@@ -75,7 +89,7 @@ reasons=()
 # Low commit activity = stable
 echo -n "  Checking git activity... "
 if [ -d ".git" ]; then
-    recent_commits=$(timeout 5 git log --since="30 days ago" --oneline 2>/dev/null | wc -l || echo "0")
+    recent_commits=$(timeout 5 git log --since="30 days ago" --oneline 2>/dev/null | wc -l | tr -d ' \n' || echo "0")
     echo "$recent_commits commits/30d"
     if [ "$recent_commits" = "0" ] || [ "$recent_commits" -lt 5 ]; then
         production_score=$((production_score + 1))
@@ -141,27 +155,32 @@ echo "────────────────────────�
 echo ""
 
 # Confirm
-read -p "Proceed? (Y/n): " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Nn]$ ]]; then
-    echo "Cancelled"
-    exit 0
-fi
-
-# Override option
-read -p "Override detected mode? (y/N): " -n 1 -r
-echo ""
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+if [ "$AUTO_YES" = false ]; then
+    read -p "Proceed? (Y/n): " -n 1 -r
     echo ""
-    echo "1) LIGHT - Production safe"
-    echo "2) FULL  - Complete retrofit"
-    read -p "Choice: " -n 1 -r choice
-    echo ""
-    if [ "$choice" = "2" ]; then
-        MODE="FULL"
-    else
-        MODE="LIGHT"
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        echo "Cancelled"
+        exit 0
     fi
+
+    # Override option
+    read -p "Override detected mode? (y/N): " -n 1 -r
+    echo ""
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "1) LIGHT - Production safe"
+        echo "2) FULL  - Complete retrofit"
+        read -p "Choice: " -n 1 -r choice
+        echo ""
+        if [ "$choice" = "2" ]; then
+            MODE="FULL"
+        else
+            MODE="LIGHT"
+        fi
+    fi
+else
+    echo "Auto-confirmed (--yes flag)"
+    echo ""
 fi
 
 echo ""
