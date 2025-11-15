@@ -138,7 +138,34 @@ mcp__memory__save_session_summary
 - `identify_scope_creep` - Find non-essential tasks
 - `create_task_breakdown` - Break project into tasks
 
-**See** `.claude/skills/mcp-usage/` for detailed workflows
+**Learning MCP** (FULL mode only):
+- `detect_project_objective` - Read PROJECT_PLAN.md to understand domain
+- `map_objective_to_domains` - Map objective to research domains (PM, optimization, docs, etc.)
+- `research_domain_topic` - Generate domain-specific research plan
+- `store_learning` - Save research to `docs/references/domain-knowledge/`
+- `get_learnings` - Retrieve project-specific knowledge base
+
+**How Learning MCP Works**:
+- **Project-Objective-Driven**: Adapts to each project's domain
+- **Examples**:
+  - rapid-pm → researches PM methodologies, Scrum, Agile, tools
+  - ai-task-optimisation-MVP → researches optimization algorithms, solvers
+  - document-generator → researches doc methodologies, templates
+- **Storage**: Saves to project's `docs/references/domain-knowledge/{domain}/`
+- **Dynamic**: Uses WebFetch for real-time data, no hardcoded lists
+
+**Usage Example**:
+```
+1. mcp__learning__detect_project_objective(project_path="/path/to/project")
+2. mcp__learning__map_objective_to_domains(objective_data)
+3. mcp__learning__research_domain_topic(topic="sprint planning")
+   → Returns domain-specific search queries and sources
+4. Use WebSearch/WebFetch with returned queries
+5. mcp__learning__store_learning(topic, learning_data, project_path)
+   → Saves to docs/references/domain-knowledge/project_management/
+```
+
+**See** `.claude/skills/domain-learning/` for detailed workflows
 
 ---
 
