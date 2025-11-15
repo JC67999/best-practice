@@ -334,13 +334,47 @@ else
     echo "⚠️  Skills not found in toolkit"
 fi
 
+echo -n "Slash Commands (to .claude/commands/)... "
+mkdir -p .claude/commands
+if [ -d "$TOOLKIT_DIR/.claude/commands" ]; then
+    cp -r "$TOOLKIT_DIR/.claude/commands"/* .claude/commands/ 2>/dev/null || true
+    cmd_count=$(ls -1 .claude/commands/*.md 2>/dev/null | wc -l)
+    echo "✅ ($cmd_count commands)"
+else
+    echo "⚠️  Commands not found in toolkit"
+fi
+
+echo -n "Quick Reference (to .claude/)... "
+if [ -f "$TOOLKIT_DIR/.claude/QUICK_REFERENCE.md" ]; then
+    cp "$TOOLKIT_DIR/.claude/QUICK_REFERENCE.md" .claude/QUICK_REFERENCE.md
+    echo "✅"
+else
+    echo "⚠️  Not found"
+fi
+
+echo -n "Troubleshooting Guide (to .claude/)... "
+if [ -f "$TOOLKIT_DIR/.claude/TROUBLESHOOTING.md" ]; then
+    cp "$TOOLKIT_DIR/.claude/TROUBLESHOOTING.md" .claude/TROUBLESHOOTING.md
+    echo "✅"
+else
+    echo "⚠️  Not found"
+fi
+
 # Full mode extras in .claude/
 if [ "$MODE" = "FULL" ]; then
     echo -n "Quality gate (to .claude/quality-gate/)... "
     mkdir -p .claude/quality-gate
-    cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" .claude/quality-gate/ 2>/dev/null || true
-    chmod +x .claude/quality-gate/check_quality.sh 2>/dev/null || true
-    echo "✅"
+    if [ -f "$TOOLKIT_DIR/.claude/quality-gate/check_quality.sh" ]; then
+        cp "$TOOLKIT_DIR/.claude/quality-gate/check_quality.sh" .claude/quality-gate/
+        chmod +x .claude/quality-gate/check_quality.sh 2>/dev/null || true
+        echo "✅"
+    elif [ -f "$TOOLKIT_DIR/.ai-validation/check_quality.sh" ]; then
+        cp "$TOOLKIT_DIR/.ai-validation/check_quality.sh" .claude/quality-gate/
+        chmod +x .claude/quality-gate/check_quality.sh 2>/dev/null || true
+        echo "✅ (from .ai-validation)"
+    else
+        echo "⚠️  Not found"
+    fi
 
     echo -n "MCP servers (to .claude/mcp-servers/)... "
     mkdir -p .claude/mcp-servers
@@ -349,6 +383,53 @@ if [ "$MODE" = "FULL" ]; then
         echo "✅ (Memory, Quality, Project MCPs)"
     else
         echo "⚠️  MCP servers not found"
+    fi
+
+    echo -n "Git Hooks (to .claude/hooks/)... "
+    mkdir -p .claude/hooks
+    if [ -d "$TOOLKIT_DIR/.claude/hooks" ]; then
+        cp -r "$TOOLKIT_DIR/.claude/hooks"/* .claude/hooks/ 2>/dev/null || true
+        chmod +x .claude/hooks/*.sh 2>/dev/null || true
+        chmod +x .claude/hooks/pre-commit .claude/hooks/commit-msg .claude/hooks/pre-push 2>/dev/null || true
+        echo "✅ (pre-commit, commit-msg, pre-push)"
+    else
+        echo "⚠️  Hooks not found"
+    fi
+
+    echo -n "Templates (to .claude/templates/)... "
+    mkdir -p .claude/templates
+    if [ -d "$TOOLKIT_DIR/.claude/templates" ]; then
+        cp -r "$TOOLKIT_DIR/.claude/templates"/* .claude/templates/ 2>/dev/null || true
+        echo "✅ (CI/CD, project configs, README)"
+    else
+        echo "⚠️  Templates not found"
+    fi
+
+    echo -n "Init Wizard (to .claude/)... "
+    if [ -f "$TOOLKIT_DIR/.claude/init-wizard.sh" ]; then
+        cp "$TOOLKIT_DIR/.claude/init-wizard.sh" .claude/init-wizard.sh
+        chmod +x .claude/init-wizard.sh 2>/dev/null || true
+        echo "✅"
+    else
+        echo "⚠️  Not found"
+    fi
+
+    echo -n "Uninstall Script (to .claude/)... "
+    if [ -f "$TOOLKIT_DIR/.claude/uninstall.sh" ]; then
+        cp "$TOOLKIT_DIR/.claude/uninstall.sh" .claude/uninstall.sh
+        chmod +x .claude/uninstall.sh 2>/dev/null || true
+        echo "✅"
+    else
+        echo "⚠️  Not found"
+    fi
+
+    echo -n "Git Verification Script (to .claude/)... "
+    if [ -f "$TOOLKIT_DIR/.claude/verify-git-clean.sh" ]; then
+        cp "$TOOLKIT_DIR/.claude/verify-git-clean.sh" .claude/verify-git-clean.sh
+        chmod +x .claude/verify-git-clean.sh 2>/dev/null || true
+        echo "✅"
+    else
+        echo "⚠️  Not found"
     fi
 
     if [ ! -d "tests" ]; then
