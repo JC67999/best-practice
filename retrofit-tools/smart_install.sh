@@ -383,10 +383,9 @@ add_to_gitignore() {
 
 echo ""
 echo "Adding toolkit folders to .gitignore (no git clutter):"
-add_to_gitignore "# Best Practice Toolkit - gitignored"
+add_to_gitignore "# Best Practice Toolkit - gitignored (local dev tool only)"
 add_to_gitignore ".claude/"
 add_to_gitignore "docs/"
-add_to_gitignore "CLAUDE.md"
 if [ "$MODE" = "FULL" ]; then
     add_to_gitignore "tests/"
 fi
@@ -425,11 +424,14 @@ Installed files:
 - .claude/best-practice.md - Project standards
 - .claude/TASKS.md - Live task list
 - .claude/skills/ - 9 toolkit skills + template
+- .claude/hooks/ - Git hooks (pre-commit, commit-msg, pre-push)
+- .claude/quality-gate/ - Language-aware quality gate
+- .claude/templates/ - Project type configs + CI/CD
 $([ "$MODE" = "FULL" ] && echo "- .claude/mcp-servers/ - MCP servers with prompts
-- .claude/quality-gate/ - Quality gate scripts
 - tests/ - Test structure")
 - docs/notes/PROJECT_PLAN.md - Project planning
-- CLAUDE.md - Root standards reference
+
+All files in .claude/ folder (nothing in project root)
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
@@ -455,10 +457,10 @@ echo ""
 validation_errors=0
 validation_warnings=0
 
-# Check CLAUDE.md
-echo -n "CLAUDE.md ... "
-if [ -f "CLAUDE.md" ]; then
-    size=$(wc -c < "CLAUDE.md")
+# Check .claude/best-practice.md
+echo -n ".claude/best-practice.md ... "
+if [ -f ".claude/best-practice.md" ]; then
+    size=$(wc -c < ".claude/best-practice.md")
     echo "✅ ($size bytes)"
 else
     echo "❌ MISSING"

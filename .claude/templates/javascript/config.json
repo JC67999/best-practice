@@ -1,0 +1,25 @@
+{
+  "language": "javascript",
+  "quality_tools": {
+    "linter": "eslint",
+    "type_checker": "typescript",
+    "formatter": "prettier",
+    "security": "npm audit"
+  },
+  "testing": {
+    "framework": "jest",
+    "coverage_tool": "jest",
+    "min_coverage": 80
+  },
+  "standards": {
+    "style_guide": "Airbnb",
+    "max_line_length": 100,
+    "use_typescript": true
+  },
+  "quality_gate_commands": [
+    "npm run lint",
+    "npm run type-check",
+    "npm test -- --coverage",
+    "npm audit --audit-level=moderate"
+  ]
+}

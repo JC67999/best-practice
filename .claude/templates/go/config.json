@@ -1,0 +1,24 @@
+{
+  "language": "go",
+  "quality_tools": {
+    "linter": "golangci-lint",
+    "formatter": "gofmt",
+    "security": "gosec"
+  },
+  "testing": {
+    "framework": "go test",
+    "coverage_tool": "go test -cover",
+    "min_coverage": 80
+  },
+  "standards": {
+    "style_guide": "Effective Go",
+    "max_line_length": 100,
+    "use_modules": true
+  },
+  "quality_gate_commands": [
+    "gofmt -l .",
+    "golangci-lint run",
+    "go test -race -cover ./...",
+    "gosec ./..."
+  ]
+}

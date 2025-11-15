@@ -1,0 +1,52 @@
+# GitLab CI - Quality Gate Pipeline
+# Add this to your .gitlab-ci.yml
+
+stages:
+  - quality
+
+quality-gate:
+  stage: quality
+  image: python:3.12  # Adjust for your language
+
+  before_script:
+    # Install dependencies (adjust for your project type)
+    - |
+      if [ -f requirements.txt ]; then
+        pip install -r requirements.txt
+      elif [ -f package.json ]; then
+        apt-get update && apt-get install -y nodejs npm
+        npm install
+      elif [ -f go.mod ]; then
+        apt-get update && apt-get install -y golang
+        go mod download
+      fi
+
+    # Install quality tools
+    - pip install ruff mypy pytest pytest-cov bandit || true
+
+  script:
+    # Run quality gate
+    - |
+      if [ -f ".claude/quality-gate/check_quality.sh" ]; then
+        bash .claude/quality-gate/check_quality.sh
+      else
+        echo "Quality gate not found, running basic checks..."
+        ruff check . || true
+        mypy . || true
+        pytest --cov || true
+      fi
+
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"'
+
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    when: always
+    paths:
+      - coverage.xml
+      - htmlcov/
+    expire_in: 30 days

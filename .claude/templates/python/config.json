@@ -1,0 +1,25 @@
+{
+  "language": "python",
+  "quality_tools": {
+    "linter": "ruff",
+    "type_checker": "mypy",
+    "formatter": "black",
+    "security": "bandit"
+  },
+  "testing": {
+    "framework": "pytest",
+    "coverage_tool": "pytest-cov",
+    "min_coverage": 80
+  },
+  "standards": {
+    "style_guide": "PEP 8",
+    "max_line_length": 100,
+    "docstring_style": "Google"
+  },
+  "quality_gate_commands": [
+    "ruff check .",
+    "mypy .",
+    "pytest --cov --cov-report=term-missing",
+    "bandit -r ."
+  ]
+}

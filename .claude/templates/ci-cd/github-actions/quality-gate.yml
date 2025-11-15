@@ -1,0 +1,63 @@
+# GitHub Actions - Quality Gate Workflow
+# Auto-runs on pull requests and pushes to main
+
+name: Quality Gate
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up environment
+      uses: actions/setup-python@v5  # Adjust for your language
+      with:
+        python-version: '3.12'
+
+    # Install dependencies (adjust for your project type)
+    - name: Install dependencies
+      run: |
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        elif [ -f package.json ]; then
+          npm install
+        elif [ -f go.mod ]; then
+          go mod download
+        fi
+
+    # Install quality tools
+    - name: Install quality tools
+      run: |
+        # Python
+        pip install ruff mypy pytest pytest-cov bandit || true
+        # JavaScript (add if needed)
+        # npm install -g eslint
+        # Go (add if needed)
+        # go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+    # Run quality gate
+    - name: Run Quality Gate
+      run: |
+        if [ -f ".claude/quality-gate/check_quality.sh" ]; then
+          bash .claude/quality-gate/check_quality.sh
+        else
+          echo "Quality gate not found, running basic checks..."
+          # Fallback checks
+          if command -v ruff &> /dev/null; then ruff check .; fi
+          if command -v pytest &> /dev/null; then pytest --cov; fi
+        fi
+
+    # Upload coverage (optional)
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      if: success()
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false

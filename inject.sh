@@ -182,15 +182,66 @@ if [ $INSTALL_EXIT_CODE -eq 0 ]; then
     echo -e "${GREEN}Successfully injected toolkit into:${NC}"
     echo "  $TARGET_PROJECT_ABS"
     echo ""
+
+    # Offer to run init wizard
+    echo "────────────────────────────────────────────────────────"
+    echo -e "${YELLOW}Would you like to run the initialization wizard?${NC}"
+    echo ""
+    echo "The wizard will:"
+    echo "  • Detect project type (Python/JS/Go/etc.)"
+    echo "  • Create project-specific configuration"
+    echo "  • Install git hooks for quality enforcement"
+    echo "  • Set up initial tasks and project objective"
+    echo "  • Customize toolkit for your project"
+    echo ""
+    read -p "Run initialization wizard now? (Y/n): " -n 1 -r
+    echo ""
+    echo ""
+
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        # Change to target directory and run wizard
+        cd "$TARGET_PROJECT_ABS"
+
+        if [ -f ".claude/init-wizard.sh" ]; then
+            bash .claude/init-wizard.sh
+            WIZARD_EXIT_CODE=$?
+            cd "$ORIGINAL_DIR"
+
+            if [ $WIZARD_EXIT_CODE -eq 0 ]; then
+                echo ""
+                echo "════════════════════════════════════════════════════════"
+                echo -e "  ${GREEN}🎉 Setup Complete - Ready to Code!${NC}"
+                echo "════════════════════════════════════════════════════════"
+                echo ""
+            fi
+        else
+            echo -e "${RED}Error: init-wizard.sh not found${NC}"
+            cd "$ORIGINAL_DIR"
+        fi
+    else
+        echo -e "${YELLOW}Skipped initialization wizard${NC}"
+        echo ""
+        echo -e "${BLUE}To run later:${NC}"
+        echo "  cd $TARGET_PROJECT_ABS"
+        echo "  bash .claude/init-wizard.sh"
+        echo ""
+    fi
+
     echo -e "${BLUE}Next steps:${NC}"
     echo "  1. cd $TARGET_PROJECT_ABS"
-    echo "  2. Review: docs/notes/PROJECT_PLAN.md"
-    echo "  3. Open in Claude Code: code ."
+    echo "  2. Review: .claude/config.json (if wizard ran)"
+    echo "  3. Review: .claude/TASKS.md"
+    echo "  4. Open in Claude Code: code ."
     echo ""
     echo -e "${BLUE}Verify:${NC}"
     echo "  git status     # Should be clean (all gitignored)"
     echo "  ls .claude/    # Toolkit files exist locally"
     echo "  cat .gitignore # Toolkit folders listed"
+    echo ""
+    echo -e "${BLUE}Resources:${NC}"
+    echo "  cat CLAUDE.md                    # Project standards"
+    echo "  cat .claude/skills/INDEX.md      # Skill catalog"
+    echo "  bash .claude/hooks/install-hooks.sh  # Install git hooks"
     echo ""
 else
     echo -e "  ${RED}❌ Injection Failed${NC}"

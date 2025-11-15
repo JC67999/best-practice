@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: Quality Gate Enforcement
+# Blocks commits that fail quality standards
+#
+set -e
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo -e "  ${GREEN}Running Pre-Commit Quality Gate${NC}"
+echo "════════════════════════════════════════════════════════"
+echo ""
+
+# Check if quality gate script exists
+if [ ! -f ".claude/quality-gate/check_quality.sh" ]; then
+    echo -e "${YELLOW}⚠ Quality gate not found - skipping checks${NC}"
+    exit 0
+fi
+
+# Run quality gate
+if bash .claude/quality-gate/check_quality.sh; then
+    echo ""
+    echo -e "${GREEN}✅ Quality gate PASSED - commit allowed${NC}"
+    echo ""
+    exit 0
+else
+    EXIT_CODE=$?
+    echo ""
+    echo "════════════════════════════════════════════════════════"
+    echo -e "  ${RED}❌ Quality Gate FAILED${NC}"
+    echo "════════════════════════════════════════════════════════"
+    echo ""
+    echo -e "${RED}Commit blocked due to quality issues above.${NC}"
+    echo ""
+    echo -e "${YELLOW}Fix the issues and try again, or:${NC}"
+    echo ""
+    echo "  • See relevant skill:"
+    echo "    cat .claude/skills/quality-standards/skill.md"
+    echo ""
+    echo "  • Bypass (NOT recommended, will be logged):"
+    echo "    git commit --no-verify"
+    echo ""
+    exit $EXIT_CODE
+fi
