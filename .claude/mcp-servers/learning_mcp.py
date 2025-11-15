@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
 """
-Learning MCP Server - Self-learning best practices system
-Scans Anthropic's skills repository and updates toolkit with new skills
+Learning MCP Server - Project-Objective-Driven Self-Learning System
+
+PURPOSE:
+Adapts to the objective of whatever project it's injected into and continuously
+researches that project's specific domain to support achieving that objective.
+
+EXAMPLES:
+- In rapid-pm: Researches project management methodologies, PM tools, artifacts
+- In ai-task-optimisation-MVP: Researches optimization algorithms, solver techniques
+- In document-generator: Researches doc methodologies, exemplar templates, best practices
+- In best-practice: Researches Claude Code best practices, MCP patterns, skills usage
+
+The system is PROJECT-OBJECTIVE-AWARE: It becomes a domain expert for whatever
+domain it's deployed in, building specialized knowledge that directly supports
+that project's success. It's a domain-adaptive research engine that makes each
+project smarter about its own domain over time.
 """
 import asyncio
 import json
@@ -32,6 +46,9 @@ class LearningServer:
 
     def __init__(self):
         self.server = Server("learning-server")
+        self.project_objective = None
+        self.project_domain = None
+        self.research_domains = []
         self.setup_handlers()
 
     def setup_handlers(self):
@@ -40,6 +57,56 @@ class LearningServer:
         @self.server.list_tools()
         async def list_tools() -> list[Tool]:
             return [
+                Tool(
+                    name="detect_project_objective",
+                    description="Detect and load the project objective to determine research focus",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "project_path": {
+                                "type": "string",
+                                "description": "Path to project root directory"
+                            }
+                        },
+                        "required": ["project_path"]
+                    }
+                ),
+                Tool(
+                    name="map_objective_to_domains",
+                    description="Analyze project objective and map it to research domains and sources",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "objective_data": {
+                                "type": "object",
+                                "description": "Project objective data from detect_project_objective"
+                            }
+                        },
+                        "required": ["objective_data"]
+                    }
+                ),
+                Tool(
+                    name="research_domain_topic",
+                    description="Research a topic using domain-specific sources (not just Anthropic)",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "topic": {
+                                "type": "string",
+                                "description": "Topic to research (e.g., 'sprint planning', 'constraint solving')"
+                            },
+                            "domain": {
+                                "type": "string",
+                                "description": "Optional domain override (project_management, optimization, etc.)"
+                            },
+                            "project_path": {
+                                "type": "string",
+                                "description": "Optional project path to auto-detect domain"
+                            }
+                        },
+                        "required": ["topic"]
+                    }
+                ),
                 Tool(
                     name="scan_anthropic_skills",
                     description="Scan Anthropic's official skills repository for new/updated skills",
@@ -97,17 +164,21 @@ class LearningServer:
                 ),
                 Tool(
                     name="store_learning",
-                    description="Store discovered best practices and learnings",
+                    description="Store discovered best practices to project-specific knowledge base",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "topic": {
                                 "type": "string",
-                                "description": "Topic or technology (python, skills, testing, etc.)"
+                                "description": "Topic or technology (sprint-planning, constraint-solving, etc.)"
                             },
                             "learning_data": {
                                 "type": "object",
-                                "description": "Dict with learnings, sources, confidence, recommendations"
+                                "description": "Dict with domain, overview, best_practices, anti_patterns, tools, sources, confidence, recommendations"
+                            },
+                            "project_path": {
+                                "type": "string",
+                                "description": "Project path to store in docs/references/domain-knowledge/ (recommended)"
                             }
                         },
                         "required": ["topic", "learning_data"]
@@ -115,13 +186,21 @@ class LearningServer:
                 ),
                 Tool(
                     name="get_learnings",
-                    description="Retrieve stored learnings by topic or date",
+                    description="Retrieve stored learnings from project knowledge base or global storage",
                     inputSchema={
                         "type": "object",
                         "properties": {
                             "topic": {
                                 "type": "string",
                                 "description": "Topic to filter by (optional)"
+                            },
+                            "project_path": {
+                                "type": "string",
+                                "description": "Project path to read from docs/references/domain-knowledge/"
+                            },
+                            "domain": {
+                                "type": "string",
+                                "description": "Domain to filter by (project_management, optimization, etc.)"
                             },
                             "since": {
                                 "type": "string",
@@ -163,7 +242,13 @@ class LearningServer:
         async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             """Handle tool calls."""
             try:
-                if name == "scan_anthropic_skills":
+                if name == "detect_project_objective":
+                    result = self.detect_project_objective(**arguments)
+                elif name == "map_objective_to_domains":
+                    result = self.map_objective_to_domains(**arguments)
+                elif name == "research_domain_topic":
+                    result = self.research_domain_topic(**arguments)
+                elif name == "scan_anthropic_skills":
                     result = await self.scan_anthropic_skills()
                 elif name == "compare_skills":
                     result = self.compare_skills(**arguments)
@@ -572,99 +657,439 @@ Generate structured recommendations:
             else:
                 raise ValueError(f"Unknown prompt: {name}")
 
+    def detect_project_objective(self, project_path: str) -> Dict:
+        """Detect and load project objective from PROJECT_PLAN.md or Project MCP.
+
+        Args:
+            project_path: Absolute path to project root directory
+
+        Returns:
+            Dictionary with objective data including problem, users, solution, etc.
+        """
+        try:
+            project_dir = Path(project_path)
+            if not project_dir.exists():
+                return {"error": f"Project path not found: {project_path}"}
+
+            # Try to read from docs/notes/PROJECT_PLAN.md
+            plan_file = project_dir / "docs" / "notes" / "PROJECT_PLAN.md"
+
+            if not plan_file.exists():
+                # Try alternative locations
+                plan_file = project_dir / "docs" / "PROJECT_PLAN.md"
+                if not plan_file.exists():
+                    plan_file = project_dir / "PROJECT_PLAN.md"
+                    if not plan_file.exists():
+                        return {
+                            "error": "PROJECT_PLAN.md not found",
+                            "searched_paths": [
+                                str(project_dir / "docs" / "notes" / "PROJECT_PLAN.md"),
+                                str(project_dir / "docs" / "PROJECT_PLAN.md"),
+                                str(project_dir / "PROJECT_PLAN.md")
+                            ],
+                            "suggestion": "Create PROJECT_PLAN.md or use Project MCP to define objective"
+                        }
+
+            # Read and parse PROJECT_PLAN.md
+            content = plan_file.read_text()
+
+            # Extract objective sections using regex
+            objective_data = {
+                "project_path": project_path,
+                "project_name": project_dir.name,
+                "plan_file": str(plan_file)
+            }
+
+            # Extract key sections
+            sections = {
+                "problem": r"##\s*(?:Problem|The Problem|Problem Statement)\s*\n(.*?)(?=\n##|\Z)",
+                "target_users": r"##\s*(?:Target Users|Users|Who)\s*\n(.*?)(?=\n##|\Z)",
+                "solution": r"##\s*(?:Solution|The Solution|Approach)\s*\n(.*?)(?=\n##|\Z)",
+                "success": r"##\s*(?:Success|Definition of Success|Goals)\s*\n(.*?)(?=\n##|\Z)",
+                "constraints": r"##\s*(?:Constraints|Limitations)\s*\n(.*?)(?=\n##|\Z)"
+            }
+
+            for key, pattern in sections.items():
+                match = re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+                if match:
+                    objective_data[key] = match.group(1).strip()
+
+            # Try to extract project description from top of file
+            desc_match = re.search(r"#\s*(.+?)\n", content)
+            if desc_match:
+                objective_data["title"] = desc_match.group(1).strip()
+
+            # Store objective for future use
+            self.project_objective = objective_data
+
+            return {
+                "success": True,
+                "objective": objective_data,
+                "message": f"Project objective loaded from {plan_file.name}",
+                "next_step": "Call map_objective_to_domains to identify research areas"
+            }
+
+        except Exception as e:
+            return {"error": f"Failed to detect objective: {str(e)}"}
+
+    def map_objective_to_domains(self, objective_data: Dict) -> Dict:
+        """Map project objective to research domains and sources.
+
+        Args:
+            objective_data: Output from detect_project_objective
+
+        Returns:
+            Dictionary with research domains, keywords, and recommended sources
+        """
+        try:
+            if "error" in objective_data:
+                return objective_data
+
+            objective = objective_data.get("objective", {})
+            project_name = objective.get("project_name", "").lower()
+            problem = objective.get("problem", "").lower()
+            solution = objective.get("solution", "").lower()
+            title = objective.get("title", "").lower()
+
+            # Combine all text for analysis
+            combined_text = f"{project_name} {title} {problem} {solution}"
+
+            # Domain detection patterns
+            domain_patterns = {
+                "project_management": {
+                    "keywords": ["project management", "pm", "agile", "scrum", "kanban", "sprint", "backlog", "jira", "roadmap"],
+                    "sources": [
+                        "https://www.pmi.org/",
+                        "https://www.scrum.org/",
+                        "https://www.atlassian.com/agile",
+                        "https://asana.com/resources/project-management",
+                        "https://www.scrumalliance.org/"
+                    ],
+                    "search_terms": ["project management best practices", "agile methodologies", "PM tools comparison", "sprint planning techniques"]
+                },
+                "optimization": {
+                    "keywords": ["optimization", "optimize", "performance", "efficiency", "solver", "algorithm", "constraint", "minimize", "maximize"],
+                    "sources": [
+                        "https://optimization.cbe.cornell.edu/",
+                        "https://neos-guide.org/",
+                        "https://scipbook.readthedocs.io/",
+                        "https://docs.scipy.org/doc/scipy/reference/optimize.html",
+                        "https://or.stackexchange.com/"
+                    ],
+                    "search_terms": ["optimization algorithms", "solver techniques", "constraint programming", "linear programming best practices"]
+                },
+                "documentation": {
+                    "keywords": ["documentation", "docs", "document", "technical writing", "readme", "api docs", "template", "markdown"],
+                    "sources": [
+                        "https://www.writethedocs.org/",
+                        "https://developers.google.com/tech-writing",
+                        "https://documentation.divio.com/",
+                        "https://github.com/github/docs",
+                        "https://www.markdownguide.org/"
+                    ],
+                    "search_terms": ["technical documentation best practices", "API documentation templates", "documentation methodologies", "README examples"]
+                },
+                "claude_development": {
+                    "keywords": ["claude", "mcp", "skill", "anthropic", "ai assistant", "prompt", "best practice"],
+                    "sources": [
+                        "https://docs.anthropic.com/",
+                        "https://github.com/anthropics/",
+                        "https://modelcontextprotocol.io/",
+                        "https://code.claude.com/docs",
+                        "https://github.com/anthropics/skills"
+                    ],
+                    "search_terms": ["Claude Code best practices", "MCP server development", "Claude skills creation", "Anthropic API usage"]
+                },
+                "web_development": {
+                    "keywords": ["web", "frontend", "backend", "api", "react", "node", "javascript", "typescript", "html", "css"],
+                    "sources": [
+                        "https://developer.mozilla.org/",
+                        "https://web.dev/",
+                        "https://react.dev/",
+                        "https://nodejs.org/docs/",
+                        "https://github.com/airbnb/javascript"
+                    ],
+                    "search_terms": ["web development best practices", "React patterns", "API design", "frontend performance"]
+                },
+                "data_science": {
+                    "keywords": ["data", "analysis", "machine learning", "ml", "ai", "model", "training", "dataset", "pandas", "numpy"],
+                    "sources": [
+                        "https://scikit-learn.org/",
+                        "https://www.kaggle.com/",
+                        "https://pytorch.org/docs/",
+                        "https://www.tensorflow.org/",
+                        "https://pandas.pydata.org/"
+                    ],
+                    "search_terms": ["data science best practices", "ML model training", "data analysis techniques", "feature engineering"]
+                }
+            }
+
+            # Detect which domains match
+            detected_domains = []
+            for domain, config in domain_patterns.items():
+                # Count keyword matches
+                matches = sum(1 for keyword in config["keywords"] if keyword in combined_text)
+                if matches > 0:
+                    detected_domains.append({
+                        "domain": domain,
+                        "match_score": matches,
+                        "sources": config["sources"],
+                        "search_terms": config["search_terms"],
+                        "keywords_matched": [kw for kw in config["keywords"] if kw in combined_text]
+                    })
+
+            # Sort by match score
+            detected_domains.sort(key=lambda x: x["match_score"], reverse=True)
+
+            # Store for future use
+            if detected_domains:
+                self.project_domain = detected_domains[0]["domain"]
+                self.research_domains = [d["domain"] for d in detected_domains[:3]]  # Top 3
+
+            return {
+                "success": True,
+                "project_name": objective.get("project_name"),
+                "detected_domains": detected_domains,
+                "primary_domain": detected_domains[0]["domain"] if detected_domains else "general",
+                "recommended_sources": detected_domains[0]["sources"] if detected_domains else [],
+                "search_terms": detected_domains[0]["search_terms"] if detected_domains else [],
+                "message": f"Detected {len(detected_domains)} relevant research domain(s)",
+                "next_step": "Use search_terms with WebSearch to find domain-specific resources"
+            }
+
+        except Exception as e:
+            return {"error": f"Failed to map domains: {str(e)}"}
+
+    def research_domain_topic(self, topic: str, domain: Optional[str] = None, project_path: Optional[str] = None) -> Dict:
+        """Research a topic using domain-specific sources (not just Anthropic).
+
+        Args:
+            topic: Topic to research (e.g., 'sprint planning', 'optimization algorithms')
+            domain: Optional domain override (project_management, optimization, etc.)
+            project_path: Optional project path to auto-detect domain
+
+        Returns:
+            Dictionary with domain-specific search queries, sources, and research guidance
+        """
+        try:
+            # Determine which domain to use
+            target_domain = domain
+
+            if not target_domain and project_path:
+                # Auto-detect domain from project
+                obj_result = self.detect_project_objective(project_path)
+                if "objective" in obj_result:
+                    domain_result = self.map_objective_to_domains(obj_result)
+                    if "primary_domain" in domain_result:
+                        target_domain = domain_result["primary_domain"]
+
+            if not target_domain and self.project_domain:
+                # Use stored domain
+                target_domain = self.project_domain
+
+            if not target_domain:
+                target_domain = "general"
+
+            # Domain-specific research patterns
+            domain_configs = {
+                "project_management": {
+                    "sources": [
+                        "https://www.pmi.org/",
+                        "https://www.scrum.org/",
+                        "https://www.atlassian.com/agile",
+                        "https://asana.com/resources/",
+                        "https://www.scrumalliance.org/"
+                    ],
+                    "search_template": [
+                        f"{topic} project management best practices",
+                        f"{topic} agile methodology",
+                        f"{topic} scrum guide",
+                        f"how to {topic} in software projects"
+                    ]
+                },
+                "optimization": {
+                    "sources": [
+                        "https://optimization.cbe.cornell.edu/",
+                        "https://neos-guide.org/",
+                        "https://scipbook.readthedocs.io/",
+                        "https://docs.scipy.org/doc/scipy/reference/optimize.html",
+                        "https://or.stackexchange.com/"
+                    ],
+                    "search_template": [
+                        f"{topic} optimization algorithms",
+                        f"{topic} mathematical programming",
+                        f"{topic} solver techniques",
+                        f"{topic} constraint satisfaction"
+                    ]
+                },
+                "documentation": {
+                    "sources": [
+                        "https://www.writethedocs.org/",
+                        "https://developers.google.com/tech-writing",
+                        "https://documentation.divio.com/",
+                        "https://github.com/github/docs",
+                        "https://www.markdownguide.org/"
+                    ],
+                    "search_template": [
+                        f"{topic} technical documentation best practices",
+                        f"{topic} documentation templates",
+                        f"{topic} technical writing guide",
+                        f"examples of {topic} documentation"
+                    ]
+                },
+                "claude_development": {
+                    "sources": [
+                        "https://docs.anthropic.com/",
+                        "https://github.com/anthropics/",
+                        "https://modelcontextprotocol.io/",
+                        "https://code.claude.com/docs",
+                        "https://github.com/anthropics/skills"
+                    ],
+                    "search_template": [
+                        f"{topic} Claude Code best practices",
+                        f"{topic} MCP server development",
+                        f"{topic} Anthropic API",
+                        f"{topic} Claude skills"
+                    ]
+                },
+                "web_development": {
+                    "sources": [
+                        "https://developer.mozilla.org/",
+                        "https://web.dev/",
+                        "https://react.dev/",
+                        "https://nodejs.org/docs/",
+                        "https://github.com/airbnb/javascript"
+                    ],
+                    "search_template": [
+                        f"{topic} web development best practices 2025",
+                        f"{topic} React patterns",
+                        f"{topic} frontend architecture",
+                        f"{topic} JavaScript guide"
+                    ]
+                },
+                "data_science": {
+                    "sources": [
+                        "https://scikit-learn.org/",
+                        "https://www.kaggle.com/",
+                        "https://pytorch.org/docs/",
+                        "https://pandas.pydata.org/",
+                        "https://github.com/google/jax"
+                    ],
+                    "search_template": [
+                        f"{topic} machine learning best practices",
+                        f"{topic} data science guide",
+                        f"{topic} ML techniques",
+                        f"{topic} feature engineering"
+                    ]
+                },
+                "general": {
+                    "sources": [],
+                    "search_template": [
+                        f"{topic} best practices 2025",
+                        f"{topic} tutorial",
+                        f"{topic} comprehensive guide",
+                        f"{topic} examples and patterns"
+                    ]
+                }
+            }
+
+            config = domain_configs.get(target_domain, domain_configs["general"])
+
+            return {
+                "success": True,
+                "topic": topic,
+                "domain": target_domain,
+                "search_queries": config["search_template"],
+                "recommended_sources": config["sources"],
+                "research_workflow": {
+                    "step_1": f"Use WebSearch with queries: {config['search_template']}",
+                    "step_2": f"Use WebFetch on top results from these sources: {', '.join(config['sources'][:3])}",
+                    "step_3": f"Extract key patterns, techniques, and best practices for {topic}",
+                    "step_4": f"Store learnings using store_learning tool",
+                    "step_5": f"Save to project-specific docs/references/domain-knowledge/{target_domain}/"
+                },
+                "example_workflow": f"""
+# Research Workflow for: {topic}
+
+## 1. Web Search (Domain: {target_domain})
+Use WebSearch tool with these queries:
+{chr(10).join('- ' + q for q in config['search_template'])}
+
+## 2. Fetch Top Resources
+Use WebFetch on results from:
+{chr(10).join('- ' + s for s in config['sources'][:5])}
+
+## 3. Extract Learnings
+Focus on:
+- Best practices and patterns
+- Common pitfalls and anti-patterns
+- Tool recommendations
+- Code/configuration examples
+- Performance considerations
+
+## 4. Store Results
+Call store_learning with structured data:
+- Topic: "{topic}"
+- Domain: "{target_domain}"
+- Sources: [URLs from WebFetch]
+- Confidence: high/medium/low
+- Recommendations: What to apply to project
+                """,
+                "storage_path": f"docs/references/domain-knowledge/{target_domain}/{topic.replace(' ', '-').lower()}.md",
+                "message": f"Research plan generated for '{topic}' in {target_domain} domain"
+            }
+
+        except Exception as e:
+            return {"error": f"Failed to generate research plan: {str(e)}"}
+
     async def scan_anthropic_skills(self) -> Dict:
         """Scan Anthropic's skills repository for available skills.
 
-        Note: This is a template. Real implementation would use WebFetch
-        or GitHub API to fetch the actual repository contents.
+        Returns instructions for using WebFetch to get real-time data.
         """
-        # Known skills from Anthropic repository (as of 2025-11-14)
-        known_skills = {
-            "creative_design": [
-                {
-                    "name": "algorithmic-art",
-                    "description": "Generative art creation using p5.js with seeded randomness"
-                },
-                {
-                    "name": "canvas-design",
-                    "description": "Visual art design for .png and .pdf formats"
-                },
-                {
-                    "name": "slack-gif-creator",
-                    "description": "Animated GIF creation optimized for Slack"
-                }
-            ],
-            "development": [
-                {
-                    "name": "artifacts-builder",
-                    "description": "Build complex HTML artifacts using React, Tailwind CSS, shadcn/ui"
-                },
-                {
-                    "name": "mcp-builder",
-                    "description": "Guide for creating MCP servers to integrate external APIs"
-                },
-                {
-                    "name": "webapp-testing",
-                    "description": "Web application testing using Playwright"
-                }
-            ],
-            "enterprise": [
-                {
-                    "name": "brand-guidelines",
-                    "description": "Apply Anthropic's official brand colors and typography"
-                },
-                {
-                    "name": "internal-comms",
-                    "description": "Write internal communications like status reports"
-                },
-                {
-                    "name": "theme-factory",
-                    "description": "Style artifacts with 10 pre-set professional themes"
-                }
-            ],
-            "meta": [
-                {
-                    "name": "skill-creator",
-                    "description": "Guide for creating effective skills extending Claude's capabilities"
-                },
-                {
-                    "name": "template-skill",
-                    "description": "Basic starting template for new skills"
-                }
-            ],
-            "documents": [
-                {
-                    "name": "docx",
-                    "description": "Word document creation, editing, and analysis"
-                },
-                {
-                    "name": "pdf",
-                    "description": "PDF manipulation including extraction and form handling"
-                },
-                {
-                    "name": "pptx",
-                    "description": "PowerPoint presentation creation and editing"
-                },
-                {
-                    "name": "xlsx",
-                    "description": "Excel spreadsheet creation with formulas"
-                }
-            ]
-        }
-
-        total_skills = sum(len(skills) for skills in known_skills.values())
-
         return {
             "success": True,
             "repository": ANTHROPIC_SKILLS_REPO,
-            "scanned_at": datetime.now().isoformat(),
-            "total_skills": total_skills,
-            "skills_by_category": known_skills,
-            "message": "Skills scanned from Anthropic repository. Use WebFetch for real-time updates."
+            "method": "dynamic",
+            "instructions": {
+                "step_1": "Use WebFetch to scan the skills repository",
+                "step_2": "Parse the repository structure",
+                "step_3": "Categorize skills by domain",
+                "step_4": "Compare with project domain to find relevant skills"
+            },
+            "webfetch_urls": [
+                f"{ANTHROPIC_SKILLS_API}",  # Lists all skills
+                f"{ANTHROPIC_SKILLS_REPO}"   # Repository overview
+            ],
+            "workflow": """
+# Dynamic Skills Scanning Workflow
+
+## 1. Fetch Repository Index
+WebFetch: https://api.github.com/repos/anthropics/skills/contents
+This returns JSON with all skill folders.
+
+## 2. For Each Skill
+WebFetch: https://raw.githubusercontent.com/anthropics/skills/main/{skill-name}/SKILL.md
+Extract name, description, category from SKILL.md front matter.
+
+## 3. Filter by Project Domain
+If project domain is 'optimization', prioritize development/technical skills.
+If project domain is 'project_management', consider all skill types.
+
+## 4. Return Categorized Results
+Group skills by relevance to current project objective.
+            """,
+            "message": "Use WebFetch with the URLs above to get real-time skills data",
+            "fallback_categories": ["development", "meta", "documents", "creative", "enterprise"],
+            "note": "This replaces hardcoded data with dynamic fetching"
         }
 
+
     def compare_skills(self, toolkit_skills_path: str) -> Dict:
-        """Compare Anthropic skills with our toolkit skills."""
+        """Compare Anthropic skills with our toolkit skills.
+
+        Returns instructions to use WebFetch for real-time comparison.
+        """
         toolkit_path = Path(toolkit_skills_path)
 
         if not toolkit_path.exists():
@@ -676,30 +1101,39 @@ Generate structured recommendations:
             if skill_dir.is_dir() and skill_dir.name != "template":
                 our_skills.append(skill_dir.name)
 
-        # Anthropic skills (flattened)
-        anthropic_skills = [
-            "algorithmic-art", "canvas-design", "slack-gif-creator",
-            "artifacts-builder", "mcp-builder", "webapp-testing",
-            "brand-guidelines", "internal-comms", "theme-factory",
-            "skill-creator", "template-skill",
-            "docx", "pdf", "pptx", "xlsx"
-        ]
-
-        # Find gaps
-        they_have_we_dont = [s for s in anthropic_skills if s not in our_skills]
-        we_have_they_dont = [s for s in our_skills if s not in anthropic_skills]
-        common_skills = [s for s in our_skills if s in anthropic_skills]
-
         return {
             "success": True,
+            "method": "dynamic_comparison",
             "toolkit_skills": our_skills,
-            "anthropic_skills": anthropic_skills,
-            "they_have_we_dont": they_have_we_dont,
-            "we_have_they_dont": we_have_they_dont,
-            "common_skills": common_skills,
-            "our_skill_count": len(our_skills),
-            "their_skill_count": len(anthropic_skills),
-            "gap_count": len(they_have_we_dont)
+            "toolkit_skill_count": len(our_skills),
+            "instructions": {
+                "step_1": "Call scan_anthropic_skills to get WebFetch instructions",
+                "step_2": "Use WebFetch to get real-time Anthropic skills list",
+                "step_3": "Compare with our toolkit skills",
+                "step_4": "Filter by project domain relevance"
+            },
+            "workflow": f"""
+# Dynamic Skills Comparison
+
+## 1. Get Anthropic Skills (Real-time)
+Call scan_anthropic_skills, then use returned WebFetch URLs.
+
+## 2. Our Toolkit Skills
+We have {len(our_skills)} skills:
+{chr(10).join('- ' + s for s in our_skills)}
+
+## 3. Compare and Filter
+- Find skills they have that we don't
+- Filter by project domain (use map_objective_to_domains)
+- Prioritize skills relevant to this project's objective
+
+## 4. Recommend Additions
+- HIGH priority: Skills matching project domain
+- MEDIUM priority: Universal development skills
+- LOW priority: Domain-specific but not matching project
+- SKIP: Enterprise-specific, already have equivalent
+            """,
+            "note": "Use WebFetch for real-time Anthropic data instead of hardcoded lists"
         }
 
     def suggest_skill_updates(self, comparison_data: Dict) -> Dict:
@@ -816,90 +1250,236 @@ priority: toolkit
             ]
         }
 
-    def store_learning(self, topic: str, learning_data: Dict) -> Dict:
-        """Store discovered best practices."""
+    def store_learning(self, topic: str, learning_data: Dict, project_path: Optional[str] = None) -> Dict:
+        """Store discovered best practices to project-specific location.
+
+        Args:
+            topic: Topic name (e.g., "optimization", "project-management")
+            learning_data: Dictionary with learnings, sources, confidence, recommendations
+            project_path: Optional project path. If provided, stores in project's docs/references/
+
+        Returns:
+            Dictionary with success status and file path
+        """
         try:
-            # Create storage directory
-            storage_dir = LEARNING_DIR / topic.lower()
-            storage_dir.mkdir(parents=True, exist_ok=True)
+            # Determine storage location
+            if project_path:
+                # Project-specific storage: {project}/docs/references/domain-knowledge/{domain}/
+                project_dir = Path(project_path)
+                domain = learning_data.get("domain", self.project_domain or "general")
+                storage_dir = project_dir / "docs" / "references" / "domain-knowledge" / domain
+                storage_dir.mkdir(parents=True, exist_ok=True)
 
-            # Generate filename with timestamp
-            timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-            subtopic = learning_data.get("subtopic", "general")
-            filename = f"{timestamp}_{subtopic}.json"
-            filepath = storage_dir / filename
+                # Create markdown file (more readable than JSON)
+                filename = f"{topic.replace(' ', '-').lower()}.md"
+                filepath = storage_dir / filename
 
-            # Add metadata
-            learning_data["stored_at"] = datetime.now().isoformat()
-            learning_data["topic"] = topic
+                # Format as markdown
+                md_content = f"""# {topic}
 
-            # Store learning
-            with open(filepath, 'w') as f:
-                json.dump(learning_data, f, indent=2)
+**Domain**: {domain}
+**Last Updated**: {datetime.now().strftime('%Y-%m-%d')}
+**Confidence**: {learning_data.get('confidence', 'medium')}
+
+## Overview
+
+{learning_data.get('overview', 'Research findings for ' + topic)}
+
+## Key Findings
+
+{chr(10).join('- ' + str(p) for p in learning_data.get('principles', learning_data.get('best_practices', [])))}
+
+## Best Practices
+
+{chr(10).join('- ' + str(bp) for bp in learning_data.get('best_practices', []))}
+
+## Anti-Patterns / Pitfalls
+
+{chr(10).join('- ' + str(ap) for ap in learning_data.get('anti_patterns', []))}
+
+## Tools & Resources
+
+{chr(10).join('- ' + str(t) for t in learning_data.get('tools', []))}
+
+## Sources
+
+{chr(10).join('- ' + str(s) for s in learning_data.get('sources', []))}
+
+## Recommendations
+
+{learning_data.get('recommendations', 'Apply findings to project implementation.')}
+
+---
+
+*Researched for project: {Path(project_path).name if project_path else 'general'}*
+*Stored at: {datetime.now().isoformat()}*
+"""
+
+                with open(filepath, 'w') as f:
+                    f.write(md_content)
+
+                storage_type = "project-specific"
+
+            else:
+                # Fallback to global storage
+                storage_dir = LEARNING_DIR / topic.lower()
+                storage_dir.mkdir(parents=True, exist_ok=True)
+
+                timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+                subtopic = learning_data.get("subtopic", "general")
+                filename = f"{timestamp}_{subtopic}.json"
+                filepath = storage_dir / filename
+
+                learning_data["stored_at"] = datetime.now().isoformat()
+                learning_data["topic"] = topic
+
+                with open(filepath, 'w') as f:
+                    json.dump(learning_data, f, indent=2)
+
+                storage_type = "global"
 
             return {
                 "success": True,
                 "topic": topic,
                 "filepath": str(filepath),
-                "message": f"Learning stored successfully"
+                "storage_type": storage_type,
+                "message": f"Learning stored successfully to {storage_type} location",
+                "note": "Knowledge is now part of project repository" if project_path else "Use project_path parameter to store in project"
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def get_learnings(self, topic: Optional[str] = None, since: Optional[str] = None) -> Dict:
-        """Retrieve stored learnings by topic or date."""
+    def get_learnings(
+        self,
+        topic: Optional[str] = None,
+        project_path: Optional[str] = None,
+        domain: Optional[str] = None,
+        since: Optional[str] = None
+    ) -> Dict:
+        """Retrieve stored learnings from project-specific or global storage.
+
+        Args:
+            topic: Topic to filter by
+            project_path: Project path to read from docs/references/domain-knowledge/
+            domain: Domain to filter by (project_management, optimization, etc.)
+            since: Date filter YYYY-MM-DD
+
+        Returns:
+            Dictionary with learnings list and metadata
+        """
         try:
             learnings = []
 
-            # Determine search path
-            if topic:
-                search_dir = LEARNING_DIR / topic.lower()
-                if not search_dir.exists():
+            # Determine search location
+            if project_path:
+                # Project-specific storage
+                project_dir = Path(project_path)
+                knowledge_base = project_dir / "docs" / "references" / "domain-knowledge"
+
+                if not knowledge_base.exists():
                     return {
                         "success": True,
                         "learnings": [],
                         "count": 0,
-                        "message": f"No learnings found for topic: {topic}"
+                        "storage_type": "project-specific",
+                        "message": f"No knowledge base found at {knowledge_base}",
+                        "suggestion": "Use store_learning with project_path to create knowledge base"
                     }
-                search_dirs = [search_dir]
-            else:
-                search_dirs = [d for d in LEARNING_DIR.iterdir() if d.is_dir()]
 
-            # Search for learning files
-            for dir_path in search_dirs:
-                for json_file in dir_path.glob("*.json"):
-                    try:
-                        with open(json_file, 'r') as f:
-                            data = json.load(f)
+                # Search in domain folders
+                if domain:
+                    search_dirs = [knowledge_base / domain]
+                else:
+                    search_dirs = [d for d in knowledge_base.iterdir() if d.is_dir()]
 
-                        # Filter by date if provided
-                        if since:
-                            stored_at = data.get("stored_at", "")
-                            if stored_at < since:
-                                continue
-
-                        learnings.append({
-                            "file": str(json_file),
-                            "topic": data.get("topic"),
-                            "subtopic": data.get("subtopic"),
-                            "stored_at": data.get("stored_at"),
-                            "confidence": data.get("confidence"),
-                            "data": data
-                        })
-                    except:
+                # Search for markdown files
+                for dir_path in search_dirs:
+                    if not dir_path.exists():
                         continue
 
-            # Sort by date (newest first)
-            learnings.sort(key=lambda x: x.get("stored_at", ""), reverse=True)
+                    for md_file in dir_path.glob("*.md"):
+                        try:
+                            content = md_file.read_text()
+
+                            # Parse markdown metadata
+                            if topic and topic.lower() not in md_file.stem.lower():
+                                continue
+
+                            # Extract date from content if since filter provided
+                            if since:
+                                date_match = re.search(r"\*\*Last Updated\*\*: (\d{4}-\d{2}-\d{2})", content)
+                                if date_match and date_match.group(1) < since:
+                                    continue
+
+                            learnings.append({
+                                "file": str(md_file),
+                                "topic": md_file.stem.replace('-', ' '),
+                                "domain": dir_path.name,
+                                "format": "markdown",
+                                "preview": content[:500] + "..." if len(content) > 500 else content
+                            })
+                        except:
+                            continue
+
+                storage_type = "project-specific"
+
+            else:
+                # Global storage (fallback)
+                if topic:
+                    search_dir = LEARNING_DIR / topic.lower()
+                    if not search_dir.exists():
+                        return {
+                            "success": True,
+                            "learnings": [],
+                            "count": 0,
+                            "storage_type": "global",
+                            "message": f"No learnings found for topic: {topic}"
+                        }
+                    search_dirs = [search_dir]
+                else:
+                    search_dirs = [d for d in LEARNING_DIR.iterdir() if d.is_dir()]
+
+                # Search for JSON files (global format)
+                for dir_path in search_dirs:
+                    for json_file in dir_path.glob("*.json"):
+                        try:
+                            with open(json_file, 'r') as f:
+                                data = json.load(f)
+
+                            if since:
+                                stored_at = data.get("stored_at", "")
+                                if stored_at < since:
+                                    continue
+
+                            learnings.append({
+                                "file": str(json_file),
+                                "topic": data.get("topic"),
+                                "subtopic": data.get("subtopic"),
+                                "stored_at": data.get("stored_at"),
+                                "confidence": data.get("confidence"),
+                                "format": "json",
+                                "data": data
+                            })
+                        except:
+                            continue
+
+                storage_type = "global"
+
+            # Sort by filename (newest typically last)
+            learnings.sort(key=lambda x: x.get("file", ""), reverse=True)
 
             return {
                 "success": True,
                 "learnings": learnings,
                 "count": len(learnings),
+                "storage_type": storage_type,
                 "filtered_by": {
                     "topic": topic,
+                    "domain": domain,
+                    "project_path": project_path,
                     "since": since
-                }
+                },
+                "note": "Use project_path to read project-specific knowledge base" if not project_path else None
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -907,159 +1487,129 @@ priority: toolkit
     async def scan_anthropic_cookbooks(self) -> Dict:
         """Scan Anthropic's claude-cookbooks repository.
 
-        Returns categorized list of cookbooks with descriptions.
+        Returns WebFetch instructions for real-time cookbook discovery.
         """
-        cookbooks = {
-            "capabilities": [
-                {"name": "classification", "description": "Text and data classification techniques"},
-                {"name": "retrieval_augmented_generation", "description": "RAG - enhance Claude with external knowledge"},
-                {"name": "summarization", "description": "Effective text summarization methods"}
-            ],
-            "tool_use": [
-                {"name": "customer_service_agent", "description": "Customer service agent implementation"},
-                {"name": "calculator_tool", "description": "Calculator tool integration"},
-                {"name": "sql_query_execution", "description": "SQL query execution guides"}
-            ],
-            "third_party": [
-                {"name": "pinecone_integration", "description": "Vector database integration"},
-                {"name": "wikipedia_integration", "description": "Wikipedia data access"},
-                {"name": "web_page_extraction", "description": "Web content extraction"},
-                {"name": "voyage_ai_embeddings", "description": "Voyage AI embeddings integration"}
-            ],
-            "multimodal": [
-                {"name": "getting_started_images", "description": "Image processing basics"},
-                {"name": "vision_best_practices", "description": "Vision capabilities best practices"},
-                {"name": "chart_graph_interpretation", "description": "Chart and graph analysis"},
-                {"name": "form_extraction", "description": "Extract content from forms"},
-                {"name": "image_generation_stable_diffusion", "description": "Image generation with Stable Diffusion"}
-            ],
-            "patterns": [
-                {"name": "sub_agent_patterns", "description": "Haiku with Opus sub-agent patterns"},
-                {"name": "pdf_upload_summarization", "description": "PDF processing and summarization"},
-                {"name": "automated_evaluation", "description": "Automated evaluation frameworks"},
-                {"name": "json_mode", "description": "JSON mode configuration"},
-                {"name": "content_moderation", "description": "Content moderation filters"},
-                {"name": "prompt_caching", "description": "Prompt caching optimization"}
-            ],
-            "extended_thinking": [
-                {"name": "extended_thinking_guide", "description": "Extended thinking mode usage"}
-            ],
-            "claude_agent_sdk": [
-                {"name": "agent_patterns", "description": "Agent design patterns and implementation"}
-            ]
-        }
-
-        total_cookbooks = sum(len(items) for items in cookbooks.values())
-
         return {
             "success": True,
             "repository": ANTHROPIC_COOKBOOKS_REPO,
-            "scanned_at": datetime.now().isoformat(),
-            "total_cookbooks": total_cookbooks,
-            "stars": "27.6k",
-            "language": "Jupyter Notebooks (97.3%), Python (2.7%)",
-            "cookbooks_by_category": cookbooks,
-            "message": "Cookbooks cataloged from Anthropic repository. Use WebFetch for detailed content."
+            "method": "dynamic",
+            "webfetch_urls": [
+                "https://api.github.com/repos/anthropics/claude-cookbooks/contents",
+                f"{ANTHROPIC_COOKBOOKS_REPO}/blob/main/README.md"
+            ],
+            "workflow": """
+# Dynamic Cookbooks Scanning
+
+## 1. Fetch Repository Structure
+WebFetch: https://api.github.com/repos/anthropics/claude-cookbooks/contents
+Returns all folders (capabilities, tool_use, multimodal, etc.)
+
+## 2. Fetch README for Overview
+WebFetch: https://github.com/anthropics/claude-cookbooks/blob/main/README.md
+Extract categories and cookbook descriptions.
+
+## 3. Filter by Project Domain
+- If domain=optimization: Focus on patterns, automated_evaluation
+- If domain=documentation: Focus on summarization, pdf_upload
+- If domain=claude_development: All categories relevant
+
+## 4. Return Domain-Relevant Cookbooks
+Prioritize cookbooks that support project objective.
+            """,
+            "domain_relevance": {
+                "optimization": ["patterns", "automated_evaluation"],
+                "documentation": ["summarization", "pdf_upload_summarization"],
+                "claude_development": ["all"],
+                "project_management": ["tool_use", "retrieval_augmented_generation"],
+                "web_development": ["tool_use", "third_party"],
+                "data_science": ["multimodal", "retrieval_augmented_generation"]
+            },
+            "message": "Use WebFetch to get real-time cookbooks data filtered by project domain"
         }
 
     async def scan_anthropic_quickstarts(self) -> Dict:
         """Scan Anthropic's claude-quickstarts repository.
 
-        Returns list of starter projects with technologies.
+        Returns WebFetch instructions for real-time quickstart discovery.
         """
-        quickstarts = [
-            {
-                "name": "customer-support-agent",
-                "description": "Customer support agent powered by Claude with knowledge base access",
-                "technologies": ["Python", "TypeScript", "JavaScript"],
-                "path": "/customer-support-agent"
-            },
-            {
-                "name": "financial-data-analyst",
-                "description": "Financial data analyst with interactive data visualization",
-                "technologies": ["Python", "Data Visualization"],
-                "path": "/financial-data-analyst"
-            },
-            {
-                "name": "computer-use-demo",
-                "description": "Desktop computer control using Claude 3.5 Sonnet computer use capabilities",
-                "technologies": ["Python", "Desktop Automation"],
-                "path": "/computer-use-demo"
-            },
-            {
-                "name": "agents",
-                "description": "Agent-related starter projects",
-                "technologies": ["TypeScript", "Python"],
-                "path": "/agents"
-            }
-        ]
-
         return {
             "success": True,
             "repository": ANTHROPIC_QUICKSTARTS_REPO,
-            "scanned_at": datetime.now().isoformat(),
-            "total_quickstarts": len(quickstarts),
-            "stars": "10.2k",
-            "languages": "TypeScript (43.5%), Python (37.2%), Jupyter Notebook (12.0%)",
-            "quickstarts": quickstarts,
-            "message": "Quickstarts cataloged from Anthropic repository. Use WebFetch for project details."
+            "method": "dynamic",
+            "webfetch_urls": [
+                "https://api.github.com/repos/anthropics/claude-quickstarts/contents",
+                f"{ANTHROPIC_QUICKSTARTS_REPO}/blob/main/README.md"
+            ],
+            "workflow": """
+# Dynamic Quickstarts Scanning
+
+## 1. Fetch Repository
+WebFetch: https://api.github.com/repos/anthropics/claude-quickstarts/contents
+Lists all quickstart project folders.
+
+## 2. Filter by Project Domain
+- If domain=optimization: Look for data-analyst, algorithm patterns
+- If domain=web_development: Look for web-based quickstarts
+- If domain=claude_development: All quickstarts relevant
+
+## 3. Identify Reusable Patterns
+Extract project structures, build configs, deployment patterns.
+
+## 4. Suggest Project Templates
+Recommend quickstarts that match project type and domain.
+            """,
+            "message": "Use WebFetch to get real-time quickstarts filtered by domain"
         }
 
     async def scan_anthropic_org(self) -> Dict:
         """Scan all repositories in Anthropic's GitHub organization.
 
-        Returns comprehensive list of all 54 repositories categorized by type.
+        Returns WebFetch instructions for real-time organization scan.
         """
-        repositories = {
-            "sdks": [
-                {"name": "anthropic-sdk-python", "stars": "2.4k", "language": "Python"},
-                {"name": "anthropic-sdk-typescript", "stars": "1.3k", "language": "TypeScript"},
-                {"name": "anthropic-sdk-go", "stars": "603", "language": "Go"},
-                {"name": "anthropic-sdk-java", "stars": "183", "language": "Kotlin/Java"},
-                {"name": "anthropic-sdk-ruby", "stars": "235", "language": "Ruby"},
-                {"name": "anthropic-sdk-csharp", "stars": "40", "language": "C#"},
-                {"name": "anthropic-sdk-php", "stars": "54", "language": "PHP"}
-            ],
-            "agent_frameworks": [
-                {"name": "claude-code", "stars": "42.3k", "description": "Agentic coding tool for terminal"},
-                {"name": "claude-agent-sdk-python", "stars": "3.1k", "description": "Python agent framework"},
-                {"name": "claude-agent-sdk-typescript", "stars": "324", "description": "TypeScript agent SDK"},
-                {"name": "claude-agent-sdk-demos", "stars": "606", "description": "SDK demonstration projects"}
-            ],
-            "developer_resources": [
-                {"name": "claude-cookbooks", "stars": "27.6k", "description": "Collection of notebooks/recipes"},
-                {"name": "courses", "stars": "17.6k", "description": "Educational courses from Anthropic"},
-                {"name": "claude-quickstarts", "stars": "10.2k", "description": "Quick start projects"},
-                {"name": "skills", "stars": "16.8k", "description": "Public Skills repository"}
-            ],
-            "security_tools": [
-                {"name": "claude-code-action", "stars": "4.1k", "description": "GitHub Action for code analysis"},
-                {"name": "claude-code-base-action", "stars": "518", "description": "Base action mirror"},
-                {"name": "claude-code-security-review", "stars": "2.6k", "description": "AI-powered security review Action"},
-                {"name": "claude-code-monitoring-guide", "stars": "95", "description": "Monitoring implementation guide"}
-            ],
-            "specialized": [
-                {"name": "political-neutrality-eval", "stars": "26", "description": "Political neutrality evaluation"},
-                {"name": "life-sciences", "stars": "58", "description": "Life sciences marketplace and MCP servers"}
-            ]
-        }
-
-        total_repos = sum(len(items) for items in repositories.values())
-
         return {
             "success": True,
             "organization": "anthropics",
             "org_url": ANTHROPIC_ORG_URL,
-            "scanned_at": datetime.now().isoformat(),
-            "total_repositories": total_repos,
-            "repositories_by_category": repositories,
-            "key_stats": {
-                "sdks_available": 7,
-                "agent_frameworks": 4,
-                "educational_resources": 4,
-                "security_tools": 4
+            "method": "dynamic",
+            "webfetch_urls": [
+                "https://api.github.com/orgs/anthropics/repos?per_page=100",
+                "https://github.com/orgs/anthropics/repositories"
+            ],
+            "workflow": """
+# Dynamic Organization Scanning
+
+## 1. Fetch All Repositories
+WebFetch: https://api.github.com/orgs/anthropics/repos?per_page=100
+Returns JSON with all repos, stars, languages, descriptions.
+
+## 2. Categorize Repositories
+- SDKs: anthropic-sdk-*
+- Agent Frameworks: claude-agent-*, claude-code
+- Developer Resources: cookbooks, courses, quickstarts, skills
+- Security Tools: *-action, *-security-*
+- Domain-Specific: Based on description/README
+
+## 3. Filter by Project Needs
+- If domain=claude_development: Prioritize ALL repos
+- If domain=web_development: Focus on TypeScript/JavaScript SDKs
+- If domain=data_science: Focus on Python SDK, notebooks
+- If domain=optimization: Focus on agent frameworks, patterns
+
+## 4. Identify Integration Opportunities
+- Which SDK to use for project language
+- Which agent patterns to adopt
+- Which security tools to integrate
+- Which courses to reference for learning
+            """,
+            "domain_priority": {
+                "claude_development": "all repos",
+                "web_development": ["anthropic-sdk-typescript", "claude-cookbooks"],
+                "data_science": ["anthropic-sdk-python", "courses"],
+                "optimization": ["claude-agent-sdk-python", "claude-cookbooks"],
+                "project_management": ["claude-agent-sdk-python"],
+                "documentation": ["courses", "claude-cookbooks"]
             },
-            "message": "All Anthropic repositories cataloged. Use WebFetch for detailed information."
+            "message": "Use WebFetch to get real-time org repos filtered by project domain"
         }
 
     async def run(self):

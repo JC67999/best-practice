@@ -1,7 +1,7 @@
 ---
 name: Domain Learning
-description: Autonomous research and knowledge base building for project-specific domains
-tags: research, learning, knowledge-base, domain-expertise
+description: Project-objective-driven autonomous research and knowledge building
+tags: research, learning, knowledge-base, domain-expertise, objective-driven
 auto_load_triggers: research, learn, unknown, unfamiliar, how does, what is
 priority: toolkit
 ---
@@ -10,7 +10,15 @@ priority: toolkit
 
 ## Purpose
 
-Enables Claude to autonomously research domain-specific topics, fetch relevant documentation, and build a local knowledge base for the project. When encountering unfamiliar concepts in the project domain, this skill triggers research and knowledge acquisition.
+**Project-Objective-Driven Research**: Adapts to the objective of whatever project it's injected into and continuously researches that project's specific domain to support achieving that objective.
+
+**Examples**:
+- **rapid-pm**: Researches project management methodologies, PM tools, artifacts, best practices
+- **ai-task-optimisation-MVP**: Researches optimization algorithms, solver techniques, performance strategies
+- **document-generator**: Researches documentation methodologies, exemplar templates, methodology-specific best practices
+- **best-practice**: Researches Claude Code best practices, MCP patterns, skills usage, development workflows
+
+**How it works**: When encountering unfamiliar concepts in the project domain, this skill triggers domain-specific research, fetches relevant documentation, and builds a local knowledge base that directly supports the project's objective. It becomes a domain expert for whatever domain it's deployed in.
 
 ---
 
