@@ -486,6 +486,7 @@ echo "Adding toolkit folders to .gitignore (no git clutter):"
 add_to_gitignore "# Best Practice Toolkit - gitignored (local dev tool only)"
 add_to_gitignore ".claude/"
 add_to_gitignore "docs/"
+add_to_gitignore "CLAUDE.md"
 if [ "$MODE" = "FULL" ]; then
     add_to_gitignore "tests/"
 fi
