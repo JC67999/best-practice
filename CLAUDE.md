@@ -1,7 +1,7 @@
 # Project Standards - Best Practice Toolkit
 
 > **Purpose**: Enforce changelog, comments, minimal structure - maximum efficiency
-> **Last Updated**: 2025-11-15
+> **Last Updated**: 2025-11-16
 > **Applies To**: Claude Code and all AI assistants working on this codebase
 
 ---
@@ -254,13 +254,23 @@ git checkout -b feature/feature-x-#42
 
 # 4. Work on task
 
-# 5. Link commits
-git commit -m "feat: implement X
+# 5. Commit with clear, atomic messages
+# Simple format (small changes):
+git commit -m "feat: implement user login (closes #42)"
 
-Closes #42"
+# Detailed format (larger changes):
+git commit -m "feat: add user authentication (closes #42)
 
-# 6. Create PR
-gh pr create --title "feat: Add feature X (closes #42)"
+- Implement JWT token generation
+- Add login endpoint with validation
+- Create user session management
+- Add error handling for invalid credentials"
+
+# 6. Push branch
+git push -u origin feature/feature-x-#42
+
+# 7. Create PR
+gh pr create --title "feat: Add user authentication (closes #42)"
 ```
 
 **When to create issue**:
@@ -271,6 +281,128 @@ gh pr create --title "feat: Add feature X (closes #42)"
 - ❌ DO NOT start coding without issue
 - ❌ DO NOT commit without referencing issue
 - ✅ ALWAYS: issue → branch → code → commit → PR
+
+---
+
+### Branching Strategy
+
+**Keep `main` protected**:
+- Never commit directly to main
+- Always work in feature branches
+- Merge only via pull requests
+
+**Branch naming convention**:
+```
+feature/issue-{number}-{short-description}
+bugfix/issue-{number}-{short-description}
+refactor/issue-{number}-{short-description}
+```
+
+**Branch from latest main**:
+```bash
+git checkout main
+git pull origin main
+git checkout -b feature/issue-123-user-authentication
+```
+
+**One issue per branch**:
+- Create new branch for each issue
+- Keep branches focused and short-lived
+- Delete branch after PR merge
+
+---
+
+### Pull Request Workflow
+
+**Create descriptive PRs** - Include:
+- **What**: Summary of changes made
+- **Why**: Reason/motivation for changes
+- **How to test**: Steps to verify the changes work
+- **Screenshots/videos**: For UI changes (Angular, React, etc.)
+- **Link to issue**: Use "Closes #123" or "Fixes #123"
+
+**Example PR description**:
+```markdown
+## Summary
+Implements user authentication with JWT tokens (Closes #123)
+
+## Changes Made
+- Add JWT token generation
+- Create login endpoint
+- Implement session management
+
+## How to Test
+1. Start server: `npm start`
+2. Navigate to /login
+3. Enter credentials: test@example.com / password123
+4. Verify redirect to dashboard
+
+## Screenshots
+[Attach screenshots of login flow]
+```
+
+**PR best practices**:
+- Request at least one review (team projects)
+- Keep PRs small and focused (<400 lines changed)
+- Respond to review comments promptly
+- Don't merge your own PRs without review
+
+---
+
+### Code Quality - Language-Specific
+
+**Python Projects**:
+```bash
+# Linting
+flake8 . --max-line-length=100
+# or
+pylint src/
+# or
+ruff check .
+
+# Formatting
+black .
+
+# Type checking
+mypy src/
+
+# Update dependencies
+pip freeze > requirements.txt
+# or update pyproject.toml
+```
+
+**Requirements**:
+- Use type hints where appropriate
+- Follow PEP 8 style guide
+- Document all public functions/classes
+- Keep functions ≤30 lines
+
+**Angular Projects**:
+```bash
+# Linting
+ng lint
+
+# Tests
+ng test
+ng e2e
+
+# Build check
+ng build --configuration production
+```
+
+**Requirements**:
+- Follow Angular style guide
+- Component/service/module naming conventions
+- Properly test components with TestBed
+- Update package.json dependencies when needed
+- Keep components focused (Single Responsibility)
+
+**Universal Requirements** (all languages):
+- ≥80% test coverage
+- Zero linting errors
+- Zero type errors
+- Zero security vulnerabilities
+- Documented public APIs
 
 ---
 
@@ -401,13 +533,23 @@ git reset --hard checkpoint-before-refactor  # if failed
 
 ## ✅ Pre-Commit Checklist
 
+**Before Committing**:
 - [ ] GitHub issue created (for code changes)
+- [ ] Branch created from latest main
 - [ ] Commit references issue number
-- [ ] All tests pass
+- [ ] All tests pass locally
 - [ ] Quality gate passed
+- [ ] Linting/formatting applied (language-specific)
 - [ ] Structure compliance (≤5 root folders)
-- [ ] Documentation updated (if API changed)
 - [ ] Changes ≤30 lines (or checkpointed)
+
+**Before Creating PR**:
+- [ ] Branch pushed to remote
+- [ ] PR description includes: What, Why, How to test
+- [ ] Screenshots attached (if UI changes)
+- [ ] PR references issue ("Closes #123")
+- [ ] PR is small and focused (<400 lines)
+- [ ] Documentation updated (if API changed)
 
 ---
 
@@ -448,6 +590,6 @@ The best code is written while you're not watching—if you've defined what you 
 
 ---
 
-**Last Updated**: 2025-11-15
+**Last Updated**: 2025-11-16
 **Review**: After major features or monthly
 **Applies To**: All AI assistants on this project
