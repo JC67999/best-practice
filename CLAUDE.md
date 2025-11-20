@@ -1,7 +1,7 @@
 # Project Standards - Best Practice Toolkit
 
 > **Purpose**: Enforce changelog, comments, minimal structure - maximum efficiency
-> **Last Updated**: 2025-11-16
+> **Last Updated**: 2025-11-20
 > **Applies To**: Claude Code and all AI assistants working on this codebase
 
 ---
@@ -11,6 +11,156 @@
 **Enforce**: Changelog for every change + Well-commented code + Minimal structure
 **Focus**: Speed and frugality - no bloat
 **No**: Unsolicited reports, verbose docs, or folder sprawl
+
+---
+
+## 🎯 Pre-Flight Setup (Project-Level Rules)
+
+> **The game-changer**: Define boundaries BEFORE coding to prevent Claude from making random decisions
+
+**MANDATORY: Every project MUST define in CLAUDE.md:**
+1. **Architecture rules** - Patterns to follow (MVC, component-based, etc.)
+2. **Naming conventions** - File names, variables, functions, classes
+3. **Folder structure** - Where things go, what's allowed
+4. **Component patterns** - How to structure reusable pieces
+5. **Constraints** - What Claude should NEVER do
+
+**Example project-level rules:**
+```markdown
+## Architecture Rules
+- Use existing MVC pattern in src/
+- All API calls go through services/, never in components
+- State management via Redux only
+
+## Naming Conventions
+- Components: PascalCase (UserProfile.tsx)
+- Utilities: camelCase (formatDate.ts)
+- Tests: *.test.ts alongside source files
+
+## Critical Constraints
+- ❌ NO new dependencies without approval
+- ❌ Touch ONLY files listed in task
+- ✅ Use existing patterns, don't invent new ones
+```
+
+**Why this matters:**
+- Claude follows rules across sessions → stops random decisions
+- Boundaries defined = better autonomous performance
+- Less course-correction, more coding time
+
+**Enforcement:**
+- ALWAYS read project CLAUDE.md at session start (via MCP context load)
+- NEVER create new patterns when existing ones work
+- ALWAYS ask if constraints unclear
+
+---
+
+## ✅ BEFORE EVERY CHANGE - Your Checklist
+
+> **CRITICAL**: Run through this checklist BEFORE starting ANY work
+
+### 📋 Session Start (First Thing)
+```
+□ Load project context: mcp__memory__load_project_context
+□ Get current status: mcp__project__get_current_status
+□ Read project CLAUDE.md for rules/patterns
+□ Check .claude/TASKS.md for current tasks
+```
+
+### 📋 Before Planning/Discussion
+```
+□ DO NOT jump to code
+□ Understand: What? Why? Edge cases? Constraints?
+□ Ask clarifying questions first
+□ Identify existing patterns to follow
+```
+
+### 📋 Before Starting Any Task
+```
+□ Validate alignment: mcp__project__validate_task_alignment (≥70 score)
+□ Validate size: mcp__project__validate_task_size (≤30 lines)
+□ Create step-by-step plan (Phase 1)
+□ Break into 3-5 small chunks
+□ Get explicit user approval
+□ Document plan in .claude/TASKS.md
+```
+
+### 📋 Task Constraints (Define These)
+```
+□ Existing pattern to follow: _____________
+□ Files to touch ONLY: _____________
+□ Dependencies allowed: _____________
+□ Scope boundaries: _____________
+□ Commit checkpoints: After tests, structure, implementation, fixes
+```
+
+### 📋 Before Implementation (Each Chunk)
+```
+□ Create GitHub issue (if pushing to GitHub)
+□ Create feature branch
+□ Write failing tests FIRST
+□ Confirm tests FAIL
+□ Commit: "test: add failing tests for X"
+```
+
+### 📋 During Implementation
+```
+□ Implement ≤30 lines only
+□ Run tests after each change
+□ Commit granularly (tests → structure → implementation → fixes)
+□ Stay within file boundaries
+□ NO refactoring yet (wait for Phase 4)
+□ NO scope expansion
+□ NO new dependencies without approval
+```
+
+### 📋 Before Completing Task
+```
+□ All tests passing
+□ Feature stable and working
+□ Run quality gate: mcp__quality__run_quality_gate
+□ Quality gate PASS (if FAIL → fix → rerun)
+□ Mark task complete: mcp__project__mark_task_complete
+□ Update .claude/TASKS.md
+```
+
+### 📋 Before Creating PR
+```
+□ All tests pass locally
+□ Linting/formatting applied
+□ Commit references issue (#123)
+□ Branch pushed to remote
+□ PR description: What, Why, How to test
+□ Screenshots (if UI changes)
+```
+
+### 📋 Session End
+```
+□ Save session summary: mcp__memory__save_session_summary
+□ Update .claude/TASKS.md with next steps
+□ Commit any pending changes
+```
+
+---
+
+**Quick Reference Card:**
+```
+NEVER:
+❌ Jump to code without plan
+❌ Implement >30 lines without checkpoint
+❌ Refactor before stable
+❌ Add dependencies without asking
+❌ Touch files outside scope
+❌ Skip quality gate
+
+ALWAYS:
+✅ Discuss first, code second
+✅ Break large tasks down
+✅ Write tests first, see them fail
+✅ Commit granularly
+✅ Use existing patterns
+✅ Ask when uncertain
+```
 
 ---
 
@@ -169,24 +319,249 @@ mcp__memory__save_session_summary
 
 ---
 
-## 🎯 Planning Mode - MANDATORY for New Features
+## 🎯 The Autonomous Coding Flow (5 Phases)
 
-> **CRITICAL**: Planning Mode (Shift+Tab×2) is NON-NEGOTIABLE
+> **CRITICAL**: Follow this sequence religiously to prevent drift and random decisions
 
-**ALWAYS enter Planning Mode for**:
+### **Phase 1: Plan Before Code** ⚠️ MANDATORY
+
+**❌ NEVER let Claude jump straight to code**
+
+**Required steps:**
+1. **Discuss the problem** - Understand context, constraints, edge cases
+2. **Request step-by-step plan** - Tighten logic, surface unknowns
+3. **Get explicit approval** - Most mistakes disappear here
+4. **Break into 3-5 small chunks** - Each ≤30 lines, laser-focused
+
+**Enforcement:**
+- If requirements unclear → ASK, don't assume
+- If no plan exists → STOP, create plan first
+- If user hasn't approved → WAIT, don't start coding
+- If chunks feel large → BREAK DOWN smaller
+
+**Planning Mode (Shift+Tab×2) is NON-NEGOTIABLE for:**
 - New features or functionality
 - Significant refactoring (>30 lines)
 - Complex bug fixes requiring multiple files
 - Architecture changes
 - Unclear requirements
 
-**Rules**:
-1. NEVER skip Planning Mode for new features
-2. Plans must include: tasks, acceptance criteria, file changes, tests
-3. Get explicit user approval before exiting Planning Mode
-4. Document plan in .claude/TASKS.md
+**Plans must include:**
+- Tasks (each ≤30 lines)
+- Acceptance criteria
+- File changes (explicit list)
+- Tests to write
+- User approval checkpoint
 
 **See** `.claude/skills/planning-mode/` for detailed workflow
+
+---
+
+### **Phase 2: Test-Driven Cycle** 🔁 MANDATORY
+
+> **Red-Green-Refactor with granular commits**
+
+**FOR EACH CHUNK (≤30 lines):**
+
+```
+1. Write failing tests first      → git commit "test: add failing tests for X"
+2. Confirm tests FAIL              → verify red state
+3. Write skeleton/structure        → git commit "feat: add structure for X"
+4. Add minimal implementation      → git commit "feat: implement X logic"
+5. Run tests                       → check results
+6. Fix what breaks                 → git commit "fix: resolve X error"
+7. LOOP until tests pass           → repeat steps 5-6
+8. Tests pass & feature stable     → git commit "feat: complete X functionality"
+9. Refactor ONLY if working        → git commit "refactor: optimize X"
+```
+
+**Granular commit philosophy:**
+- Commit after EVERY meaningful step (not just at end)
+- Each commit is a checkpoint (easy rollback)
+- Commit messages tell the story
+- Small commits = easy debugging
+
+**Visual feedback loop:**
+- Run tests in terminal/browser after each change
+- See immediate results
+- Fix → Test → Fix → Test until stable
+
+**NEVER:**
+- Skip seeing tests fail first (you might write passing tests by accident)
+- Refactor before tests pass (Claude invents features)
+- Make >30 lines changes without checkpoint
+
+**See** `.claude/skills/tdd-workflow/` for detailed cycle
+
+---
+
+### **Phase 3: Autonomous Mode** 🤖 (Lazy Mode)
+
+> **Let Claude work unattended for heavy lifting**
+
+**When to use:**
+- Repetitive file changes (e.g., updating 20 components)
+- Long-running test-fix cycles
+- Comprehensive refactoring (after feature works)
+
+**Setup:**
+```bash
+# Tell Claude:
+"Use tests to verify, loop until complete and functioning.
+Commit after each fix. Notify me when done or blocked."
+```
+
+**Monitoring:**
+- Set up notification hook for human input needed
+- Let Claude run 20-30 minutes unattended
+- Check completed work in git log
+
+**Boundaries for autonomous mode:**
+- Clear success criteria defined
+- Tests written and passing baseline
+- No architectural decisions required
+- File scope pre-defined
+
+**Safety:**
+- Frequent commits = easy rollback
+- Quality gate still required before completion
+- User reviews final result
+
+---
+
+### **Phase 4: Polish** ✨
+
+> **Refactor ONLY after everything works**
+
+**CRITICAL RULE**: NEVER refactor before feature is stable
+
+**Why:**
+- Refactoring unstable code → Claude invents features
+- Working code first → safe to optimize
+- Tests passing → refactor with confidence
+
+**Refactoring checklist:**
+- ✅ All tests passing
+- ✅ Feature complete and stable
+- ✅ User has tested functionality
+- ❌ Don't refactor during implementation
+
+**Allowed refactors:**
+- Extract repeated code into functions
+- Improve naming for clarity
+- Optimize performance (with profiling data)
+- Simplify complex logic
+
+**Claude's refactors are "honestly great" once feature is solid**
+
+---
+
+### **Phase 5: Ship** 🚀
+
+1. Push branch
+2. Create PR with descriptive summary
+3. Request review (if team project)
+4. Merge after approval
+5. Delete feature branch
+6. Done ✅
+
+---
+
+## ⚠️ Critical Constraints (ALWAYS Provide)
+
+> **Explicit boundaries = way better performance**
+
+**MANDATORY: Always specify these constraints when assigning work:**
+
+### 1. **Use Existing Patterns** 🎯
+```
+✅ "Follow the existing MVC pattern in src/"
+✅ "Use the same component structure as UserProfile.tsx"
+✅ "Match the API service pattern in src/services/"
+
+❌ Don't let Claude invent new patterns
+```
+
+**Enforcement:**
+- If pattern exists → USE IT, don't create new
+- If uncertain → ASK which pattern to follow
+- NEVER create abstractions for one-off use
+
+---
+
+### 2. **Touch Only These Files** 📁
+```
+✅ "Modify ONLY: src/auth/login.ts, src/components/LoginForm.tsx"
+✅ "Don't touch any other files unless absolutely necessary"
+
+❌ Don't let Claude wander into other files
+```
+
+**Enforcement:**
+- Explicit file list = focused work
+- If other files needed → ASK first
+- Scope creep = primary failure mode
+
+---
+
+### 3. **No New Dependencies** 🚫
+```
+✅ "Use existing libraries (lodash, axios)"
+✅ "No new npm packages without approval"
+
+❌ Don't let Claude add dependencies freely
+```
+
+**Enforcement:**
+- If new dependency needed → ASK with justification
+- Check package.json before adding
+- Prefer standard library or existing deps
+
+---
+
+### 4. **Checkpoint Frequently** 💾
+```
+✅ Commit after every meaningful change
+✅ Use git tags before risky refactors
+✅ Claude auto-saves before edits (Esc×2 to rollback)
+
+❌ Don't make large changes without checkpoints
+```
+
+**Enforcement:**
+- Commit granularly (see Phase 2)
+- Use `/checkpoint` before risky work
+- NEVER batch 50+ line changes
+
+---
+
+### 5. **Scope Boundaries** 📦
+```
+✅ "Implement only the login form, not password reset"
+✅ "Fix this specific bug, don't refactor surrounding code"
+✅ "Add tests for this function only"
+
+❌ Don't let scope expand
+```
+
+**Enforcement:**
+- If task expands → STOP, ask if in scope
+- "While we're here..." = scope creep
+- Finish one thing before adding "improvements"
+
+---
+
+**Example Task with Constraints:**
+```
+Task: Add user login functionality
+
+Constraints:
+- Use existing pattern: src/auth/register.ts
+- Touch only: src/auth/login.ts, src/components/LoginForm.tsx
+- No new dependencies (use existing JWT library)
+- Scope: Login only, not password reset or 2FA
+- Commit after: tests, structure, implementation, fixes
+```
 
 ---
 
@@ -461,11 +836,76 @@ git reset --hard checkpoint-before-refactor  # if failed
 
 ## 🚫 Anti-Patterns - What NOT to Do
 
+> **CRITICAL**: These are the top failure modes that destroy autonomous coding
+
+### ❌ #1 Failure Mode: Letting Claude Dive Into Code Too Fast
+
+**The problem:**
+- Claude jumps straight to implementation without understanding
+- Skips planning, discussion, edge cases
+- Makes assumptions instead of asking
+
+**The fix:**
+- ✅ ALWAYS discuss problem first (Phase 1)
+- ✅ Create step-by-step plan before coding
+- ✅ Get explicit approval before implementation
+- ✅ Break into small chunks (≤30 lines)
+
+**Enforcement:**
+- If no plan exists → STOP, ask questions
+- If requirements unclear → ASK, don't assume
+- If user hasn't approved → WAIT
+
+---
+
+### ❌ #2 Failure Mode: Scope Too Big (Claude Wanders)
+
+**The problem:**
+- Tasks >30 lines → Claude invents features
+- No file boundaries → touches unnecessary files
+- No constraints → adds dependencies freely
+- "While we're here..." → scope creep
+
+**The fix:**
+- ✅ Tasks ≤30 lines, break down larger
+- ✅ Explicit file list: "Touch ONLY these files"
+- ✅ No new dependencies without approval
+- ✅ Scope boundaries: "Login only, not password reset"
+
+**Enforcement:**
+- If task feels large → STOP, break down
+- If scope expands → ASK if in scope
+- If new files needed → ASK first
+
+---
+
+### ❌ #3 Failure Mode: Refactoring Before Stability (Claude Invents)
+
+**The problem:**
+- Refactoring unstable code → Claude invents features
+- "Improving" while implementing → breaks tests
+- Optimizing before working → premature abstraction
+
+**The fix:**
+- ✅ Implement first, refactor after (Phase 4)
+- ✅ All tests passing before refactoring
+- ✅ Feature stable and user-tested first
+- ✅ One thing at a time
+
+**Enforcement:**
+- If code not working → NO refactoring
+- If tests not passing → NO optimization
+- If feature incomplete → NO "improvements"
+
+---
+
 ### Prohibited Implementation
 **NEVER**:
 - Incomplete implementations or placeholders
 - Mock functions or TODO comments
 - Skip error handling or edge cases
+- Refactor during initial implementation
+- Make >30 line changes without checkpoint
 
 ### Prohibited Communication
 **NEVER**:
@@ -473,20 +913,13 @@ git reset --hard checkpoint-before-refactor  # if failed
 - Hedging language ("might," "could")
 - Over-apologizing
 
-### Premature Coding (#1 Failure Mode)
-**NEVER start coding when**:
-- Requirements unclear
-- No plan created
-- User hasn't approved
-- Success criteria undefined
-
-**ALWAYS ask first**: What? Why? Edge cases? Constraints?
-
 ### Technical Mistakes
 **NEVER**:
 - Skip compiling before tests
 - Write tests expecting pass without seeing fail
 - Leave old code when rewriting
+- Add dependencies without asking
+- Touch files outside explicit scope
 
 ---
 
@@ -590,6 +1023,6 @@ The best code is written while you're not watching—if you've defined what you 
 
 ---
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-20
 **Review**: After major features or monthly
 **Applies To**: All AI assistants on this project
