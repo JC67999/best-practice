@@ -1,7 +1,7 @@
 # Project Standards - Best Practice Toolkit
 
 > **Purpose**: Enforce changelog, comments, minimal structure - maximum efficiency
-> **Last Updated**: 2025-11-20
+> **Last Updated**: 2025-11-20 (v2.0 - Systems Analyst Edition)
 > **Applies To**: Claude Code and all AI assistants working on this codebase
 
 ---
@@ -19,28 +19,64 @@
 > **The game-changer**: Define boundaries BEFORE coding to prevent Claude from making random decisions
 
 **MANDATORY: Every project MUST define in CLAUDE.md:**
-1. **Architecture rules** - Patterns to follow (MVC, component-based, etc.)
-2. **Naming conventions** - File names, variables, functions, classes
-3. **Folder structure** - Where things go, what's allowed
-4. **Component patterns** - How to structure reusable pieces
-5. **Constraints** - What Claude should NEVER do
 
-**Example project-level rules:**
+### 📋 Project Documentation Template
+
 ```markdown
-## Architecture Rules
-- Use existing MVC pattern in src/
-- All API calls go through services/, never in components
-- State management via Redux only
+# PROJECT OVERVIEW
+[What this system does in 2-3 sentences]
 
-## Naming Conventions
-- Components: PascalCase (UserProfile.tsx)
-- Utilities: camelCase (formatDate.ts)
-- Tests: *.test.ts alongside source files
+# TECH STACK (Don't change without approval)
+- Backend: [Python/Flask, Node/Express, etc.]
+- Frontend: [Angular, React, Vue, etc.]
+- Database: [PostgreSQL, MySQL, MongoDB, etc.]
+- Hosting: [AWS, Azure, etc.]
 
-## Critical Constraints
-- ❌ NO new dependencies without approval
-- ❌ Touch ONLY files listed in task
-- ✅ Use existing patterns, don't invent new ones
+# DATABASE SCHEMA
+[Paste ERD or table definitions]
+- users: id, email, name, created_at
+- projects: id, user_id, title, status
+- tasks: id, project_id, title, due_date
+
+# BUSINESS RULES
+1. Users can only see their own data
+2. Required field validation rules
+3. Status transitions allowed
+4. Data constraints (dates, amounts, etc.)
+
+# ARCHITECTURE RULES
+- All database queries through repository pattern
+- No raw SQL in routes/controllers
+- All dates stored as UTC
+- All money stored as integers (cents/pennies)
+- [Add your patterns here]
+
+# FILE ORGANIZATION
+/backend
+  /models        <- Database models only
+  /repositories  <- All DB queries here
+  /routes        <- API endpoints only
+  /services      <- Business logic only
+
+/frontend
+  /components    <- Reusable UI pieces
+  /pages         <- Full pages
+  /services      <- API calls only
+
+# NAMING CONVENTIONS
+- Functions: snake_case (get_user_projects)
+- Classes: PascalCase (ProjectRepository)
+- Variables: snake_case (user_id)
+- Database tables: plural (users, projects)
+- API endpoints: /api/v1/resource-name
+
+# THINGS CLAUDE MUST NEVER DO
+- ❌ Add new packages without asking
+- ❌ Change database schema without approval
+- ❌ Modify authentication logic
+- ❌ Change existing API contracts
+- ❌ Invent new patterns - use existing only
+- ❌ Touch files outside specified scope
 ```
 
 **Why this matters:**
@@ -161,6 +197,79 @@ ALWAYS:
 ✅ Use existing patterns
 ✅ Ask when uncertain
 ```
+
+---
+
+## 📝 How to Communicate Requirements (For Non-Coders)
+
+> **Think like a systems analyst, not a programmer**
+
+### ❌ Don't Say:
+```
+"Add a feature to track time"
+"Make it look better"
+"Fix the login"
+```
+
+### ✅ Instead, Specify:
+
+**Format:**
+```markdown
+TASK: [Feature name]
+
+DATABASE CHANGES NEEDED:
+- New table: time_entries
+  - id (primary key)
+  - task_id (foreign key → tasks)
+  - user_id (foreign key → users)
+  - start_time (timestamp)
+  - end_time (timestamp, nullable)
+  - duration_minutes (integer, calculated)
+  - notes (text, optional)
+
+BUSINESS RULES:
+- Only one active timer per user at a time
+- Can't start timer if one already running
+- End time must be after start time
+- Duration auto-calculated when timer stops
+- Only user who started can stop their timer
+
+API ENDPOINTS NEEDED:
+- POST /api/v1/time-entries/start (task_id)
+- POST /api/v1/time-entries/stop (entry_id)
+- GET /api/v1/time-entries (filter by task_id or date range)
+
+UI REQUIREMENTS:
+- Timer widget on task detail page
+- Shows current running time if active
+- "Start/Stop" button
+- List of past entries below
+
+EDGE CASES TO HANDLE:
+- What if user closes browser with timer running?
+- What if task deleted with active timer?
+- Timezone handling (store UTC, display user's TZ)
+
+CONSTRAINTS:
+- Use existing pattern: [specify file/pattern]
+- Touch only: [list files]
+- No new dependencies
+- Scope: Timer only, not reporting yet
+```
+
+### Your Strengths (Leverage These):
+- ✅ **Database design** - You understand data relationships
+- ✅ **Business logic** - You know how the system should work
+- ✅ **Data flow** - You understand the process
+- ✅ **Edge cases** - You think through scenarios
+
+### Let Claude Handle:
+- ❌ Syntax (Python/JavaScript/TypeScript)
+- ❌ Framework patterns (Flask/Angular/React)
+- ❌ Package management
+- ❌ Modern tooling
+
+**You're the architect, Claude is the carpenter.**
 
 ---
 
@@ -464,6 +573,108 @@ Commit after each fix. Notify me when done or blocked."
 4. Merge after approval
 5. Delete feature branch
 6. Done ✅
+
+---
+
+## 🔍 User Quality Review (Non-Technical)
+
+> **Review as a systems analyst, not a programmer**
+
+After Claude completes work, review **logic and requirements**, not syntax:
+
+### Your Review Checklist:
+```
+□ Does it match my requirements document?
+□ Did it follow the database schema I specified?
+□ Are business rules enforced correctly?
+□ Does the API match what I asked for?
+□ Can I trace the data flow? (DB → Repository → Service → Route → Frontend)
+□ Did it touch ONLY the files I specified?
+□ Did it use existing patterns (no new inventions)?
+```
+
+### Testing Without Coding:
+
+**Walk through scenarios:**
+```
+You: "Walk me through what happens when user clicks 'Start Timer'"
+
+Claude explains:
+1. Frontend calls POST /api/v1/time-entries/start
+2. Route validates user authenticated
+3. Service checks if user already has running timer
+4. If not, creates new time_entry record
+5. Returns entry with start_time
+6. Frontend updates UI
+
+You: "What if they already have a timer running?"
+
+Claude: Service returns error 400 "Timer already active"
+         Frontend shows error message
+         No database write occurs
+```
+
+**You're testing the LOGIC, not the SYNTAX.**
+
+### Signs Claude Went Rogue:
+- "I've added a helpful utility library..."
+- "I've refactored the authentication..."
+- "I've improved the database structure..."
+- Files changed you didn't expect
+
+### Recovery:
+```
+You: "Stop. Show me git diff of changes."
+[Review]
+You: "Revert the authentication changes.
+     Stick to ONLY time tracking feature.
+     Use existing patterns."
+```
+
+---
+
+## 📦 Build in Vertical Slices
+
+> **Complete features incrementally, not horizontally**
+
+### ❌ Don't Build Horizontally:
+```
+Week 1: All database models
+Week 2: All repositories
+Week 3: All services
+Week 4: All routes
+Week 5: All frontend
+```
+**Problem:** Nothing works until week 5
+
+### ✅ Build Vertical Slices:
+```
+Week 1: Basic timer (start/stop only)
+        ├─ Database: time_entries table
+        ├─ Repository: start(), stop()
+        ├─ Service: validate, create
+        ├─ Route: POST /start, /stop
+        └─ Frontend: Start/Stop button
+        ✅ WORKS END-TO-END
+
+Week 2: Timer history list
+        ├─ Repository: get_entries()
+        ├─ Route: GET /time-entries
+        └─ Frontend: History table
+        ✅ WORKS END-TO-END
+
+Week 3: Reporting/analytics
+Week 4: Export functionality
+```
+
+**Each slice is COMPLETE** (database → backend → frontend → tests)
+
+**Benefits:**
+- ✅ Working feature every week
+- ✅ Can test immediately
+- ✅ Easy to rollback one slice
+- ✅ User can give feedback early
+- ✅ Claude stays on-rails (scope is clear)
 
 ---
 
