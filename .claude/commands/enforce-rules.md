@@ -74,3 +74,40 @@ Dependencies: _________________________________
 
 ---
 
+### 4️⃣ Scope Boundaries
+
+**Question**: What is explicitly IN scope vs OUT of scope?
+
+**Examples**:
+- ✅ "IN: Login form only. OUT: Password reset, 2FA, registration"
+- ✅ "IN: Timer start/stop. OUT: Reporting, analytics, export"
+- ✅ "IN: Create /enforce-rules command. OUT: Automated enforcement"
+- ❌ "Implement authentication" (too broad)
+- ❌ "Whatever is needed" (infinite scope)
+
+**Your Answer**:
+```
+IN scope: _________________________________
+OUT of scope: _________________________________
+```
+
+---
+
+### 5️⃣ Checkpoint Plan
+
+**Question**: When will you commit? (granular checkpoints)
+
+**Examples**:
+- ✅ "After: structure, prompts 1-3, prompts 4-5, examples, testing"
+- ✅ "After: tests, implementation, fixes, refactor"
+- ✅ "Every 30 lines or 15 minutes"
+- ❌ "When done" (too coarse)
+- ❌ "At end of day" (no safety net)
+
+**Your Answer**:
+```
+Commit checkpoints: _________________________________
+```
+
+---
+
