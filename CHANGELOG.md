@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added - /enforce-rules Slash Command
+- **New command**: `/enforce-rules` validates all 5 Critical Constraints before coding starts
+- **Purpose**: Prevent #2 Failure Mode (Scope Too Big - Claude Wanders)
+- **Validates**:
+  1. Existing pattern to follow (which file/pattern to use as template)
+  2. Files to touch ONLY (explicit list of allowed files)
+  3. Dependencies allowed (no new dependencies without approval)
+  4. Scope boundaries (clear IN vs OUT of scope)
+  5. Checkpoint plan (when to commit granularly)
+- **Features**:
+  - Interactive prompts for each constraint
+  - Good vs bad examples for each constraint
+  - Constraint summary template for reference
+  - Real example showing explicit boundaries
+  - Validation checklist before proceeding
+- **Workflow**: Run `/enforce-rules` → Define constraints → Copy summary → Reference during coding
+- **Benefits**:
+  - ✅ Prevents scope creep and wandering
+  - ✅ Forces explicit boundaries before coding
+  - ✅ Stops Claude from touching unexpected files
+  - ✅ Prevents dependency sprawl
+  - ✅ Ensures granular checkpoints
+- **Location**: `.claude/commands/enforce-rules.md`
+- **Related**: Issue #6, CLAUDE.md lines 681-775 (Critical Constraints)
+
 ### Added - MANDATORY GitHub Issue Requirement
 - **New workflow requirement**: ALL code changes going to GitHub MUST have a corresponding GitHub issue
 - **When required**:
