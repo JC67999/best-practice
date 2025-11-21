@@ -113,12 +113,13 @@
 
 ### 📋 Before Starting Any Task
 ```
+□ Check GitHub Issues for existing issue or create new one
 □ Validate alignment: mcp__project__validate_task_alignment (≥70 score)
 □ Validate size: mcp__project__validate_task_size (≤30 lines)
 □ Create step-by-step plan (Phase 1)
 □ Break into 3-5 small chunks
 □ Get explicit user approval
-□ Document plan in .claude/TASKS.md
+□ Document plan in .claude/TASKS.md (reference GitHub issue #)
 ```
 
 ### 📋 Task Constraints (Define These)
@@ -132,11 +133,11 @@
 
 ### 📋 Before Implementation (Each Chunk)
 ```
-□ Create GitHub issue (if pushing to GitHub)
-□ Create feature branch
+□ Confirm GitHub issue exists (MANDATORY - create if missing)
+□ Create feature branch (reference issue # in branch name)
 □ Write failing tests FIRST
 □ Confirm tests FAIL
-□ Commit: "test: add failing tests for X"
+□ Commit: "test: add failing tests for X (ref #123)"
 ```
 
 ### 📋 During Implementation
@@ -183,6 +184,7 @@
 ```
 NEVER:
 ❌ Jump to code without plan
+❌ Start work without GitHub issue
 ❌ Implement >30 lines without checkpoint
 ❌ Refactor before stable
 ❌ Add dependencies without asking
@@ -190,10 +192,11 @@ NEVER:
 ❌ Skip quality gate
 
 ALWAYS:
+✅ Create/check GitHub issue first
 ✅ Discuss first, code second
 ✅ Break large tasks down
 ✅ Write tests first, see them fail
-✅ Commit granularly
+✅ Commit granularly (reference issue #)
 ✅ Use existing patterns
 ✅ Ask when uncertain
 ```
@@ -304,17 +307,25 @@ CONSTRAINTS:
 3. **One task at a time**: Complete, test, commit before next
 4. **Break down large tasks**: If >30 lines, STOP and break into sub-tasks
 5. **Update TASKS.md**: Mark complete when done, add new as discovered
+6. **⚠️ CRITICAL: All tasks/actions/issues MUST be stored in GitHub Issues** - TASKS.md is for planning/tracking only; GitHub Issues is the source of truth
 
 ### Workflow
 ```
-1. Check .claude/TASKS.md
-2. Implement (≤30 lines)
-3. Test change works
-4. Run quality gate
-5. Commit with descriptive message
-6. Mark task complete
-7. Move to next task
+1. Check GitHub Issues for current tasks
+2. Check .claude/TASKS.md for task breakdown
+3. Implement (≤30 lines)
+4. Test change works
+5. Run quality gate
+6. Commit with descriptive message (reference issue #)
+7. Mark task complete in TASKS.md
+8. Update GitHub issue with progress
+9. Move to next task
 ```
+
+**Task Storage Hierarchy**:
+- **GitHub Issues** = Source of truth (features, bugs, enhancements)
+- **TASKS.md** = Session planning, task breakdown (≤30 line chunks)
+- **TodoWrite tool** = Real-time task tracking during session
 
 **If task feels too large**: STOP, break it down first, then implement smallest piece.
 
